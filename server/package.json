@@ -1,0 +1,9 @@
+{
+  "name": "tournament-scheduler-server",
+  "version": "1.0.0",
+  "description": "backend of a tournament scheduler",
+  "main": "src/index.ts",
+  "author": "Matthias Jugan",
+  "license": "MIT",
+  "private": true
+}
