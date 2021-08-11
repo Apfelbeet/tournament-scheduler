@@ -1,0 +1,17 @@
+{
+  "port": 8080,
+  "modes" : [
+    {
+      "id": 0,
+      "title": "Semi K.O.",
+      "description": "2 Groups, Semifinal, Final",
+      "init" : "./generation_modules/kosystem_module"
+    },
+    {
+      "id": 1,
+      "title": "Group",
+      "description": "one big group",
+      "init": "./generation_modules/group_module"
+    }
+  ]
+}
