@@ -148,6 +148,7 @@ class Storage {
 
 
   void _setModules(data) {
+    print(data);
     if(data != "") {
       _tournament?.modules = _decodeModule(data["modules"][0], null);
 
@@ -164,20 +165,20 @@ class Storage {
 
   void _setStatus(data) {
     _tournament?.started = data["started"];
-    _tournament?.activeMode = _server!.modes.firstWhere((mode) => mode.id == data["mode"]);
+    _tournament?.activeMode = _server!.modes.firstWhere((mode) => mode.id == data["mode"], orElse: () => ModeModel(-1, "", ""));
     modeNotifier.notify();
     infoNotifier.notify();
   }
 
-  void _adjustSync(int increment, int compare) {
-    final temp = _tournament!.sync + increment;
-
-    if(temp % 2 != compare) {
-      _requestAll();
-    }else {
-      _tournament!.sync = temp;
-    }
-  }
+  // void _adjustSync(int increment, int compare) {
+  //   final temp = _tournament!.sync + increment;
+  //
+  //   if(temp % 2 != compare) {
+  //     _requestAll();
+  //   }else {
+  //     _tournament!.sync = temp;
+  //   }
+  // }
 
   List<ModuleModel> _decodeModule(Map module, ModuleModel? parent) {
     final List<Map> submodules = [];
@@ -313,7 +314,7 @@ class Storage {
 
 class _TournamentState {
   bool started = false;
-  int sync = 0;
+  String sync = "";
 
   ModeModel? activeMode;
   List<TeamModel> teams = [];
