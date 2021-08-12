@@ -6,9 +6,9 @@ export class Entry extends Module {
     
     entryModule: Module;
 
-    constructor(teams: Team[], entryModule: typeof Module) {
+    constructor(teams: Team[], entryModule: any) {
         super(null, teams, true, "entry");
-        this.entryModule = new entryModule(this.self(), this.downstream_teams, true);
+        this.entryModule = new entryModule.default(this.self(), this.downstream_teams, true);
         this.type = "entry"
     }
 

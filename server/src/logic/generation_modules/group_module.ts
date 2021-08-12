@@ -5,7 +5,7 @@ import { Team } from "../../types/general_types";
 /**
  * Group is the classic model of a group in which everybody plays against everybody
  */
-export class SimpleGroupModule extends Module {
+export default class SimpleGroupModule extends Module {
   constructor(
     master: Module,
     downstream_teams: Team[],

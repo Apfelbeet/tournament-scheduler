@@ -129,7 +129,7 @@ export function sendAll(key: Key, connection: websocket.connection) {
                 data: {
                     sync: logic.getTournament(key).sync,
                     teams: logic.getTeamsFromTournament(key),
-                    modules: logic.getStructureFromTournament(key),
+                    modules: logic.getStatusFromTournament(key).started ? logic.getStructureFromTournament(key) : "",
                     status: logic.getStatusFromTournament(key),
                 },
             })

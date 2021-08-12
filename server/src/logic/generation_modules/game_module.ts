@@ -6,7 +6,6 @@ import { State } from "../../types/module_types";
  * Game is an terminal module, it has no submodules and only one game between two teams.
  */
 export class Game extends Module {
-  data?: { a: number; b: number };
 
   constructor(master: Module, downstream_teams: Team[]) {
     super(master, downstream_teams);

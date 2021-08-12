@@ -1,6 +1,6 @@
 import { Module } from "./module";
 import { Game } from "./game_module";
-import { SimpleGroupModule as Group } from "./group_module";
+import Group from "./group_module";
 import { Team } from "../../types/general_types";
 
 /**

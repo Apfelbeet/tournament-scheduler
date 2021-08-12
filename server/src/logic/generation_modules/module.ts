@@ -39,6 +39,8 @@ export class Module {
 
     stats?: Stats[]
 
+    data?: any
+
     /**
      * The type shows the type of the module.
      * This can help to filter for certain modules and can be used by the UI to make different representations of the modules.
@@ -164,7 +166,7 @@ export class Module {
             down: this.downstream_teams,
             up: this.upstream_teams,
             stats: this.stats,
-            data: undefined,
+            data: this.data,
         };
     }
 
