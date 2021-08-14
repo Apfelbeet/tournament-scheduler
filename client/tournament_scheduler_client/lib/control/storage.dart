@@ -167,7 +167,7 @@ class Storage {
   }
 
   void _setModules(data) {
-    if (data != "") {
+    if (data != null) {
       _tournament?.modules = _decodeModule(data["modules"][0], null);
     } else {
       _tournament?.modules = [];
@@ -193,7 +193,9 @@ class Storage {
     if(data.containsKey("winner") && _tournament?.winner != data["winner"]) {
         //TODO: Winner message
         TeamModel? winner = _tournament!.getTeamById(data["winner"]);
-        notifyError((winner == null ? "" : winner.name) + " wins");
+        if(winner != null) {
+          notifyError(winner.name + " wins");
+        }
     }
     _tournament?.winner = data["winner"];
 
