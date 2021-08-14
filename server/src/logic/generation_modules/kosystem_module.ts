@@ -77,6 +77,7 @@ class SimpleKOSystemGame extends Module {
         super(master, downstream_teams, false, getLabelFromLevel(level));
         this.level = level;
         this.type = "ko-system-game";
+        this.visible = true;
     }
 
     gameBuilder() : {last: boolean, games: Module[] | null} {
