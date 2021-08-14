@@ -95,7 +95,7 @@ Widget _urlToWidget(BuildContext context, String url) {
                 //Open new layer
                 builder: (_) => ServerLayer()));
       } else {
-        Scaffold.of(context)
+        ScaffoldMessenger.of(context)
             .showSnackBar(const SnackBar(content: Text("Connection failed")));
       }
     },

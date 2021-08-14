@@ -22,8 +22,7 @@ class ErrorMessageWidget extends StatelessWidget {
 
   void _action(BuildContext context) {
     if (Storage.instance().errorMessage != null && layer == currentLayer) {
-
-      Scaffold.of(context).showSnackBar(
+      ScaffoldMessenger.of(context).showSnackBar(
           new SnackBar(content: Text(Storage.instance().errorMessage!),
           ));
       Storage.instance().errorMessage = null;

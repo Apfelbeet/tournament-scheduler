@@ -5,7 +5,6 @@ import 'package:tournament_scheduler_client/control/connection.dart';
 import 'package:tournament_scheduler_client/control/file.dart';
 import 'package:tournament_scheduler_client/control/model.dart';
 import 'package:tournament_scheduler_client/control/notifier.dart';
-import 'package:flutter/material.dart';
 
 class Storage {
   TeamNotifier teamNotifier = TeamNotifier();
@@ -100,7 +99,7 @@ class Storage {
   ///   This happens also if the stream is closed. Therefore this method will be called again, if the stream isn't closed already.
   ///Todo: the user should be notified and/or the current server layer should be closed if it's still open.
   void disconnect() {
-    notifyError("Disconnected!");
+    print("Disconnected!");
     _connection?.disconnect();
     _connection = null;
   }
@@ -197,7 +196,6 @@ class Storage {
         notifyError((winner == null ? "" : winner.name) + " wins");
     }
     _tournament?.winner = data["winner"];
-    print(_tournament?.winner);
 
     modeNotifier.notify();
     infoNotifier.notify();
@@ -243,8 +241,8 @@ class Storage {
   }
 
   void notifyError(String message) {
-    //errorMessage = message;
-    //errorNotifier.notify();
+    errorMessage = message;
+    errorNotifier.notify();
     print(message);
   }
 
