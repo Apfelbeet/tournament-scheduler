@@ -42,6 +42,7 @@ export class Tournament {
 
     reset() {
         this.entry = undefined;
+        this.winner = undefined;
     }
 
     addTeam(name: string) {
