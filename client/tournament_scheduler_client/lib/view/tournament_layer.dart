@@ -5,6 +5,7 @@ import 'package:tournament_scheduler_client/view/error_message_widget.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:tournament_scheduler_client/view/menu.dart';
 
 import 'game_view.dart';
 import 'mode_view.dart';
@@ -42,10 +43,12 @@ class TournamentLayer extends StatelessWidget {
                 actions: [
                   IconButton(
                       icon: Consumer<InfoNotifier>(
-                        builder: (context, value, child) => Icon(
-                            Storage.instance().isStarted() != null && Storage.instance().isStarted()!
-                                ? Icons.stop
-                                : Icons.play_arrow),
+                        builder: (context, value, child) {
+                          return Icon(
+                              Storage.instance().isStarted() != null && Storage.instance().isStarted()!
+                                  ? Icons.stop
+                                  : Icons.play_arrow);
+                        }
                       ),
                       onPressed: () => Storage.instance().isStarted() != null && Storage.instance().isStarted()!
                           ? Storage.instance().resetTournament()
@@ -55,7 +58,7 @@ class TournamentLayer extends StatelessWidget {
               body: ErrorMessageWidget(
                 layer: 2,
                 child: TabBarView(
-                  children: _tabs,
+                      children: _tabs,
                 ),
               )
             )));
