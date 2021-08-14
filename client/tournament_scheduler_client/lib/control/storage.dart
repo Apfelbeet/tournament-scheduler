@@ -24,16 +24,14 @@ class Storage {
   _ServerState? _server;
 
   Storage() {
-
-    try{
+    try {
       FileSystem.loadAsJsonData("urls.txt").then((jsonUrls) {
-        if(jsonUrls is List<dynamic>) {
+        if (jsonUrls is List<dynamic>) {
           _urls = jsonUrls.cast<String>().toList();
           urlNotifier.notify();
         }
       });
     } catch (e) {}
-
   }
 
   ///List of all urls the user has previously saved.
@@ -108,7 +106,6 @@ class Storage {
 
   ///Called on messages received by the socket.
   void _onData(message) {
-
     final m = json.decode(message);
     try {
       if (m["type"] == "tournaments") {
@@ -118,7 +115,11 @@ class Storage {
 
         serverNotifier.notify();
       } else if (m["type"] == "modes") {
-        final data = m["data"].map((j) => ModeModel.fromJson(j)).toList().cast<ModeModel>().toList();
+        final data = m["data"]
+            .map((j) => ModeModel.fromJson(j))
+            .toList()
+            .cast<ModeModel>()
+            .toList();
 
         _server?.modes = data;
 
@@ -131,13 +132,32 @@ class Storage {
           _setModules(m["data"]["modules"]);
         }
       } else if (m["type"] == "tournamentData") {
-        _requestAll(); //TODO Parse events
-      } else if(m["type"] == "error") {
+        if (m["key"] == _server?.activeKey &&
+            m["syncOld"] == _tournament?.sync) {
+          _tournament?.sync = m["sync"];
+          switch(m["dataType"]) {
+            case "team":
+              print("TEAM!");
+              _setTeams(m["data"]);
+              break;
+            case "status":
+              print("STATUS!");
+              _setStatus(m["data"]);
+              break;
+            case "structure":
+              print("STRUCTURE!");
+              _setModules(m["data"]);
+              break;
+          }
+        } else {
+          _requestAll();
+        }
+      } else if (m["type"] == "error") {
         notifyError(m["message"]);
-      }else if(m["type"] == "syncError") {
+      } else if (m["type"] == "syncError") {
         _requestAll();
         notifyError("Synchronisation error. Please try again!");
-      }else if(m["type"] == "connected") {
+      } else if (m["type"] == "connected") {
         _connection?.connected = true;
         serverNotifier.notify();
       }
@@ -146,26 +166,30 @@ class Storage {
     }
   }
 
-
   void _setModules(data) {
     print(data);
-    if(data != "") {
+    if (data != "") {
       _tournament?.modules = _decodeModule(data["modules"][0], null);
-
-    }else {
+    } else {
       _tournament?.modules = [];
     }
     gameNotifier.notify();
   }
 
   void _setTeams(data) {
-    _tournament?.teams = data.map((t) => TeamModel.fromJson(t)).toList().cast<TeamModel>().toList();
+    _tournament?.teams = data
+        .map((t) => TeamModel.fromJson(t))
+        .toList()
+        .cast<TeamModel>()
+        .toList();
     teamNotifier.notify();
   }
 
   void _setStatus(data) {
     _tournament?.started = data["started"];
-    _tournament?.activeMode = _server!.modes.firstWhere((mode) => mode.id == data["mode"], orElse: () => ModeModel(-1, "", ""));
+    _tournament?.activeMode = _server!.modes.firstWhere(
+        (mode) => mode.id == data["mode"],
+        orElse: () => ModeModel(-1, "", ""));
     modeNotifier.notify();
     infoNotifier.notify();
   }
@@ -209,17 +233,18 @@ class Storage {
       return previousValue;
     });
 
-    if (lastVisibleModel != null && lastVisibleModel != parent && lastVisibleModel.games.length > 0)
-      decoded.add(lastVisibleModel);
+    if (lastVisibleModel != null &&
+        lastVisibleModel != parent &&
+        lastVisibleModel.games.length > 0) decoded.add(lastVisibleModel);
 
     return decoded;
   }
 
   void notifyError(String message) {
-    errorMessage = message;
-    errorNotifier.notify();
+    //errorMessage = message;
+    //errorNotifier.notify();
+    print(message);
   }
-
 
   ///
   ///ServerState:
@@ -261,15 +286,15 @@ class Storage {
 
   List<TeamModel> getTeams() => _tournament != null ? _tournament!.teams : [];
 
-  List<ModuleModel> getModules() => _tournament != null ? _tournament!.modules : [];
-
-
+  List<ModuleModel> getModules() =>
+      _tournament != null ? _tournament!.modules : [];
 
   ///
   /// Actions
   ///
 
-  void _requestAll() => _connection?.send('{"type":"requestAll","key":"${_server!.activeKey}"}');
+  void _requestAll() =>
+      _connection?.send('{"type":"requestAll","key":"${_server!.activeKey}"}');
 
   void _requestTournaments() => _connection?.send('{"type":"getTournaments"}');
 
@@ -283,26 +308,33 @@ class Storage {
   }
 
   void unsubscribe() {
-    if(_server != null && _server!.activeKey != null) {
+    if (_server != null && _server!.activeKey != null) {
       _connection?.send('{"type":"unsubscribe","key":"${_server!.activeKey}"}');
       _tournament = null;
       _server!.activeKey = null;
     }
   }
 
-  void createTournament(String name) => _connection?.send('{"type":"createTournament","key":"$name"}');
+  void createTournament(String name) =>
+      _connection?.send('{"type":"createTournament","key":"$name"}');
 
-  void startTournament() => _connection?.send('{"type":"start","key":"${_server!.activeKey}","sync":"${_tournament!.sync}"}');
+  void startTournament() => _connection?.send(
+      '{"type":"start","key":"${_server!.activeKey}","sync":"${_tournament!.sync}"}');
 
-  void resetTournament() => _connection?.send('{"type":"reset","key":"${_server!.activeKey}","sync":"${_tournament!.sync}"}');
+  void resetTournament() => _connection?.send(
+      '{"type":"reset","key":"${_server!.activeKey}","sync":"${_tournament!.sync}"}');
 
-  void addTeam(String name) => _connection?.send('{"type":"addTeam","key":"${_server!.activeKey}","sync":"${_tournament!.sync}","name":"$name"}');
+  void addTeam(String name) => _connection?.send(
+      '{"type":"addTeam","key":"${_server!.activeKey}","sync":"${_tournament!.sync}","name":"$name"}');
 
-  void removeTeam(int id) => _connection?.send('{"type":"removeTeam","key":"${_server!.activeKey}","sync":"${_tournament!.sync}","id":"$id"}');
+  void removeTeam(int id) => _connection?.send(
+      '{"type":"removeTeam","key":"${_server!.activeKey}","sync":"${_tournament!.sync}","id":"$id"}');
 
-  void setActiveMode(int id) => _connection?.send('{"type":"setMode","key":"${_server!.activeKey}","sync":"${_tournament!.sync}","id":"$id"}');
+  void setActiveMode(int id) => _connection?.send(
+      '{"type":"setMode","key":"${_server!.activeKey}","sync":"${_tournament!.sync}","id":"$id"}');
 
-  void setResult(int gameId, int resultA, int resultB) => _connection?.send('{"type":"setResult","key":"${_server!.activeKey}","sync":"${_tournament!.sync}","gameId":"$gameId","resultA":"$resultA","resultB":"$resultB"}');
+  void setResult(int gameId, int resultA, int resultB) => _connection?.send(
+      '{"type":"setResult","key":"${_server!.activeKey}","sync":"${_tournament!.sync}","gameId":"$gameId","resultA":"$resultA","resultB":"$resultB"}');
 
   ///
   ///Singleton logic
