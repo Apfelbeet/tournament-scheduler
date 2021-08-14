@@ -1,3 +1,4 @@
+import 'dart:collection';
 import 'dart:convert';
 
 import 'package:tournament_scheduler_client/control/connection.dart';
@@ -167,7 +168,6 @@ class Storage {
   }
 
   void _setModules(data) {
-    print(data);
     if (data != "") {
       _tournament?.modules = _decodeModule(data["modules"][0], null);
     } else {
@@ -190,29 +190,29 @@ class Storage {
     _tournament?.activeMode = _server!.modes.firstWhere(
         (mode) => mode.id == data["mode"],
         orElse: () => ModeModel(-1, "", ""));
+
+    if(data.containsKey("winner") && _tournament?.winner != data["winner"]) {
+        //TODO: Winner message
+        TeamModel? winner = _tournament!.getTeamById(data["winner"]);
+        notifyError((winner == null ? "" : winner.name) + " wins");
+    }
+    _tournament?.winner = data["winner"];
+    print(_tournament?.winner);
+
     modeNotifier.notify();
     infoNotifier.notify();
   }
 
-  // void _adjustSync(int increment, int compare) {
-  //   final temp = _tournament!.sync + increment;
-  //
-  //   if(temp % 2 != compare) {
-  //     _requestAll();
-  //   }else {
-  //     _tournament!.sync = temp;
-  //   }
-  // }
-
   List<ModuleModel> _decodeModule(Map module, ModuleModel? parent) {
     final List<Map> submodules = [];
+    final List<GameModel> games = [];
     final ModuleModel? lastVisibleModel = module["visible"]
         ? ModuleModel(module["type"] as String, module["label"] as String)
         : parent;
 
     module['modules'].forEach((element) {
       if ((element["type"] as String) == "game") {
-        lastVisibleModel?.games.add(GameModel.fromJson(element));
+        games.add(GameModel.fromJson(element));
       } else {
         submodules.add(element);
       }
@@ -220,7 +220,7 @@ class Storage {
 
     module['games'].forEach((element) {
       if ((element["type"] as String) == "game") {
-        lastVisibleModel?.games.add(GameModel.fromJson(element));
+        games.add(GameModel.fromJson(element));
       } else {
         submodules.add(element);
       }
@@ -232,6 +232,8 @@ class Storage {
       previousValue.addAll(e);
       return previousValue;
     });
+
+    lastVisibleModel?.games.addAll(games);
 
     if (lastVisibleModel != null &&
         lastVisibleModel != parent &&
@@ -347,10 +349,19 @@ class Storage {
 class _TournamentState {
   bool started = false;
   String sync = "";
+  int? winner;
 
   ModeModel? activeMode;
   List<TeamModel> teams = [];
   List<ModuleModel> modules = [];
+
+  TeamModel? getTeamById(id) {
+    for(int i = 0; i < teams.length; i++) {
+      if(teams[i].id == id) {
+        return teams[i];
+      }
+    }
+  }
 }
 
 class _ServerState {
