@@ -1,15 +1,19 @@
 import { Module} from "./module"
 import { Team } from "../../types/general_types";
 import { Structure } from "../../types/module_types";
+import * as logger from "../../util/logger";
+import { Tournament } from "../tournament";
 
 export class Entry extends Module {
     
     entryModule: Module;
+    tournament: Tournament;
 
-    constructor(teams: Team[], entryModule: any) {
+    constructor(teams: Team[], entryModule: any, tournament: Tournament) {
         super(null, teams, true, "entry");
         this.entryModule = new entryModule.default(this.self(), this.downstream_teams, true);
         this.type = "entry"
+        this.tournament = tournament;
     }
 
     structure() : Structure {
@@ -32,7 +36,7 @@ export class Entry extends Module {
     }
 
     onFinish() {
-        //TODO:
+        this.upstream_teams = this.entryModule.upstream_teams
     }
 
     validInput() {

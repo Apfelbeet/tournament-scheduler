@@ -68,6 +68,7 @@ export function getStatusFromTournament(key: Key): Status {
     return {
         started: getTournament(key).isStarted(),
         mode: getTournament(key).mode ? getTournament(key).mode!.id : -1,
+        winner: getTournament(key).winner,
     };
 }
 
@@ -154,6 +155,12 @@ export function setResult(key: Key, sync: Sync, game_id: number, resultA: number
     getTournament(key).setResult(game_id, resultA, resultB);
  
     const game: Game = (getTournament(key).search(game_id) as Game);
-    logger.log(`new result for ${key}: + ${game.upstream_teams[0].id}("${game.upstream_teams[0].name}") ${resultA}-${resultB} ${game.upstream_teams[1].id}("${game.upstream_teams[1].name}")`)
+    console.log(game.upstream_teams);
+    //logger.log(`new result for ${key}: + ${game.upstream_teams[0].id}("${game.upstream_teams[0].name}") ${resultA}-${resultB} ${game.upstream_teams[1].id}("${game.upstream_teams[1].name}")`)
     socket.sendStructure(key, sk, osk);
+    
+    if(getTournament(key).winner !== undefined) {
+        logger.success(`${key}: ${getTournament(key).getTeam(getTournament(key).winner!)!.name} wins!`);
+        socket.sendStatus(key, sk, sk);
+    }
 }

@@ -17,6 +17,7 @@ export class Tournament {
 
     teams = new Map<TeamId, Team>();
     new_team_id: TeamId = 0;
+    winner?: TeamId; 
 
     invoke() {
         if (!this.mode) {
@@ -28,7 +29,8 @@ export class Tournament {
 
         this.entry = new Entry(
             Array.from(this.teams.values()),
-            this.mode.init
+            this.mode.init,
+            this
         );
         if (this.entry.validInput()) {
             this.entry.invoke();
@@ -82,6 +84,10 @@ export class Tournament {
         this.mode = mode;
     }
 
+    setWinner(id: TeamId) {
+        this.winner = id;
+    }
+
     isStarted() {
         return this.entry !== undefined;
     }
@@ -107,6 +113,13 @@ export class Tournament {
             }
 
             (game as Game).setResult(resultA, resultB);
+
+            //If the entry module has any teams in the upstream, we assume the game is over.
+            //It is sufficant to only check is after a result is set, because thats the only event
+            //that can cause a game to end.
+            if(this.entry!.upstream_teams.length > 0) {
+                this.winner = this.entry!.upstream_teams[0].id;
+            }
         } else {
             throw new Error(
                 "incomplete data: {id: " +
