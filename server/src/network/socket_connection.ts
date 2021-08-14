@@ -135,7 +135,7 @@ export function sendAll(key: Key, connection: websocket.connection) {
             })
         );
     } catch (e) {
-        sendError(connection, "TODO: error messages");
+        sendError(connection, (e as Error).message);
     }
 }
 
@@ -356,7 +356,7 @@ export function parseReceivedMessage(
         if (e instanceof OutOfSyncError) {
             send(connection, JSON.stringify({ type: "syncError" }));
         } else {
-            sendError(connection, "TODO: error messages");
+            sendError(connection, (e as Error).message);
         }
     }
 }
