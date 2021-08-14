@@ -115,7 +115,7 @@ export function sendAll(key: Key, connection: websocket.connection) {
             data: {
                 sync: logic.getTournament(key).sync,
                 teams: logic.getTeamsFromTournament(key),
-                modules: logic.getStatusFromTournament(key).started ? logic.getStructureFromTournament(key) : "",
+                modules: logic.getStructureFromTournament(key),
                 status: logic.getStatusFromTournament(key),
             },
         })
@@ -321,7 +321,7 @@ export function parseReceivedMessage(
             logger.error(`${connection.remoteAddress} is out of sync!`);
             send(connection, JSON.stringify({ type: "syncError" }));
         } else {
-            logger.error(`connection.remoteAddress caused: ${(e as Error).message}`)
+            logger.error(`${connection.remoteAddress} caused: ${(e as Error).message}`)
             sendError(connection, (e as Error).message);
         }
     }

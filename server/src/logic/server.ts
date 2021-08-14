@@ -72,8 +72,8 @@ export function getStatusFromTournament(key: Key): Status {
     };
 }
 
-export function getStructureFromTournament(key: Key): Structure {
-    return getTournament(key).getStructure();
+export function getStructureFromTournament(key: Key): Structure | undefined {
+    return getTournament(key).isStarted() ? getTournament(key).getStructure() : undefined;
 }
 
 export function getTeamsFromTournament(key: Key): Team[] {
