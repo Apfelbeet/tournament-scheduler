@@ -108,7 +108,7 @@ export function addTeamToTournament(key: Key, sync: Sync, name: string) {
 
 export function removeTeamFromTournament(key: Key, sync: Sync , id: TeamId) {
     const [osk ,sk] = useSync(key, sync);
-    if (!id) {
+    if (id === undefined) {
         throw new Error("invalid id!");
     }else if (getTournament(key).isStarted()) {
         throw new Error("currently no team can be removed!");
