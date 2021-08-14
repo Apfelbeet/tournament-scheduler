@@ -26,9 +26,13 @@ export type UnparsedMode = {
 export type UnparsedConfiguration = {
     port: number;
     modes: UnparsedMode[];
+    logTags: LogType[];
 }
 
 export type Configuration = {
     port: number;
     modes: Mode[];
+    logTags: LogType[];
 };
+
+export type LogType = "info" | "warning" | "error" | "always" | "network"

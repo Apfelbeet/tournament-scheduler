@@ -1,5 +1,6 @@
 {
   "port": 8080,
+  "logTags": ["warning", "info", "error", "network"],
   "modes" : [
     {
       "id": 0,

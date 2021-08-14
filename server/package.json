@@ -19,6 +19,7 @@
     "dev": "ts-node-dev --respawn src/index.ts"
   },
   "dependencies": {
+    "chalk": "^4.1.2",
     "websocket": "^1.0.34"
   }
 }

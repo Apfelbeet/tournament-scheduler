@@ -1,25 +1,29 @@
 import { Key, Team, Mode, Sync, TeamId } from "../types/general_types";
 import { Status } from "../types/tournament_types";
-import { randomKey } from "./util/util";
+import { randomKey } from "../util/util";
 import * as config from "./server_config";
 import { Tournament, newSync } from "./tournament";
 import { Structure } from "../types/module_types";
-import { OutOfSyncError } from "./util/errors";
+import { OutOfSyncError } from "../util/errors";
 import * as socket from "../network/socket_connection";
+import * as logger from "../util/logger";
+import { Game } from "./generation_modules/game_module";
 
 const tournaments = new Map<string, Tournament>();
 let modes: Mode[] = [];
 
 export function init() {
     modes = config.getModes();
+    logger.success("Server initialized!");
 }
 
 export function newTournamentWithKey(key: Key): Key {
     if (tournamentExists(key)) {
-        throw new Error(key + " is already in use!");
+        throw new Error(`${key} is already in use!`);
     }
 
     tournaments.set(key, new Tournament());
+    logger.success(`New Tournament with key: ${key}`);
     return key;
 }
 
@@ -37,7 +41,7 @@ export function tournamentExists(key: Key): boolean {
 
 export function getTournament(key: Key): Tournament {
     if (!tournamentExists(key)) {
-        throw new Error("tournament with key" + key + " does not exist!");
+        throw new Error(`tournament with key ${key} does not exist!`);
     }
     return tournaments.get(key)!;
 }
@@ -48,7 +52,7 @@ export function getMode(id: number): Mode {
     if (mode) {
         return mode;
     } else {
-        throw new Error("no mode with id " + id + " was found!");
+        throw new Error(`no mode with id ${id} was found!`);
     }
 }
 
@@ -92,59 +96,64 @@ export function useSync(key: Key, sync: Sync): [Key, Key] {
 }
 
 export function addTeamToTournament(key: Key, sync: Sync, name: string) {
-    const [osk ,sk] = useSync(key, sync);
+    const [osk, sk] = useSync(key, sync);
     if (!name) {
         throw new Error("invalid name!");
-    }else if (getTournament(key).isStarted()) {
+    } else if (getTournament(key).isStarted()) {
         throw new Error("currently no team can be added!");
     }
-    
-    
 
     getTournament(key).addTeam(name);
 
+    logger.log(`added team: ${name} to ${key}`);
     socket.sendTeams(key, sk, osk);
 }
 
-export function removeTeamFromTournament(key: Key, sync: Sync , id: TeamId) {
-    const [osk ,sk] = useSync(key, sync);
+export function removeTeamFromTournament(key: Key, sync: Sync, id: TeamId) {
+    const [osk, sk] = useSync(key, sync);
     if (id === undefined) {
         throw new Error("invalid id!");
-    }else if (getTournament(key).isStarted()) {
+    } else if (getTournament(key).isStarted()) {
         throw new Error("currently no team can be removed!");
     }
 
     getTournament(key).removeTeam(id);
 
+    logger.log(`removed team: ${id} from ${key}`);
     socket.sendTeams(key, sk, osk);
 }
 
 export function setModeOfTournament(key: Key, sync: Sync, mode: number) {
-    const [osk ,sk] = useSync(key, sync);
+    const [osk, sk] = useSync(key, sync);
     getTournament(key).setMode(getMode(mode));
 
+    logger.log(`set mode of ${key} to ${mode}`);
     socket.sendStatus(key, sk, osk);
 }
 
 export function startTournament(key: Key, sync: Sync) {
-    const [osk ,sk] = useSync(key, sync);
+    const [osk, sk] = useSync(key, sync);
     getTournament(key).invoke();
 
+    logger.success(`${key} started!`);
     socket.sendStatus(key, sk, osk);
     socket.sendStructure(key, sk, sk);
 }
 
 export function resetTournament(key: Key, sync: Sync) {
-    const [osk ,sk] = useSync(key, sync);
+    const [osk, sk] = useSync(key, sync);
     getTournament(key).reset();
 
+    logger.success(`${key} stopped!`);
     socket.sendStatus(key, sk, osk);
     socket.sendStructure(key, sk, sk);
 }
 
 export function setResult(key: Key, sync: Sync, game_id: number, resultA: number, resultB: number) {
-    const [osk ,sk] = useSync(key, sync);
+    const [osk, sk] = useSync(key, sync);
     getTournament(key).setResult(game_id, resultA, resultB);
-
+ 
+    const game: Game = (getTournament(key).search(game_id) as Game);
+    logger.log(`new result for ${key}: + ${game.upstream_teams[0].id}("${game.upstream_teams[0].name}") ${resultA}-${resultB} ${game.upstream_teams[1].id}("${game.upstream_teams[1].name}")`)
     socket.sendStructure(key, sk, osk);
 }

@@ -1,4 +1,4 @@
-import { randomKey } from "./util/util";
+import { randomKey } from "../util/util";
 import { Entry } from "./generation_modules/entry_module";
 import { Module } from "./generation_modules/module";
 import { Game } from "./generation_modules/game_module";

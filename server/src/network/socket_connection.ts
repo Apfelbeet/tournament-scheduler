@@ -3,7 +3,8 @@ import * as logic from "../logic/server";
 import * as http from "http";
 import { Key, Sync } from "../types/general_types";
 import { ClientMessage, DataType, DataTypeString } from "../types/socket_types";
-import { OutOfSyncError} from "../logic/util/errors"
+import { OutOfSyncError } from "../util/errors"
+import * as logger from "../util/logger";
 
 const subscriptions = new Map<Key, websocket.connection[]>();
 let httpServer;
@@ -18,6 +19,7 @@ export function init(port: number) {
     });
 
     wsServer.on("request", onRequest);
+    logger.success(`Socket is listening on ${port}!`);
 }
 
 export function originIsAllowed(origin: string): boolean {
@@ -27,32 +29,23 @@ export function originIsAllowed(origin: string): boolean {
 export function onRequest(request: websocket.request) {
     if (!originIsAllowed(request.origin)) {
         request.reject();
-        console.log(new Date() + " Connection rejected: " + request.origin);
+        logger.warn(`Connection rejected: ${request.origin}`);
         return;
     }
 
     const connection = request.accept("echo-protocol", request.origin);
-    console.log(
-        new Date() + " Connection accepted: " + connection.remoteAddress
-    );
+    logger.log(`Connection accepted: ${connection.remoteAddress}`);
 
     connection.on("message", (message) => {
         if (message.type === "utf8") {
-            console.log(
-                new Date() +
-                    " Message received from " +
-                    connection.remoteAddress +
-                    ": " +
-                    message.utf8Data
-            );
-
+            logger.net(`Message received from ${connection.remoteAddress}:\n${message.utf8Data}`);
             let json_message = JSON.parse(message.utf8Data);
             parseReceivedMessage(json_message, connection);
         }
     });
 
     connection.on("close", (reasonCode, description) => {
-        console.log(new Date() + connection.remoteAddress + " disconnected!");
+        logger.log(`${connection.remoteAddress} disconnected!`);
     });
 }
 
@@ -64,7 +57,7 @@ export function sendTournamentData(
     data: DataType
 ) {
     if (!subscriptions.has(key)) {
-        throw new Error("couldn't find tournament with key: " + key);
+        throw new Error(`couldn't find tournament with key: ${key}`);
     }
 
     const connections = subscriptions.get(key);
@@ -84,59 +77,49 @@ export function sendTournamentData(
 }
 
 export function sendTeams(key: Key, syncNew: Sync, syncOld: Sync) {
-    try {
-        sendTournamentData(
-            key,
-            syncNew,
-            syncOld,
-            "team",
-            logic.getTeamsFromTournament(key)
-        );
-    } catch {}
+    sendTournamentData(
+        key,
+        syncNew,
+        syncOld,
+        "team",
+        logic.getTeamsFromTournament(key)
+    );
 }
 
 export function sendStatus(key: Key, syncNew: Sync, syncOld: Sync) {
-    try {
-        sendTournamentData(
-            key,
-            syncNew,
-            syncOld,
-            "status",
-            logic.getStatusFromTournament(key)
-        );
-    } catch {}
+    sendTournamentData(
+        key,
+        syncNew,
+        syncOld,
+        "status",
+        logic.getStatusFromTournament(key)
+    );
 }
 
 export function sendStructure(key: Key, syncNew: Sync, syncOld: Sync) {
-    try {
-        sendTournamentData(
-            key,
-            syncNew,
-            syncOld,
-            "structure",
-            logic.getStructureFromTournament(key)
-        );
-    } catch {}
+    sendTournamentData(
+        key,
+        syncNew,
+        syncOld,
+        "structure",
+        logic.getStructureFromTournament(key)
+    );
 }
 
 export function sendAll(key: Key, connection: websocket.connection) {
-    try {
-        send(
-            connection,
-            JSON.stringify({
-                type: "allTournamentData",
-                key: key,
-                data: {
-                    sync: logic.getTournament(key).sync,
-                    teams: logic.getTeamsFromTournament(key),
-                    modules: logic.getStatusFromTournament(key).started ? logic.getStructureFromTournament(key) : "",
-                    status: logic.getStatusFromTournament(key),
-                },
-            })
-        );
-    } catch (e) {
-        sendError(connection, (e as Error).message);
-    }
+    send(
+        connection,
+        JSON.stringify({
+            type: "allTournamentData",
+            key: key,
+            data: {
+                sync: logic.getTournament(key).sync,
+                teams: logic.getTeamsFromTournament(key),
+                modules: logic.getStatusFromTournament(key).started ? logic.getStructureFromTournament(key) : "",
+                status: logic.getStatusFromTournament(key),
+            },
+        })
+    );
 }
 
 export function sendTournaments(connection: websocket.connection) {
@@ -172,14 +155,7 @@ export function sendError(connection: websocket.connection, message: string) {
 }
 
 export function send(connection: websocket.connection, message: string) {
-    console.log(
-        new Date() +
-            " Send Message " +
-            message +
-            " to " +
-            connection.remoteAddress +
-            "."
-    );
+    logger.net(`Send Message to: ${connection.remoteAddress}:\n${message}`);
     connection.sendUTF(message);
 }
 
@@ -231,13 +207,7 @@ export function parseReceivedMessage(
                 }
 
                 subscriptions.get(message.key)!.push(connection);
-                console.log(
-                    new Date() +
-                        " " +
-                        connection.remoteAddress +
-                        " subscribed to " +
-                        message.key
-                );
+                logger.log(`${connection.remoteAddress} subscribed to ${message.key}`);
             }
         } else if (message.type === "unsubscribe") {
             /*
@@ -254,13 +224,7 @@ export function parseReceivedMessage(
                 subscriptions.has(message.key)
             ) {
                 subscriptions.get(message.key)!.filter((c) => c !== connection);
-                console.log(
-                    new Date() +
-                        " " +
-                        connection.remoteAddress +
-                        " unsubscribed from " +
-                        message.key
-                );
+                logger.log(`${connection.remoteAddress} unsubscribed from ${message.key}`);
             }
         } else if (message.type === "requestAll") {
             /*
@@ -354,8 +318,10 @@ export function parseReceivedMessage(
         }
     } catch (e) {
         if (e instanceof OutOfSyncError) {
+            logger.error(`${connection.remoteAddress} is out of sync!`);
             send(connection, JSON.stringify({ type: "syncError" }));
         } else {
+            logger.error(`connection.remoteAddress caused: ${(e as Error).message}`)
             sendError(connection, (e as Error).message);
         }
     }
