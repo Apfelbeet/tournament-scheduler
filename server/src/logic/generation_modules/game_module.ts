@@ -18,7 +18,7 @@ export class Game extends Module {
 
   setResult(a: number, b: number) {
     const res = { a: a, b: b }
-    if(this.data !== undefined && this.data !== { a: a, b: b }) {
+    if(this.data !== undefined && JSON.stringify(this.data) !== JSON.stringify(res)) {
       this.changed = true;
     }
     this.data = res;
