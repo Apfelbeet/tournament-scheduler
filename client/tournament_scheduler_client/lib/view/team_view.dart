@@ -38,13 +38,13 @@ class _TeamViewTile extends StatelessWidget {
   Widget build(BuildContext context) {
     return ListTile(
       title: Text(model.name),
-      trailing: IconButton(
+      trailing: Storage.instance().isStarted() != true ? IconButton(
         icon: Icon(Icons.delete),
         onPressed: () {
           Storage.instance().removeTeam(model.id);
         },
-        color: Theme.of(context).iconTheme.color,
-      ),
+      ): null,
+      selected: Storage.instance().getWinner() == model.id,
     );
   }
 
@@ -69,7 +69,7 @@ class _NewTeamTileState extends State<_NewTeamTile> {
       return ListTile(
         title: Text("add new team",
             textAlign: TextAlign.center,
-            style: Theme.of(context).accentTextTheme.bodyText1),
+            ),
         onTap: () {
           setState(() {
             write = true;

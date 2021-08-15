@@ -104,7 +104,6 @@ Widget _urlToWidget(BuildContext context, String url) {
     trailing: IconButton(
       icon: Icon(Icons.delete),
       onPressed: () => Storage.instance().removeUrl(url),
-      color: Theme.of(context).buttonColor,
     ),
   );
 }
