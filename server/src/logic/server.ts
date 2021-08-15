@@ -89,52 +89,59 @@ export function getTournaments(): Key[] {
     return x;
 }
 
-export function useSync(key: Key, sync: Sync): [Key, Key] {
+export function checkSync(key: Key, sync: Sync) {
     if (getTournament(key).sync !== sync) {
         throw new OutOfSyncError();
     }
+}
+
+export function useSync(key: Key, sync: Sync): [Key, Key] {
     return [getTournament(key).sync, (getTournament(key).sync = newSync())];
 }
 
 export function addTeamToTournament(key: Key, sync: Sync, name: string) {
-    const [osk, sk] = useSync(key, sync);
+    checkSync(key, sync);
     if (!name) {
         throw new Error("invalid name!");
     } else if (getTournament(key).isStarted()) {
         throw new Error("currently no team can be added!");
     }
-
+    
     getTournament(key).addTeam(name);
+    const [osk, sk] = useSync(key, sync);
 
     logger.log(`added team: ${name} to ${key}`);
     socket.sendTeams(key, sk, osk);
 }
 
 export function removeTeamFromTournament(key: Key, sync: Sync, id: TeamId) {
-    const [osk, sk] = useSync(key, sync);
+    checkSync(key, sync);
     if (id === undefined) {
         throw new Error("invalid id!");
     } else if (getTournament(key).isStarted()) {
         throw new Error("currently no team can be removed!");
     }
-
+    
     getTournament(key).removeTeam(id);
+    const [osk, sk] = useSync(key, sync);
 
     logger.log(`removed team: ${id} from ${key}`);
     socket.sendTeams(key, sk, osk);
 }
 
 export function setModeOfTournament(key: Key, sync: Sync, mode: number) {
-    const [osk, sk] = useSync(key, sync);
+    checkSync(key, sync);
     getTournament(key).setMode(getMode(mode));
+    const [osk, sk] = useSync(key, sync);
 
     logger.log(`set mode of ${key} to ${mode}`);
     socket.sendStatus(key, sk, osk);
 }
 
 export function startTournament(key: Key, sync: Sync) {
-    const [osk, sk] = useSync(key, sync);
+    checkSync(key, sync);
     getTournament(key).invoke();
+    const [osk, sk] = useSync(key, sync);
 
     logger.success(`${key} started!`);
     socket.sendStatus(key, sk, osk);
@@ -142,18 +149,20 @@ export function startTournament(key: Key, sync: Sync) {
 }
 
 export function resetTournament(key: Key, sync: Sync) {
-    const [osk, sk] = useSync(key, sync);
+    checkSync(key, sync);
     getTournament(key).reset();
-
+    const [osk, sk] = useSync(key, sync);
+    
     logger.success(`${key} stopped!`);
     socket.sendStatus(key, sk, osk);
     socket.sendStructure(key, sk, sk);
 }
 
 export function setResult(key: Key, sync: Sync, game_id: number, resultA: number, resultB: number) {
-    const [osk, sk] = useSync(key, sync);
+    checkSync(key, sync);
     const ow = getTournament(key).winner;
     getTournament(key).setResult(game_id, resultA, resultB);
+    const [osk, sk] = useSync(key, sync);
  
     const game: Game = (getTournament(key).search(game_id) as Game);
     logger.log(`new result for ${key}: + ${game.upstream_teams[0].id}("${game.upstream_teams[0].name}") ${resultA}-${resultB} ${game.upstream_teams[1].id}("${game.upstream_teams[1].name}")`)
