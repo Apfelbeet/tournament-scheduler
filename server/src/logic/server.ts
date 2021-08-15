@@ -156,7 +156,7 @@ export function setResult(key: Key, sync: Sync, game_id: number, resultA: number
     getTournament(key).setResult(game_id, resultA, resultB);
  
     const game: Game = (getTournament(key).search(game_id) as Game);
-    //logger.log(`new result for ${key}: + ${game.upstream_teams[0].id}("${game.upstream_teams[0].name}") ${resultA}-${resultB} ${game.upstream_teams[1].id}("${game.upstream_teams[1].name}")`)
+    logger.log(`new result for ${key}: + ${game.upstream_teams[0].id}("${game.upstream_teams[0].name}") ${resultA}-${resultB} ${game.upstream_teams[1].id}("${game.upstream_teams[1].name}")`)
     socket.sendStructure(key, sk, osk);
     
     if(getTournament(key).winner !== ow) {
