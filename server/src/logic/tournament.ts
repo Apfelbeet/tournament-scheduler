@@ -48,7 +48,7 @@ export class Tournament {
     addTeam(name: string) {
         if (this.isStarted())
             throw new Error(
-                "Can#t add any teams while the tournament is running!"
+                "Can't add any teams while the tournament is running!"
             );
 
         const id = this.nextId();
@@ -106,7 +106,7 @@ export class Tournament {
     };
 
     setResult(game_id: number, resultA: number, resultB: number) {
-        if (game_id && resultA && resultB) {
+        if (typeof game_id == "number" && typeof resultA == "number"  && typeof resultB == "number") {
             const game = this.search(game_id);
 
             if (game === undefined || game.type !== "game") {
@@ -120,6 +120,8 @@ export class Tournament {
             //that can cause a game to end.
             if(this.entry!.upstream_teams.length > 0) {
                 this.winner = this.entry!.upstream_teams[0].id;
+            } else {
+                this.winner = undefined;
             }
         } else {
             throw new Error(

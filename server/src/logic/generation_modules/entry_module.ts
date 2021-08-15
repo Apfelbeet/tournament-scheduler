@@ -1,7 +1,6 @@
 import { Module} from "./module"
 import { Team } from "../../types/general_types";
-import { Structure } from "../../types/module_types";
-import * as logger from "../../util/logger";
+import { State, Structure } from "../../types/module_types";
 import { Tournament } from "../tournament";
 
 export class Entry extends Module {
@@ -41,6 +40,13 @@ export class Entry extends Module {
 
     validInput() {
         return this.entryModule.validInput();
+    }
+
+    refreshGameState() {
+        if(this.entryModule.state !== State.FINISHED) {
+           this.upstream_teams = []; 
+        }
+        super.refreshGameState();
     }
 
     //FIXME: ???

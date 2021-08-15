@@ -86,7 +86,7 @@ export default class SimpleGroupModule extends Module {
         }
       });
 
-    if (this.stats) {
+    if (this.stats !== undefined) {
       //Sorting upstream: best team first -> worst team last
       this.upstream_teams = this.stats
         .sort((a, b) => {

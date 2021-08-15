@@ -1,16 +1,17 @@
 import { Team } from "../../types/general_types"
-import {State, Structure, Stats} from "../../types/module_types"
+import { State, Structure, Stats } from "../../types/module_types"
+import * as logger from "../../util/logger";
 
 let id = 0;
 
 export class Module {
-    
-    
+
+
     /**
     * The master node will be notified in the onFinish-Event.
     */
     master: Module | null;
-    
+
     /**
     * Downstream teams are first divided into the submodules.
     * The resulting upstream is then used to build "game" modules.
@@ -37,9 +38,11 @@ export class Module {
 
     games: Module[];
 
-    stats?: Stats[]
+    stats?: Stats[];
 
-    data?: any
+    data?: any;
+
+    changed: boolean;
 
     /**
      * The type shows the type of the module.
@@ -58,6 +61,7 @@ export class Module {
         this.modules = [];
         this.games = [];
         this.upstream_teams = [];
+        this.changed = false;
     }
 
 
@@ -69,18 +73,32 @@ export class Module {
     onFinish() {
     }
 
+    updateModules() {
+        if(this.state === State.FINISHED) {
+            this.upstream_teams = [];
+        }
+        this.games = [];
+        this.state = State.INIT;
+        this.changed = true;
+    }
+
+    updateGames() {
+        this.state = State.STARTED;
+        this.changed = true;
+    }
+
     /**
      * Generate submodules. Submodule will be generated before the actual games of this module
      */
-    moduleBuilder() : {last: boolean, modules: Module[] | null} {
-        return {modules: null, last: true};
+    moduleBuilder(): { last: boolean, modules: Module[] | null } {
+        return { modules: null, last: true };
     }
 
     /**
      * Generate inner modules/games. Games will be generated, if all submodules are finished.
      */
-    gameBuilder(): {last: boolean, games: Module[] | null} {
-        return {games: null, last: true};
+    gameBuilder(): { last: boolean, games: Module[] | null } {
+        return { games: null, last: true };
     }
 
     /**
@@ -129,32 +147,70 @@ export class Module {
         this.refreshGameState();
     }
 
-    /**
-     * Checks if all submodules or games are finished and if so run the next step of this module
-     */
     refreshGameState() {
+        //
+        //Track changes in submodules and games
+        //
+        const clear = (list: Module[]) => list.forEach(m => m.changed = false);
 
-        if (this.state === State.INIT) {
-            if (this.modules.every((value => value.state === State.FINISED))) {
+        switch (this.state) {
+            case State.INIT:
+                clear(this.modules);
+                break;
+
+            case State.STARTED:
+                if (this.modules.some(value => value.changed)) {
+                    this.updateModules();
+                    clear(this.modules);
+                }
+
+                clear(this.games);
+                break;
+
+            case State.FINISHED:
+                if (this.modules.some(value => value.changed)) {
+                    this.updateModules();
+                    clear(this.modules);
+                }
+
+                if (this.games.some(value => value.changed)) {
+                    this.updateGames();
+                    clear(this.games);
+                }
+
+                break;
+        }
+
+        if (this.changed && this.state == State.FINISHED) {
+            this.finish();
+        } else if(this.changed) {
+            this.master?.refreshGameState();
+        }
+
+        //
+        //Generating Modules based on state:
+        //
+
+        if(this.state === State.INIT) {
+            if (this.modules.every(value => value.state === State.FINISHED)) {
                 this.state = State.STARTED;
                 this.resolveGames();
             }
         }
 
-        if (this.state === State.STARTED) {
-            if (this.games.every((value => value.state === State.FINISED))) {
-                this.state = State.FINISED;
+        if(this.state == State.STARTED) {
+            if (this.games.every(value => value.state === State.FINISHED)) {
+                this.state = State.FINISHED;
                 this.finish();
             }
         }
-
     }
 
     /**
      * Recursive Method to generate a json-object as representation of the whole tournament.
      * This Method can be used to build an graphical interface.
      */
-    structure() : Structure {
+    structure(): Structure {
         return {
             id: this.id,
             type: this.type,
@@ -176,7 +232,7 @@ export class Module {
      * @return {undefined|Module}
      */
 
-    search(id: number) : Module | undefined {
+    search(id: number): Module | undefined {
         if (id === this.id) {
             return this;
         } else {
@@ -194,7 +250,7 @@ export class Module {
     /**
      * Can be used to check, if this module works with the given input.
      */
-    validInput() : boolean {
+    validInput(): boolean {
         return true;
     }
 

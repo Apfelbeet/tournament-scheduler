@@ -4,7 +4,7 @@ export enum State {
     PREINIT = 0,
     INIT = 1,
     STARTED = 2,
-    FINISED = 3
+    FINISHED = 3
 }
 
 export type Structure = {

@@ -17,12 +17,16 @@ export class Game extends Module {
   }
 
   setResult(a: number, b: number) {
-    this.data = { a: a, b: b };
+    const res = { a: a, b: b }
+    if(this.data !== undefined && this.data !== { a: a, b: b }) {
+      this.changed = true;
+    }
+    this.data = res;
     this.refreshGameState();
   }
 
   onFinish() {
-    if (this.data) {
+    if (this.data !== undefined) {
       //Creating upstream
       if (this.data.a >= this.data.b) {
         this.upstream_teams = [

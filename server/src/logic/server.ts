@@ -152,15 +152,16 @@ export function resetTournament(key: Key, sync: Sync) {
 
 export function setResult(key: Key, sync: Sync, game_id: number, resultA: number, resultB: number) {
     const [osk, sk] = useSync(key, sync);
+    const ow = getTournament(key).winner;
     getTournament(key).setResult(game_id, resultA, resultB);
  
     const game: Game = (getTournament(key).search(game_id) as Game);
-    console.log(game.upstream_teams);
     //logger.log(`new result for ${key}: + ${game.upstream_teams[0].id}("${game.upstream_teams[0].name}") ${resultA}-${resultB} ${game.upstream_teams[1].id}("${game.upstream_teams[1].name}")`)
     socket.sendStructure(key, sk, osk);
     
-    if(getTournament(key).winner !== undefined) {
-        logger.success(`${key}: ${getTournament(key).getTeam(getTournament(key).winner!)!.name} wins!`);
+    if(getTournament(key).winner !== ow) {
+        if(getTournament(key).winner !== undefined)
+            logger.success(`${key}: ${getTournament(key).getTeam(getTournament(key).winner!)!.name} wins!`);
         socket.sendStatus(key, sk, sk);
     }
 }
