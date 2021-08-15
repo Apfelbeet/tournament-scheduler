@@ -14,15 +14,17 @@ class _TeamViewState extends State<TeamView> {
   @override
   Widget build(BuildContext context) {
     return Consumer<TeamNotifier>(
-        builder: (context, n, c) => ListView(
-              children: _tiles(),
-            ));
+        builder: (context, n, c) => Consumer<InfoNotifier>(
+          builder: (context, n, c) => ListView(
+                children: _tiles(),
+              ),
+        ));
   }
 
   List<Widget> _tiles() {
     List<Widget> list = [];
     list.addAll(_TeamViewTile.fromModels(Storage.instance().getTeams()));
-    list.add(_NewTeamTile());
+    if(Storage.instance().isStarted() != true) list.add(_NewTeamTile());
     return list;
   }
 }
