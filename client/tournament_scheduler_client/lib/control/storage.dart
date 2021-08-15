@@ -23,6 +23,8 @@ class Storage {
   _TournamentState? _tournament;
   _ServerState? _server;
 
+  bool winnerShown = false;
+
   Storage() {
     try {
       FileSystem.loadAsJsonData("urls.txt").then((jsonUrls) {
@@ -194,6 +196,7 @@ class Storage {
         //TODO: Winner message
         TeamModel? winner = _tournament!.getTeamById(data["winner"]);
         if(winner != null) {
+          winnerShown = false;
           notifyError(winner.name + " wins");
         }
     }
@@ -290,6 +293,10 @@ class Storage {
 
   List<ModuleModel> getModules() =>
       _tournament != null ? _tournament!.modules : [];
+
+  int? getWinner() => _tournament?.winner;
+
+  TeamModel? getWinnerModel() => _tournament?.winner == null ? null : _tournament?.getTeamById(_tournament!.winner!);
 
   ///
   /// Actions
