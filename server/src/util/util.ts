@@ -1,3 +1,5 @@
+import { Stats } from "../types/module_types";
+
 export function randomKey(length: number) {
     let x = '';
     for(let i = length; i > 0; i -= 11) {
@@ -8,4 +10,24 @@ export function randomKey(length: number) {
 
 export function getRandomInt(max: number) {
     return Math.floor(Math.random() * Math.floor(max+1));
+}
+
+export function addStats(a: Stats, b: Stats): Stats {
+    return {
+        team: a.team,
+        wins: a.wins + b.wins,
+        loses: a.loses + b.loses,
+        scored: a.scored + b.scored,
+        conceded: a.conceded + b.conceded
+    }
+}
+
+export function subtractStats(a: Stats, b: Stats): Stats {
+    return {
+        team: a.team,
+        wins: a.wins - b.wins,
+        loses: a.loses - b.loses,
+        scored: a.scored - b.scored,
+        conceded: a.conceded - b.conceded
+    }
 }

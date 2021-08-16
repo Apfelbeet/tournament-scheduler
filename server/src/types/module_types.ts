@@ -25,6 +25,11 @@ export type Stats = {
     team: Team,
     wins: number,
     loses: number,
-    positive_score: number,
-    negative_score: number,
-} 
+    scored: number,
+    conceded: number,
+}
+
+export type CachedStats = {
+    game: number,
+    stats: Stats[]
+}

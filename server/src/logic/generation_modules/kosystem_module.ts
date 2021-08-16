@@ -56,7 +56,6 @@ export default class SimpleKOSystem extends Module {
     }
 
     onFinish() {
-        this.stats = this.games[0].stats;
         this.upstream_teams = this.games[0].upstream_teams;
     }
 
@@ -115,9 +114,6 @@ class SimpleKOSystemGame extends Module {
     }
 
     onFinish() {
-        //transfer stats of actual game
-        this.stats = this.games[0].stats;
-
         //Game sorts the player: Winner at index 0 and Loser at index 1
         //The parent module has to know what to do with this information
         this.upstream_teams = this.games[0].upstream_teams;

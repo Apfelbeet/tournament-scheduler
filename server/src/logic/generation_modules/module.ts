@@ -1,31 +1,30 @@
-import { Team } from "../../types/general_types"
-import { State, Structure, Stats } from "../../types/module_types"
+import { Team } from "../../types/general_types";
+import { State, Structure, Stats, CachedStats } from "../../types/module_types";
 import * as logger from "../../util/logger";
+import { addStats, subtractStats } from "../../util/util";
 
 let id = 0;
 
 export class Module {
-
-
     /**
-    * The master node will be notified in the onFinish-Event.
-    */
+     * The master node will be notified in the onFinish-Event.
+     */
     master: Module | null;
 
     /**
-    * Downstream teams are first divided into the submodules.
-    * The resulting upstream is then used to build "game" modules.
-    */
+     * Downstream teams are first divided into the submodules.
+     * The resulting upstream is then used to build "game" modules.
+     */
     downstream_teams: Team[];
 
     upstream_teams: Team[];
 
     /**
-    * Every Module as a state, that indicates how much of it is already resolved.
-    * 0: Only blueprint functions and preferences
-    * 1: Submodules are generated
-    * 2: Games are generated
-    */
+     * Every Module as a state, that indicates how much of it is already resolved.
+     * 0: Only blueprint functions and preferences
+     * 1: Submodules are generated
+     * 2: Games are generated
+     */
     state: State;
 
     id: number;
@@ -38,7 +37,11 @@ export class Module {
 
     games: Module[];
 
-    stats?: Stats[];
+    stats: Stats[];
+    stats_cache: {
+        games: CachedStats[];
+        teams: Team[];
+    };
 
     data?: any;
 
@@ -51,7 +54,12 @@ export class Module {
      */
     type: string = "module";
 
-    constructor(master: Module | null, downstream_teams: any[], visible: boolean = true, label: string = "unnamed") {
+    constructor(
+        master: Module | null,
+        downstream_teams: any[],
+        visible: boolean = true,
+        label: string = "unnamed"
+    ) {
         this.master = master;
         this.downstream_teams = downstream_teams;
         this.state = State.PREINIT;
@@ -61,23 +69,27 @@ export class Module {
         this.modules = [];
         this.games = [];
         this.upstream_teams = [];
+        this.stats_cache = {
+            games: [],
+            teams: [],
+        };
         this.changed = false;
+        this.stats = [];
     }
-
 
     /**
      * Called to finish up the current module:
      *  - determine upstream_teams: List of teams that can play in next module.
      *      (the order of the array presents the rank of the teams in this module)
      */
-    onFinish() {
-    }
+    onFinish() {}
 
     updateModules() {
-        if(this.state === State.FINISHED) {
+        if (this.state === State.FINISHED) {
             this.upstream_teams = [];
         }
         this.games = [];
+        this.stats = [];
         this.state = State.INIT;
         this.changed = true;
     }
@@ -90,14 +102,14 @@ export class Module {
     /**
      * Generate submodules. Submodule will be generated before the actual games of this module
      */
-    moduleBuilder(): { last: boolean, modules: Module[] | null } {
+    moduleBuilder(): { last: boolean; modules: Module[] | null } {
         return { modules: null, last: true };
     }
 
     /**
      * Generate inner modules/games. Games will be generated, if all submodules are finished.
      */
-    gameBuilder(): { last: boolean, games: Module[] | null } {
+    gameBuilder(): { last: boolean; games: Module[] | null } {
         return { games: null, last: true };
     }
 
@@ -108,11 +120,11 @@ export class Module {
         while (true) {
             const result = this.moduleBuilder();
             if (result.modules != null) {
-                this.modules = [...this.modules, ...result.modules]
+                this.modules = [...this.modules, ...result.modules];
             }
             if (result.last !== false) break;
         }
-        this.modules.forEach(e => e.invoke());
+        this.modules.forEach((e) => e.invoke());
     }
 
     /**
@@ -122,11 +134,13 @@ export class Module {
         while (true) {
             const result = this.gameBuilder();
             if (result.games != null) {
+                //cache teams in games for stats generation
+
                 this.games = [...this.games, ...result.games];
             }
             if (result.last !== false) break;
         }
-        this.games.forEach(e => e.invoke());
+        this.games.forEach((e) => e.invoke());
     }
 
     /**
@@ -137,6 +151,83 @@ export class Module {
         this.master?.refreshGameState();
     }
 
+    invokeStats() {
+        this.stats_cache = {
+            games: [],
+            teams: [],
+        };
+        this.games.forEach((game) =>
+            game.downstream_teams.forEach((team) => {
+                if (
+                    this.stats?.findIndex((st) => st.team.id === team.id) === -1
+                ) {
+                    this.stats_cache.teams.push(team);
+                    this.stats?.push({
+                        team: team,
+                        wins: 0,
+                        loses: 0,
+                        scored: 0,
+                        conceded: 0,
+                    });
+                }
+            })
+        );
+    }
+
+    /*
+     * This is a default implementation, if it is not sufficient you're supposed to overwrite it.
+     * WARNING: If a team is not part of a module in games, then it won't show up in the stats.
+     */
+    composeStats() {
+        this.games.forEach((game) => {
+            const cache_index = this.stats_cache.games.findIndex(
+                (g) => g.game === game.id
+            );
+
+            //If the game has already been cached, but its values have changed, we may want to adjust the stats accordingly.
+            //For this we remove the stats of the cached game from the entire stats
+            //and if this game is finished it will be readded with the new values in the next if branch.
+            if (cache_index !== -1 && game.changed) {
+                this.stats_cache.games[cache_index].stats?.forEach((st) => {
+                    const index = this.stats.findIndex(
+                        (st2) => st2.team.id === st.team.id
+                    );
+                    if (index !== -1) {
+                        this.stats[index] = subtractStats(
+                            this.stats[index],
+                            st
+                        );
+                    }
+                });
+            }
+
+            //If there is no value cached, we assume this game is not yet inclueded in the stats.
+            //Thus we want to included it iff it is finished
+            if (
+                (cache_index === -1 || game.changed) &&
+                game.state === State.FINISHED
+            ) {
+                game.stats?.forEach((st) => {
+                    const index = this.stats.findIndex(
+                        (st2) => st2.team.id === st.team.id
+                    );
+                    if (index !== -1) {
+                        this.stats[index] = addStats(this.stats[index], st);
+                    }
+                });
+
+                const cg = {
+                    game: game.id,
+                    stats: game.stats,
+                }
+                if (cache_index === -1) {
+                    this.stats_cache.games.push(cg);
+                } else {
+                    this.stats_cache.games[cache_index] = cg;
+                }
+            }
+        });
+    }
 
     /**
      * Invoking the module: Set Game-State and generate Submodules
@@ -151,55 +242,54 @@ export class Module {
         //
         //Track changes in submodules and games
         //
-        const clear = (list: Module[]) => list.forEach(m => m.changed = false);
+        const clear = (list: Module[]) =>
+            list.forEach((m) => (m.changed = false));
 
         switch (this.state) {
-            case State.INIT:
-                clear(this.modules);
-                break;
-
             case State.STARTED:
-                if (this.modules.some(value => value.changed)) {
+                if (this.modules.some((value) => value.changed)) {
                     this.updateModules();
-                    clear(this.modules);
                 }
-
-                clear(this.games);
                 break;
 
             case State.FINISHED:
-                if (this.modules.some(value => value.changed)) {
+                if (this.modules.some((value) => value.changed)) {
                     this.updateModules();
-                    clear(this.modules);
                 }
 
-                if (this.games.some(value => value.changed)) {
+                if (this.games.some((value) => value.changed)) {
                     this.updateGames();
-                    clear(this.games);
                 }
-
                 break;
         }
 
+        if (this.changed) {
+            this.composeStats();
+        }
+
+        clear(this.games);
+        clear(this.modules);
+
         if (this.changed && this.state == State.FINISHED) {
             this.finish();
-        } else if(this.changed) {
+        } else if (this.changed) {
             this.master?.refreshGameState();
         }
 
         //
         //Generating Modules based on state:
         //
-
-        if(this.state === State.INIT) {
-            if (this.modules.every(value => value.state === State.FINISHED)) {
+        if (this.state === State.INIT) {
+            if (this.modules.every((value) => value.state === State.FINISHED)) {
                 this.state = State.STARTED;
                 this.resolveGames();
+                this.invokeStats();
             }
         }
 
-        if(this.state == State.STARTED) {
-            if (this.games.every(value => value.state === State.FINISHED)) {
+        if (this.state == State.STARTED) {
+            this.composeStats();
+            if (this.games.every((value) => value.state === State.FINISHED)) {
                 this.state = State.FINISHED;
                 this.finish();
             }
@@ -217,8 +307,8 @@ export class Module {
             label: this.label,
             visible: this.visible,
             state: this.state,
-            modules: this.modules.map(e => e.structure()),
-            games: this.games.map(e => e.structure()),
+            modules: this.modules.map((e) => e.structure()),
+            games: this.games.map((e) => e.structure()),
             down: this.downstream_teams,
             up: this.upstream_teams,
             stats: this.stats,
@@ -253,5 +343,4 @@ export class Module {
     validInput(): boolean {
         return true;
     }
-
 }

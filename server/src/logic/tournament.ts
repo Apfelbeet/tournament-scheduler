@@ -116,7 +116,7 @@ export class Tournament {
             (game as Game).setResult(resultA, resultB);
 
             //If the entry module has any teams in the upstream, we assume the game is over.
-            //It is sufficant to only check is after a result is set, because thats the only event
+            //It is sufficient to only check is after a result is set, because thats the only event
             //that can cause a game to end.
             if(this.entry!.upstream_teams.length > 0) {
                 this.winner = this.entry!.upstream_teams[0].id;
