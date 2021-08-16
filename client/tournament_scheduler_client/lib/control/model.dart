@@ -25,8 +25,18 @@ class ModuleModel {
   final List<GameModel> games = [];
   final String type;
   final String label;
+  final List<StatsModel>? stats;
 
-  ModuleModel(this.type, this.label);
+  ModuleModel(this.type, this.label, this.stats);
+}
+
+class StatsModel {
+  final int team, wins, loses, scored, conceded;
+
+  StatsModel(this.team, this.wins, this.loses, this.scored, this.conceded);
+
+  StatsModel.fromJson(Map<String, dynamic> json) :
+      this(json['team']['id'], json['wins'], json['loses'], json['scored'], json['conceded']);
 }
 
 ///

@@ -73,3 +73,15 @@ class TournamentCreationDialog extends Dialog {
 
 }
 
+class WinDialog extends Dialog {
+
+  @override
+  Widget build(BuildContext context) {
+    final st = Storage.instance();
+    final String? name = st.getWinnerModel()?.name;
+    return AlertDialog(
+      title: Text(name == null ? "" : (name + " wins!")),
+    );
+  }
+}
+

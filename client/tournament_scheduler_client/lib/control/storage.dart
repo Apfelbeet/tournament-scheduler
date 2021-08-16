@@ -137,7 +137,7 @@ class Storage {
         if (m["key"] == _server?.activeKey &&
             m["syncOld"] == _tournament?.sync) {
           _tournament?.sync = m["sync"];
-          switch(m["dataType"]) {
+          switch (m["dataType"]) {
             case "team":
               print("TEAM!");
               _setTeams(m["data"]);
@@ -192,13 +192,13 @@ class Storage {
         (mode) => mode.id == data["mode"],
         orElse: () => ModeModel(-1, "", ""));
 
-    if(data.containsKey("winner") && _tournament?.winner != data["winner"]) {
-        //TODO: Winner message
-        TeamModel? winner = _tournament!.getTeamById(data["winner"]);
-        if(winner != null) {
-          winnerShown = false;
-          notifyError(winner.name + " wins");
-        }
+    if (data.containsKey("winner") && _tournament?.winner != data["winner"]) {
+      //TODO: Winner message
+      TeamModel? winner = _tournament!.getTeamById(data["winner"]);
+      if (winner != null) {
+        winnerShown = false;
+        notifyError(winner.name + " wins");
+      }
     }
     _tournament?.winner = data["winner"];
 
@@ -210,7 +210,13 @@ class Storage {
     final List<Map> submodules = [];
     final List<GameModel> games = [];
     final ModuleModel? lastVisibleModel = module["visible"]
-        ? ModuleModel(module["type"] as String, module["label"] as String)
+        ? ModuleModel(
+            module["type"] as String,
+            module["label"] as String,
+            module.containsKey("stats")
+                ? (module["stats"] as List)
+                    .map<StatsModel>((st) => StatsModel.fromJson(st as Map<String, dynamic>)).toList(growable: false)
+                : null)
         : parent;
 
     module['modules'].forEach((element) {
@@ -296,7 +302,11 @@ class Storage {
 
   int? getWinner() => _tournament?.winner;
 
-  TeamModel? getWinnerModel() => _tournament?.winner == null ? null : _tournament?.getTeamById(_tournament!.winner!);
+  TeamModel? getTeam(int id) => _tournament?.getTeamById(id);
+
+  TeamModel? getWinnerModel() => _tournament?.winner == null
+      ? null
+      : _tournament?.getTeamById(_tournament!.winner!);
 
   ///
   /// Actions
@@ -362,9 +372,9 @@ class _TournamentState {
   List<TeamModel> teams = [];
   List<ModuleModel> modules = [];
 
-  TeamModel? getTeamById(id) {
-    for(int i = 0; i < teams.length; i++) {
-      if(teams[i].id == id) {
+  TeamModel? getTeamById(int id) {
+    for (int i = 0; i < teams.length; i++) {
+      if (teams[i].id == id) {
         return teams[i];
       }
     }

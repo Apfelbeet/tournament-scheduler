@@ -5,10 +5,6 @@ final ThemeData basicTheme = ThemeData(
   primaryColor: Colors.purple,
   accentColor: Colors.purpleAccent,
   colorScheme: ColorScheme.light(),
-
-  bottomSheetTheme: BottomSheetThemeData(
-    backgroundColor: Colors.transparent,
-  ),
 );
 
 const TextStyle whiteTextStyle = TextStyle(
@@ -28,13 +24,13 @@ final ThemeData darkTheme = ThemeData(
   canvasColor: Colors.black,
   //floatingActionButtonTheme: FloatingActionButtonThemeData(),
   bottomSheetTheme: BottomSheetThemeData(
-    backgroundColor: Colors.transparent,
+    modalBackgroundColor: Color.fromARGB(255, 20, 20, 20)
   ),
   iconTheme: IconThemeData(
     color: Colors.white,
   ),
   cardTheme: CardTheme(
-    color: Colors.black,
+    color: Color.fromARGB(255, 20, 20, 20),
   ),
   dialogTheme: DialogTheme(
     backgroundColor: Color.fromARGB(255, 20, 20, 20),

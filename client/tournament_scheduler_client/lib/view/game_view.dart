@@ -5,6 +5,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
+import 'package:tournament_scheduler_client/view/stats_view.dart';
 
 class GameView extends StatefulWidget {
   @override
@@ -14,11 +15,12 @@ class GameView extends StatefulWidget {
 class _GameViewState extends State<GameView> {
   @override
   Widget build(BuildContext context) {
-
-    return Consumer<GameNotifier> (
-      builder: (context, n, c) =>
-          ListView(
-        children: _ModuleListTile.fromModels(Storage.instance().getModules()),
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(5, 5, 5, 0),
+      child: Consumer<GameNotifier>(
+        builder: (context, n, c) => ListView(
+          children: _ModuleListTile.fromModels(Storage.instance().getModules()),
+        ),
       ),
     );
   }
@@ -38,10 +40,33 @@ class _ModuleListTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ListTile(
-      title: Text(model.label),
-      subtitle: Column(
-        children: games,
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(0, 0, 0, 5),
+      child: Card(
+        child: InkWell(
+
+          onTap: model.stats == null
+              ? null
+              : () {
+            showModalBottomSheet<void>(
+                context: context, builder: (BuildContext context) {
+              return StatsView(model.stats!, model.label);
+            });
+          },
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(10, 10, 10, 5),
+            child: Column(
+              children: [
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(0, 5, 0, 10),
+                  child: Text(model.label, style: Theme.of(context).textTheme.headline6),
+                ),
+                Divider(thickness: 2,),
+                ...games
+              ],
+            ),
+          ),
+        ),
       ),
     );
   }
@@ -120,15 +145,15 @@ class _GameListTileState extends State<_GameListTile> {
             ],
           )));
     }
+
+    list.add(Divider(indent: 8, thickness: 1,));
     return list;
   }
 
   @override
   Widget build(BuildContext context) {
-    return Card(
-      child: Column(
-        children: components(context),
-      ),
+    return Column(
+      children: components(context),
     );
   }
 
