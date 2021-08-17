@@ -36,7 +36,6 @@ export class Game extends Module {
     }
 
     composeStats() {
-        logger.error("COMPOSE GAME STATS");
         if (this.data !== undefined) {
             this.stats = [
                 {

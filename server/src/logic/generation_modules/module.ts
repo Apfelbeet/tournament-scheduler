@@ -227,6 +227,14 @@ export class Module {
                 }
             }
         });
+
+        //TODO: Merge this into the previous code, to avoid explicit sorting.
+        this.stats.sort((a, b) => {
+            const winDiff = b.wins - b.loses - (a.wins - a.loses);
+            if (winDiff === 0)
+                return b.scored - b.conceded - (a.scored - b.scored);
+            return winDiff;
+        })
     }
 
     /**

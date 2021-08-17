@@ -59,17 +59,9 @@ export default class SimpleGroupModule extends Module {
      * Collect stats of games and determine the order of the upstream teams
      */
     onFinish() {
-
         if (this.stats !== undefined) {
             //Sorting upstream: best team first -> worst team last
-            this.upstream_teams = this.stats
-                .sort((a, b) => {
-                    const winDiff = b.wins - b.loses - (a.wins - a.loses);
-                    if (winDiff === 0)
-                        return b.scored - b.conceded - (a.scored - b.scored);
-                    return winDiff;
-                })
-                .map((stat) => stat.team);
+            this.upstream_teams = this.stats.map((stat) => stat.team);
         } else {
             throw new Error("group_module: stats is undefined.");
         }
