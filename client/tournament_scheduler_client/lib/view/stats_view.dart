@@ -20,6 +20,7 @@ class StatsView extends StatelessWidget {
                 child:
                     Text(label, style: Theme.of(context).textTheme.headline5)),
           ),
+          Divider(thickness: 2,),
           DataTable(
             columnSpacing: 40,
             columns: [
