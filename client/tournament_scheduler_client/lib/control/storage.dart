@@ -25,6 +25,9 @@ class Storage {
 
   bool winnerShown = false;
 
+  //TODO: RaceCondition
+  bool doNotifyError = false;
+
   Storage() {
     try {
       FileSystem.loadAsJsonData("urls.txt").then((jsonUrls) {
@@ -74,7 +77,7 @@ class Storage {
   ///If an old connection exists, it will be closed using disconnect().
   bool tryConnectToUrl(String url) {
     disconnect();
-    _connection = new SocketConnection(url, _onData, _onError, disconnect);
+    _connection = new SocketConnection(url, _onData, _onError, afterDisconnect);
     try {
       _connection!.connect();
       _server = _ServerState();
@@ -99,11 +102,13 @@ class Storage {
   ///1. When called, it will close the current connection and deletes the reference to it.
   ///2. It will passed to the connection and handles an event that will be raised if the stream is done.
   ///   This happens also if the stream is closed. Therefore this method will be called again, if the stream isn't closed already.
-  ///Todo: the user should be notified and/or the current server layer should be closed if it's still open.
   void disconnect() {
-    print("Disconnected!");
     _connection?.disconnect();
+  }
+
+  void afterDisconnect() {
     _connection = null;
+    notifyError("Disconnected!");
   }
 
   ///Called on messages received by the socket.
@@ -267,7 +272,7 @@ class Storage {
   ///
 
   ///True if a connection is established.
-  bool isConnected() => _connection?.connected ?? false;
+  bool isConnected() => _connection != null;
 
   ///List of all Modes the Server provides.
   ///The value is NULL, if there isn't a connection to a server.

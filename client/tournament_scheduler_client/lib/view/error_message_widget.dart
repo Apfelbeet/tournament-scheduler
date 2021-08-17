@@ -22,6 +22,10 @@ class ErrorMessageWidget extends StatelessWidget {
 
   void _action(BuildContext context) {
     if (Storage.instance().errorMessage != null && layer == currentLayer) {
+      if(!Storage.instance().isConnected()) {
+        Navigator.of(context).popUntil((route) => route.isFirst);
+        currentLayer = 0;
+      }
       ScaffoldMessenger.of(context).showSnackBar(
           new SnackBar(content: Text(Storage.instance().errorMessage!),
           ));
