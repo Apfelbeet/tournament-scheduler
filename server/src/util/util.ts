@@ -1,4 +1,6 @@
-import { Stats } from "../types/module_types";
+import { Game } from "../logic/generation_modules/game_module";
+import { Module } from "../logic/generation_modules/module";
+import { State, Stats } from "../types/module_types";
 
 export function randomKey(length: number) {
     let x = "";
@@ -34,12 +36,27 @@ export function subtractStats(a: Stats, b: Stats): Stats {
     };
 }
 
-export function sortStats(stats: Stats[]) {
-    stats.sort((a, b) => compareStats(a, b));
+export function sortStats(stats: Stats[], games?: Module[]) {
+    stats.sort((a, b) => compareStats(a, b, games));
 }
 
-export function compareStats(a: Stats, b: Stats): number {
+export function compareStats(a: Stats, b: Stats, games?: Module[]): number {
     const winDiff = b.wins - b.loses - (a.wins - a.loses);
-    if (winDiff === 0) return b.scored - b.conceded - (a.scored - b.scored);
+    if (winDiff === 0) {
+        const scoreDiff = b.scored - b.conceded - (a.scored - b.scored);
+        if (games !== undefined && scoreDiff === 0) {
+            let a_wins = 0;
+            let b_wins = 0;
+            games.filter(g => g.type === "game" && g.state === State.FINISHED).forEach(g => {
+                if (g.upstream_teams[0].id === a.team.id && g.upstream_teams[1].id === b.team.id) {
+                    a_wins++;
+                } else if (g.upstream_teams[1].id === b.team.id && g.upstream_teams[0].id === a.team.id) {
+                    b_wins++;
+                }
+            });
+            return b_wins - a_wins;
+        }
+        return scoreDiff;
+    }
     return winDiff;
 }

@@ -225,7 +225,7 @@ export class Module {
         });
 
         //TODO: Merge this into the previous code, to avoid explicit sorting.
-        if(sort) sortStats(this.stats);
+        if(sort) sortStats(this.stats, this.games);
     }
 
     /**
