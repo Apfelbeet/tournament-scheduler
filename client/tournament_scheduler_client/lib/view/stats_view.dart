@@ -15,7 +15,7 @@ class StatsView extends StatelessWidget {
       child: ListView(
         children: [
           Padding(
-            padding: const EdgeInsets.fromLTRB(0, 10, 0, 10),
+            padding: const EdgeInsets.fromLTRB(0, 15, 0, 10),
             child: Center(
                 child:
                     Text(label, style: Theme.of(context).textTheme.headline5)),

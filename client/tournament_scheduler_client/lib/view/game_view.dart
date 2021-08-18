@@ -54,14 +54,17 @@ class _ModuleListTile extends StatelessWidget {
             });
           },
           child: Padding(
-            padding: const EdgeInsets.fromLTRB(10, 10, 10, 5),
+            padding: const EdgeInsets.fromLTRB(0, 10, 0, 5),
             child: Column(
               children: [
                 Padding(
-                  padding: const EdgeInsets.fromLTRB(0, 5, 0, 10),
+                  padding: const EdgeInsets.fromLTRB(5, 5, 5, 10),
                   child: Text(model.label, style: Theme.of(context).textTheme.headline6),
                 ),
-                Divider(thickness: 2,),
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(5, 0, 5, 0),
+                  child: Divider(thickness: 2,),
+                ),
                 ...games
               ],
             ),
@@ -146,7 +149,10 @@ class _GameListTileState extends State<_GameListTile> {
           )));
     }
 
-    list.add(Divider(indent: 8, thickness: 1,));
+    list.add(Padding(
+      padding: const EdgeInsets.fromLTRB(10, 0, 10, 0),
+      child: Divider(thickness: 1,),
+    ));
     return list;
   }
 
