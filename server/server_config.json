@@ -13,6 +13,12 @@
       "title": "Group",
       "description": "one big group",
       "init": "./generation_modules/group_module"
+    },
+    {
+      "id": 2,
+      "title": "Facing Groups",
+      "description": "2 groups and then i-th team from each group face each other",
+      "init": "./generation_modules/facing_groups_module"
     }
   ]
 }

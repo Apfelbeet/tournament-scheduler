@@ -1,7 +1,7 @@
 import { Team } from "../../types/general_types";
 import { State, Structure, Stats, CachedStats } from "../../types/module_types";
 import * as logger from "../../util/logger";
-import { addStats, subtractStats } from "../../util/util";
+import { addStats, sortStats, subtractStats } from "../../util/util";
 
 let id = 0;
 
@@ -40,7 +40,6 @@ export class Module {
     stats: Stats[];
     stats_cache: {
         games: CachedStats[];
-        teams: Team[];
     };
 
     data?: any;
@@ -71,7 +70,6 @@ export class Module {
         this.upstream_teams = [];
         this.stats_cache = {
             games: [],
-            teams: [],
         };
         this.changed = false;
         this.stats = [];
@@ -154,14 +152,12 @@ export class Module {
     invokeStats() {
         this.stats_cache = {
             games: [],
-            teams: [],
         };
         this.games.forEach((game) =>
             game.downstream_teams.forEach((team) => {
                 if (
                     this.stats?.findIndex((st) => st.team.id === team.id) === -1
                 ) {
-                    this.stats_cache.teams.push(team);
                     this.stats?.push({
                         team: team,
                         wins: 0,
@@ -178,7 +174,7 @@ export class Module {
      * This is a default implementation, if it is not sufficient you're supposed to overwrite it.
      * WARNING: If a team is not part of a module in games, then it won't show up in the stats.
      */
-    composeStats() {
+    composeStats(sort : boolean = true) {
         this.games.forEach((game) => {
             const cache_index = this.stats_cache.games.findIndex(
                 (g) => g.game === game.id
@@ -229,12 +225,7 @@ export class Module {
         });
 
         //TODO: Merge this into the previous code, to avoid explicit sorting.
-        this.stats.sort((a, b) => {
-            const winDiff = b.wins - b.loses - (a.wins - a.loses);
-            if (winDiff === 0)
-                return b.scored - b.conceded - (a.scored - b.scored);
-            return winDiff;
-        })
+        if(sort) sortStats(this.stats);
     }
 
     /**
