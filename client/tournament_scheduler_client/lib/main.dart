@@ -9,8 +9,8 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 void main() {
-
-  runApp(App());
+  if(Storage.instance().tryConnectToUrl("192.168.178.30:8080"))
+    runApp(App());
 }
 
 class App extends StatelessWidget {
@@ -22,7 +22,7 @@ class App extends StatelessWidget {
       themeMode: ThemeMode.system,
       theme: basicTheme,
       darkTheme: darkTheme,
-      home: NotifierInit(child: MainLayer()),
+      home: NotifierInit(child: ServerLayer()),
     );
   }
 }
@@ -37,6 +37,7 @@ class NotifierInit extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final st = Storage.instance();
+
 
     return MultiProvider(
       providers: [

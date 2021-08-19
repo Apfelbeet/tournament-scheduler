@@ -13,13 +13,6 @@ class ServerLayer extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
         appBar: AppBar(
-          leading: BackButton(
-            onPressed: () {
-              ErrorMessageWidget.currentLayer--;
-              Storage.instance().disconnect();
-              Navigator.pop(context);
-            },
-          ),
           title: Text(Storage.instance().getUrl() ?? ""),
           actions: [
             IconButton(

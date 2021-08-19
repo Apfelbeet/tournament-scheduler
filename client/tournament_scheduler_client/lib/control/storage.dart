@@ -29,14 +29,14 @@ class Storage {
   bool doNotifyError = false;
 
   Storage() {
-    try {
+    /*try {
       FileSystem.loadAsJsonData("urls.txt").then((jsonUrls) {
         if (jsonUrls is List<dynamic>) {
           _urls = jsonUrls.cast<String>().toList();
           urlNotifier.notify();
         }
       });
-    } catch (e) {}
+    } catch (e) {}*/
   }
 
   ///List of all urls the user has previously saved.
@@ -108,7 +108,12 @@ class Storage {
 
   void afterDisconnect() {
     _connection = null;
-    notifyError("Disconnected!");
+    //notifyError("Disconnected!");
+    if(tryConnectToUrl("192.168.178.30:8080")) {
+      if(_server?.activeKey != null) {
+        subscribe(_server!.activeKey!);
+      }
+    }
   }
 
   ///Called on messages received by the socket.
