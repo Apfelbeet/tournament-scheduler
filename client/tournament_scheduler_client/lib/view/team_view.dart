@@ -15,16 +15,16 @@ class _TeamViewState extends State<TeamView> {
   Widget build(BuildContext context) {
     return Consumer<TeamNotifier>(
         builder: (context, n, c) => Consumer<InfoNotifier>(
-          builder: (context, n, c) => ListView(
+              builder: (context, n, c) => ListView(
                 children: _tiles(),
               ),
-        ));
+            ));
   }
 
   List<Widget> _tiles() {
     List<Widget> list = [];
     list.addAll(_TeamViewTile.fromModels(Storage.instance().getTeams()));
-    if(Storage.instance().isStarted() != true) list.add(_NewTeamTile());
+    if (Storage.instance().isStarted() != true) list.add(_NewTeamTile());
     return list;
   }
 }
@@ -38,12 +38,14 @@ class _TeamViewTile extends StatelessWidget {
   Widget build(BuildContext context) {
     return ListTile(
       title: Text(model.name),
-      trailing: Storage.instance().isStarted() != true ? IconButton(
-        icon: Icon(Icons.delete),
-        onPressed: () {
-          Storage.instance().removeTeam(model.id);
-        },
-      ): null,
+      trailing: Storage.instance().isStarted() != true
+          ? IconButton(
+              icon: Icon(Icons.delete),
+              onPressed: () {
+                Storage.instance().removeTeam(model.id);
+              },
+            )
+          : null,
       selected: Storage.instance().getWinner() == model.id,
     );
   }
@@ -65,35 +67,39 @@ class _NewTeamTileState extends State<_NewTeamTile> {
 
   @override
   Widget build(BuildContext context) {
-    if (!write)
-      return ListTile(
-        title: Text("add new team",
-            textAlign: TextAlign.center,
-            ),
-        onTap: () {
-          setState(() {
-            write = true;
-          });
-        },
-      );
-    else
-      return ListTile(
-          title: Row(
-        children: <Widget>[
-          Expanded(
-            child: TextField(
+    return Column(
+      children: [
+        Padding(
+          padding: const EdgeInsets.fromLTRB(15, 0, 15, 0),
+          child: Divider(
+            thickness: 1,
+          ),
+        ),
+        if (!write)
+          ListTile(
+            trailing: IconButton(
+                icon: Icon(Icons.person_add),
+                onPressed: () {
+                  setState(() {
+                    write = true;
+                  });
+                }),
+          )
+        else
+          ListTile(
+            title: TextField(
               autofocus: true,
               controller: controller,
             ),
-          ),
-          IconButton(
-            icon: const Icon(Icons.arrow_forward),
-            onPressed: () {
-              _submit(context);
-            },
+            trailing: IconButton(
+              icon: const Icon(Icons.arrow_forward),
+              onPressed: () {
+                _submit(context);
+              },
+            ),
           )
-        ],
-      ));
+      ],
+    );
   }
 
   _submit(BuildContext context) {
