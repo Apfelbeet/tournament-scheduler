@@ -351,6 +351,9 @@ class Storage {
   void addTeam(String name) => _connection?.send(
       '{"type":"addTeam","key":"${_server!.activeKey}","sync":"${_tournament!.sync}","name":"$name"}');
 
+  void editTeam(int id, String name) => _connection?.send(
+      '{"type":"editTeam","key":"${_server!.activeKey}","sync":"${_tournament!.sync}","id":"$id","name":"$name"}');
+
   void removeTeam(int id) => _connection?.send(
       '{"type":"removeTeam","key":"${_server!.activeKey}","sync":"${_tournament!.sync}","id":"$id"}');
 

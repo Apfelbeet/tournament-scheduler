@@ -29,29 +29,53 @@ class _TeamViewState extends State<TeamView> {
   }
 }
 
-class _TeamViewTile extends StatelessWidget {
+class _TeamViewTile extends StatefulWidget {
   final TeamModel model;
 
   _TeamViewTile(this.model);
 
   @override
-  Widget build(BuildContext context) {
-    return ListTile(
-      title: Text(model.name),
-      trailing: Storage.instance().isStarted() != true
-          ? IconButton(
-              icon: Icon(Icons.delete),
-              onPressed: () {
-                Storage.instance().removeTeam(model.id);
-              },
-            )
-          : null,
-      selected: Storage.instance().getWinner() == model.id,
-    );
-  }
+  _TeamViewTileState createState() => _TeamViewTileState();
 
   static List<_TeamViewTile> fromModels(List<TeamModel> teams) {
     return teams.map((e) => _TeamViewTile(e)).toList();
+  }
+}
+
+class _TeamViewTileState extends State<_TeamViewTile> {
+  bool write = false;
+  TextEditingController controller = new TextEditingController();
+
+  @override
+  Widget build(BuildContext context) {
+    return ListTile(
+      title: write ? TextField(controller: controller, autofocus: true,) : Text(widget.model.name),
+      trailing: Storage.instance().isStarted() != true
+          ? Wrap(
+              children: [
+                IconButton(
+                  icon: write ? Icon(Icons.arrow_forward) : Icon(Icons.edit),
+                  onPressed: () {
+                    if (write && controller.text.isNotEmpty) {
+                      Storage.instance().editTeam(widget.model.id, controller.text);
+                    } else {
+                      controller.text = widget.model.name;
+                    }
+                    setState(() {
+                      write = !write;
+                    });
+                  }),
+                IconButton(
+                  icon: Icon(Icons.delete),
+                  onPressed: () {
+                    Storage.instance().removeTeam(widget.model.id);
+                  },
+                ),
+              ],
+            )
+          : null,
+      selected: Storage.instance().getWinner() == widget.model.id,
+    );
   }
 }
 
