@@ -2,10 +2,11 @@ import 'dart:async';
 
 import 'package:tournament_scheduler_client/control/storage.dart';
 import 'package:web_socket_channel/io.dart';
+import 'package:web_socket_channel/web_socket_channel.dart';
 
 class SocketConnection {
   final String url;
-  IOWebSocketChannel? channel;
+  WebSocketChannel? channel;
   final _onData;
   final _onError;
   final _onDone;
@@ -15,7 +16,7 @@ class SocketConnection {
 
   void connect() {
 
-    channel = IOWebSocketChannel.connect("ws://$url", protocols: ["echo-protocol"]);
+    channel = WebSocketChannel.connect(Uri.parse("ws://$url"), protocols: ["echo-protocol"]);
 
     channel!.stream.listen(_onData, onError: _onError, onDone: _onDone, cancelOnError: true);
 
