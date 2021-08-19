@@ -55,6 +55,23 @@ export class Tournament {
         this.teams.set(id, { name: name, id: id });
     }
 
+    editTeam(id: TeamId, name: string) {
+        if (this.isStarted()) {
+            throw new Error(
+                "Can't edit teams while the tournament is running!"
+            );
+        }
+        if (!this.teams.has(id)) {
+            throw new Error(
+                "Invalid id!"
+            );
+        }
+        if (!name) {
+            throw new Error("invalid name!");
+        }
+        this.teams.set(id, {id: id, name: name});
+    }
+
     removeTeam(id: TeamId) {
         if (this.isStarted())
             throw new Error(

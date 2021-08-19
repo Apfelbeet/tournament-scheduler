@@ -114,6 +114,16 @@ export function addTeamToTournament(key: Key, sync: Sync, name: string) {
     socket.sendTeams(key, sk, osk);
 }
 
+export function editTeamInTournament(key: Key, sync: Sync, teamId: TeamId, name: string) {
+    checkSync(key, sync);
+
+    getTournament(key).editTeam(teamId, name);
+    const [osk, sk] = useSync(key, sync);
+
+    logger.log(`${key}: change team name from ${teamId} to ${name}`);
+    socket.sendTeams(key, sk, osk);
+}
+
 export function removeTeamFromTournament(key: Key, sync: Sync, id: TeamId) {
     checkSync(key, sync);
     if (id === undefined) {

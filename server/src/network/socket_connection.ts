@@ -3,7 +3,7 @@ import * as logic from "../logic/server";
 import * as http from "http";
 import { Key, Sync } from "../types/general_types";
 import { ClientMessage, DataType, DataTypeString } from "../types/socket_types";
-import { OutOfSyncError } from "../util/errors"
+import { OutOfSyncError } from "../util/errors";
 import * as logger from "../util/logger";
 
 const subscriptions = new Map<Key, websocket.connection[]>();
@@ -38,7 +38,9 @@ export function onRequest(request: websocket.request) {
 
     connection.on("message", (message) => {
         if (message.type === "utf8") {
-            logger.net(`Message received from ${connection.remoteAddress}:\n${message.utf8Data}`);
+            logger.net(
+                `Message received from ${connection.remoteAddress}:\n${message.utf8Data}`
+            );
             let json_message = JSON.parse(message.utf8Data);
             parseReceivedMessage(json_message, connection);
         }
@@ -207,7 +209,9 @@ export function parseReceivedMessage(
                 }
 
                 subscriptions.get(message.key)!.push(connection);
-                logger.log(`${connection.remoteAddress} subscribed to ${message.key}`);
+                logger.log(
+                    `${connection.remoteAddress} subscribed to ${message.key}`
+                );
             }
         } else if (message.type === "unsubscribe") {
             /*
@@ -224,7 +228,9 @@ export function parseReceivedMessage(
                 subscriptions.has(message.key)
             ) {
                 subscriptions.get(message.key)!.filter((c) => c !== connection);
-                logger.log(`${connection.remoteAddress} unsubscribed from ${message.key}`);
+                logger.log(
+                    `${connection.remoteAddress} unsubscribed from ${message.key}`
+                );
             }
         } else if (message.type === "requestAll") {
             /*
@@ -258,15 +264,28 @@ export function parseReceivedMessage(
         } else if (message.type === "addTeam") {
             /*
         {
-        type: "reset"
+        type: "addTeam"
         key: <tournamentKey>
         sync: <Int>
         name: <String>
         }
          */
-            logic.addTeamToTournament(
+            logic.addTeamToTournament(message.key, message.sync, message.name);
+        } else if (message.type === "editTeam") {
+            /*
+        {
+        type: "editTeam"
+        key: <tournamentKey>
+        sync: <Int>
+        id: <Int>
+        name: <String>
+        }
+         */
+
+            logic.editTeamInTournament(
                 message.key,
                 message.sync,
+                parseInt(message.id, 10),
                 message.name
             );
         } else if (message.type === "removeTeam") {
@@ -321,7 +340,9 @@ export function parseReceivedMessage(
             logger.error(`${connection.remoteAddress} is out of sync!`);
             send(connection, JSON.stringify({ type: "syncError" }));
         } else {
-            logger.error(`${connection.remoteAddress} caused: ${(e as Error).message}`)
+            logger.error(
+                `${connection.remoteAddress} caused: ${(e as Error).message}`
+            );
             sendError(connection, (e as Error).message);
         }
     }
