@@ -38,11 +38,16 @@ export function onRequest(request: websocket.request) {
 
     connection.on("message", (message) => {
         if (message.type === "utf8") {
+            const mes = message.utf8Data;
             logger.net(
-                `Message received from ${connection.remoteAddress}:\n${message.utf8Data}`
+                `Message received from ${connection.remoteAddress}:\n${mes}`
             );
-            let json_message = JSON.parse(message.utf8Data);
-            parseReceivedMessage(json_message, connection);
+            try {
+                let json_message = JSON.parse(mes);
+                parseReceivedMessage(json_message, connection);
+            } catch (e) {
+                console.error((e as Error).message);
+            } 
         }
     });
 
