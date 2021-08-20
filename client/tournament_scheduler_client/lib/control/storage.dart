@@ -16,6 +16,7 @@ class Storage {
   ErrorNotifier errorNotifier = ErrorNotifier();
 
   String? errorMessage;
+  final String url = "192.168.178.30:8080";
 
   List<String> _urls = [];
 
@@ -75,12 +76,14 @@ class Storage {
   ///try to create connection with given url.
   ///if it fails it will catch the error and return false.
   ///If an old connection exists, it will be closed using disconnect().
-  bool tryConnectToUrl(String url) {
+  bool tryConnectToUrl() {
     disconnect();
     _connection = new SocketConnection(url, _onData, _onError, afterDisconnect);
     try {
       _connection!.connect();
+      String? oldKey = _server?.activeKey;
       _server = _ServerState();
+      _server!.activeKey = oldKey;
       _requestTournaments();
       _requestModes();
     } catch (e) {
@@ -108,8 +111,7 @@ class Storage {
 
   void afterDisconnect() {
     _connection = null;
-    //notifyError("Disconnected!");
-    if(tryConnectToUrl("192.168.178.30:8080")) {
+    if(tryConnectToUrl()) {
       if(_server?.activeKey != null) {
         subscribe(_server!.activeKey!);
       }

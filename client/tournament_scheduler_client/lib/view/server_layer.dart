@@ -14,14 +14,9 @@ class ServerLayer extends StatelessWidget {
     return Scaffold(
         appBar: AppBar(
           title: Text(Storage.instance().getUrl() ?? ""),
-          actions: [
-            IconButton(
-                icon: Icon(Icons.add),
-                onPressed: () => TournamentCreationDialog().show(context)),
-          ],
         ),
         body: ErrorMessageWidget(
-          layer: 1,
+          layer: 0,
           child: NotifierInit(
             child: Consumer<ServerNotifier>(
                 builder: (context, value, child) => ListView(

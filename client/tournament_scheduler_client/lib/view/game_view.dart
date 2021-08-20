@@ -44,26 +44,29 @@ class _ModuleListTile extends StatelessWidget {
       padding: const EdgeInsets.fromLTRB(0, 0, 0, 5),
       child: Card(
         child: InkWell(
-
           onTap: model.stats == null
               ? null
               : () {
-            showModalBottomSheet<void>(
-                context: context, builder: (BuildContext context) {
-              return StatsView(model.stats!, model.label);
-            });
-          },
+                  showModalBottomSheet<void>(
+                      context: context,
+                      builder: (BuildContext context) {
+                        return StatsView(model.stats!, model.label);
+                      });
+                },
           child: Padding(
             padding: const EdgeInsets.fromLTRB(0, 10, 0, 5),
             child: Column(
               children: [
                 Padding(
                   padding: const EdgeInsets.fromLTRB(5, 5, 5, 10),
-                  child: Text(model.label, style: Theme.of(context).textTheme.headline6),
+                  child: Text(model.label,
+                      style: Theme.of(context).textTheme.headline6),
                 ),
                 Padding(
                   padding: const EdgeInsets.fromLTRB(5, 0, 5, 0),
-                  child: Divider(thickness: 2,),
+                  child: Divider(
+                    thickness: 2,
+                  ),
                 ),
                 ...games
               ],
@@ -91,11 +94,9 @@ class _GameListTileState extends State<_GameListTile> {
   List<Widget> components(BuildContext context) {
     var list = <Widget>[
       ListTile(
-          title: Text("${widget.model.teamA} : ${widget.model.teamB}"),
-          subtitle: Text(resultText(widget.model)),
-          onTap: () => setState(() {
-                _expanded = !_expanded;
-              })),
+        title: Text("${widget.model.teamA} : ${widget.model.teamB}"),
+        subtitle: Text(resultText(widget.model)),
+      ),
     ];
     if (_expanded) {
       list.add(Padding(
@@ -151,7 +152,9 @@ class _GameListTileState extends State<_GameListTile> {
 
     list.add(Padding(
       padding: const EdgeInsets.fromLTRB(10, 0, 10, 0),
-      child: Divider(thickness: 1,),
+      child: Divider(
+        thickness: 1,
+      ),
     ));
     return list;
   }

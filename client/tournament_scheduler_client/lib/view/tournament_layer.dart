@@ -27,7 +27,7 @@ class TournamentLayer extends StatelessWidget {
             title: Text(Storage.instance().getActiveKey() ?? ""),
           ),
           body: ErrorMessageWidget(
-            layer: 2,
+            layer: 1,
             child: GameView(),
           )
         ));

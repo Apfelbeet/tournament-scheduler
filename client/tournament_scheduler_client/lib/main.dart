@@ -9,7 +9,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 void main() {
-  if(Storage.instance().tryConnectToUrl("192.168.178.30:8080"))
+  if(Storage.instance().tryConnectToUrl())
     runApp(App());
 }
 
@@ -87,7 +87,7 @@ Widget _urlToWidget(BuildContext context, String url) {
       //if connection succeeds a new server-level layer will be created
       //if connection fails an error message will show up.
 
-      if (Storage.instance().tryConnectToUrl(url)) {
+      if (Storage.instance().tryConnectToUrl()) {
         ErrorMessageWidget.currentLayer++;
         Navigator.push(
             context,
