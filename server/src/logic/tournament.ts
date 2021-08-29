@@ -2,7 +2,7 @@ import { randomKey } from "../util/util";
 import { Entry } from "./generation_modules/entry_module";
 import { Module } from "./generation_modules/module";
 import { Game } from "./generation_modules/game_module";
-import { Mode, Team, TeamId , Sync} from "../types/general_types";
+import { Mode, Team, TeamId, Sync } from "../types/general_types";
 
 export function newSync(): Sync {
     return randomKey(20);
@@ -17,7 +17,7 @@ export class Tournament {
 
     teams = new Map<TeamId, Team>();
     new_team_id: TeamId = 0;
-    winner?: TeamId; 
+    winner?: TeamId;
 
     invoke() {
         if (!this.mode) {
@@ -34,10 +34,12 @@ export class Tournament {
         );
         if (this.entry.validInput()) {
             this.entry.invoke();
-        } else
+        } else {
+            this.entry = undefined;
             throw new Error(
                 "Selected mode has issues with the current configuration!"
             );
+        }
     }
 
     reset() {
@@ -69,7 +71,7 @@ export class Tournament {
         if (!name) {
             throw new Error("invalid name!");
         }
-        this.teams.set(id, {id: id, name: name});
+        this.teams.set(id, { id: id, name: name });
     }
 
     removeTeam(id: TeamId) {
@@ -123,7 +125,7 @@ export class Tournament {
     };
 
     setResult(game_id: number, resultA: number, resultB: number) {
-        if (typeof game_id == "number" && typeof resultA == "number"  && typeof resultB == "number") {
+        if (typeof game_id == "number" && typeof resultA == "number" && typeof resultB == "number") {
             const game = this.search(game_id);
 
             if (game === undefined || game.type !== "game") {
@@ -135,7 +137,7 @@ export class Tournament {
             //If the entry module has any teams in the upstream, we assume the game is over.
             //It is sufficient to only check is after a result is set, because thats the only event
             //that can cause a game to end.
-            if(this.entry!.upstream_teams.length > 0) {
+            if (this.entry!.upstream_teams.length > 0) {
                 this.winner = this.entry!.upstream_teams[0].id;
             } else {
                 this.winner = undefined;
@@ -143,12 +145,12 @@ export class Tournament {
         } else {
             throw new Error(
                 "incomplete data: {id: " +
-                    game_id +
-                    ", resultA: " +
-                    resultA +
-                    ", resultB: " +
-                    resultB +
-                    "}"
+                game_id +
+                ", resultA: " +
+                resultA +
+                ", resultB: " +
+                resultB +
+                "}"
             );
         }
     }
