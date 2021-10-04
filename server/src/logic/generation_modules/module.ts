@@ -4,7 +4,7 @@ import { addStats, sortStats, subtractStats } from "../../util/util";
 import { TournamentFacade } from "../tournament_facade";
 import Entry from "./entry_module";
 
-let id = 0;
+let id: ModuleId = 0;
 
 export class Module {
     
@@ -13,7 +13,7 @@ export class Module {
     /**
      * The master node will be notified in the onFinish-Event.
      */
-    master: Module | null;
+    master: ModuleId | null;
 
     /**
      * Downstream teams are first divided into the submodules.
@@ -37,9 +37,9 @@ export class Module {
 
     visible: boolean;
 
-    modules: Module[];
+    modules: ModuleId[];
 
-    games: Module[];
+    games: ModuleId[];
 
     stats: Stats[];
     stats_cache: {
@@ -59,7 +59,7 @@ export class Module {
 
     constructor(
         tournament: TournamentFacade,
-        master: Module | null,
+        master: ModuleId | null,
         downstream_teams: any[],
         visible: boolean = true,
         label: string = "unnamed"
@@ -124,11 +124,11 @@ export class Module {
         while (true) {
             const result = this.moduleBuilder();
             if (result.modules != null) {
-                this.modules = [...this.modules, ...result.modules];
+                this.modules = [...this.modules, ...result.modules.map(m => this.tournament.registerNewModule(m))];
             }
             if (result.last !== false) break;
         }
-        this.modules.forEach((e) => e.invoke());
+        this.modules.forEach((e) => this.tournament.getModule(e).invoke());
     }
 
     /**
@@ -140,11 +140,11 @@ export class Module {
             if (result.games != null) {
                 //cache teams in games for stats generation
 
-                this.games = [...this.games, ...result.games];
+                this.games = [...this.games, ...result.games.map(m => this.tournament.registerNewModule(m))];
             }
             if (result.last !== false) break;
         }
-        this.games.forEach((e) => e.invoke());
+        this.games.forEach((e) => this.tournament.getModule(e).invoke());
     }
 
     /**
@@ -152,14 +152,15 @@ export class Module {
      */
     finish() {
         this.onFinish();
-        this.master?.refreshGameState();
+        if (this.master !== null)
+            this.tournament.getModule(this.master).refreshGameState();
     }
 
     invokeStats() {
         this.stats_cache = {
             games: [],
         };
-        this.games.forEach((game) =>
+        this.tournament.getModules(this.games).forEach((game: Module) =>
             game.downstream_teams.forEach((team) => {
                 if (
                     this.stats?.findIndex((st) => st.team.id === team.id) === -1
@@ -181,7 +182,9 @@ export class Module {
      * WARNING: If a team is not part of a module in games, then it won't show up in the stats.
      */
     composeStats(sort : boolean = true) {
-        this.games.forEach((game) => {
+        const games = this.tournament.getModules(this.games);
+
+        games.forEach((game) => {
             const cache_index = this.stats_cache.games.findIndex(
                 (g) => g.game === game.id
             );
@@ -231,7 +234,7 @@ export class Module {
         });
 
         //TODO: Merge this into the previous code, to avoid explicit sorting.
-        if(sort) sortStats(this.stats, this.games);
+        if(sort) sortStats(this.stats, games);
     }
 
     /**
@@ -247,22 +250,22 @@ export class Module {
         //
         //Track changes in submodules and games
         //
-        const clear = (list: Module[]) =>
-            list.forEach((m) => (m.changed = false));
+        const clear = (list: ModuleId[]) =>
+            this.tournament.getModules(list).forEach((m) => (m.changed = false));
 
         switch (this.state) {
             case State.STARTED:
-                if (this.modules.some((value) => value.changed)) {
+                if (this.modules.some((value) => this.tournament.getModule(value).changed)) {
                     this.updateModules();
                 }
                 break;
 
             case State.FINISHED:
-                if (this.modules.some((value) => value.changed)) {
+                if (this.modules.some((value) => this.tournament.getModule(value).changed)) {
                     this.updateModules();
                 }
 
-                if (this.games.some((value) => value.changed)) {
+                if (this.games.some((value) => this.tournament.getModule(value).changed)) {
                     this.updateGames();
                 }
                 break;
@@ -278,14 +281,15 @@ export class Module {
         if (this.changed && this.state == State.FINISHED) {
             this.finish();
         } else if (this.changed) {
-            this.master?.refreshGameState();
+            if (this.master !== null)
+                this.tournament.getModule(this.master).refreshGameState();
         }
 
         //
         //Generating Modules based on state:
         //
         if (this.state === State.INIT) {
-            if (this.modules.every((value) => value.state === State.FINISHED)) {
+            if (this.tournament.getModules(this.modules).every((value) => value.state === State.FINISHED)) {
                 this.state = State.STARTED;
                 this.resolveGames();
                 this.invokeStats();
@@ -294,7 +298,7 @@ export class Module {
 
         if (this.state == State.STARTED) {
             this.composeStats();
-            if (this.games.every((value) => value.state === State.FINISHED)) {
+            if (this.tournament.getModules(this.games).every((value) => value.state === State.FINISHED)) {
                 this.state = State.FINISHED;
                 this.finish();
             }
@@ -312,34 +316,13 @@ export class Module {
             label: this.label,
             visible: this.visible,
             state: this.state,
-            modules: this.modules.map((e) => e.structure()),
-            games: this.games.map((e) => e.structure()),
+            modules: this.tournament.getModules(this.modules).map((e) => e.structure()),
+            games: this.tournament.getModules(this.games).map((e) => e.structure()),
             down: this.downstream_teams,
             up: this.upstream_teams,
             stats: this.stats,
             data: this.data,
         };
-    }
-
-    /**
-     * Search for module with given id
-     * @param id
-     * @return {undefined|Module}
-     */
-
-    search(id: number): Module | undefined {
-        if (id === this.id) {
-            return this;
-        } else {
-            for (let i = 0; i < this.modules.length; i++) {
-                const ret = this.modules[i].search(id);
-                if (ret) return ret;
-            }
-            for (let i = 0; i < this.games.length; i++) {
-                const ret = this.games[i].search(id);
-                if (ret) return ret;
-            }
-        }
     }
 
     /**

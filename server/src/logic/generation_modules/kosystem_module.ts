@@ -3,20 +3,21 @@ import Group from "./group_module";
 import { Team } from "../../types/general_types";
 import SimpleKOSystemGame from "./kosystem_game_module";
 import { TournamentFacade } from "../tournament_facade";
+import { ModuleId } from "../../types/module_types";
 
 /**
  * In KO-System the losing team discards after the game
  */
 export default class SimpleKOSystem extends Module {
     
-    constructor(tournament: TournamentFacade, master: Module, downstream_teams: Team[]) {
+    constructor(tournament: TournamentFacade, master: ModuleId, downstream_teams: Team[]) {
         super(tournament, master, downstream_teams, true, "K.O. Phase");
         this.type = "ko-system";
     }
 
     gameBuilder() : {last: boolean, games: Module[] | null} {
         const teams =
-            this.modules.map(module => module.upstream_teams.slice(0, 2)).reduce((a, b) => [...a, ...b]);
+            this.modules.map(id => this.tournament.getModule(id).upstream_teams.slice(0, 2)).reduce((a, b) => [...a, ...b]);
 
         const reordered = [];
         for (let i = 0; i < Math.floor(teams.length / 2); i++) {
@@ -28,7 +29,7 @@ export default class SimpleKOSystem extends Module {
             games: [
                 new SimpleKOSystemGame(
                     this.tournament,
-                    this,
+                    this.id,
                     reordered,
                 )
             ],
@@ -40,15 +41,15 @@ export default class SimpleKOSystem extends Module {
         if (this.downstream_teams.length >= 4) {
             return {
                 modules: [
-                    new Group(this.tournament, this, this.downstream_teams.slice(0, this.downstream_teams.length / 2), true, "Group A"),
-                    new Group(this.tournament, this, this.downstream_teams.slice(this.downstream_teams.length / 2), true, "Group B")
+                    new Group(this.tournament, this.id, this.downstream_teams.slice(0, this.downstream_teams.length / 2), true, "Group A"),
+                    new Group(this.tournament, this.id, this.downstream_teams.slice(this.downstream_teams.length / 2), true, "Group B")
                 ],
                 last: true
             };
         } else if (this.downstream_teams.length > 1) {
             return {
                 modules: [
-                    new Group(this.tournament, this, this.downstream_teams.slice(0, this.downstream_teams.length)),
+                    new Group(this.tournament, this.id, this.downstream_teams.slice(0, this.downstream_teams.length)),
                 ],
                 last: true
             }
@@ -58,7 +59,7 @@ export default class SimpleKOSystem extends Module {
     }
 
     onFinish() {
-        this.upstream_teams = this.games[0].upstream_teams;
+        this.upstream_teams = this.tournament.getModule(this.games[0]).upstream_teams;
     }
 
     validInput() {

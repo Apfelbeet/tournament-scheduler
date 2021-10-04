@@ -4,6 +4,7 @@ import { Module } from "./generation_modules/module";
 import Game from "./generation_modules/game_module";
 import { Mode, Team, TeamId , Sync} from "../types/general_types";
 import { TournamentFacade } from "./tournament_facade";
+import { ModuleId } from "../types/module_types";
 
 export function newSync(): Sync {
     return randomKey(20);
@@ -18,7 +19,9 @@ export class Tournament {
 
     teams = new Map<TeamId, Team>();
     new_team_id: TeamId = 0;
-    winner?: TeamId; 
+    winner?: TeamId;
+
+    modules: Map<ModuleId, Module> = new Map();
 
     invoke() {
         if (!this.mode) {
@@ -44,6 +47,7 @@ export class Tournament {
     reset() {
         this.entry = undefined;
         this.winner = undefined;
+        this.modules = new Map();
     }
 
     addTeam(name: string) {
@@ -52,7 +56,7 @@ export class Tournament {
                 "Can't add any teams while the tournament is running!"
             );
 
-        const id = this.nextId();
+        const id = this.nextTeamId();
         this.teams.set(id, { name: name, id: id });
     }
 
@@ -90,8 +94,12 @@ export class Tournament {
         return Array.from(this.teams.values());
     }
 
-    nextId() {
+    nextTeamId() {
         return this.new_team_id++;
+    }
+
+    registerNewModule(module: Module) {
+        this.modules.set(module.id, module);
     }
 
     getStructure() {
@@ -115,9 +123,9 @@ export class Tournament {
         return this.entry;
     }
 
-    search(id: number): Module | undefined {
+    search(id: ModuleId): Module | undefined {
         if (this.isStarted()) {
-            return this.entry!.search(id);
+            return this.modules.get(id);
         } else {
             throw new Error("tournament isn't active!");
         }

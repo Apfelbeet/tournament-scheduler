@@ -1,3 +1,6 @@
+
+import { ModuleId } from "../types/module_types";
+import { Module } from "./generation_modules/module";
 import { Tournament } from "./tournament";
 
 export class TournamentFacade {
@@ -6,5 +9,21 @@ export class TournamentFacade {
 
     constructor(tournament: Tournament) {
         this.tournament = tournament;
+    }
+
+    registerNewModule(module: Module): ModuleId {
+        this.tournament.registerNewModule(module);
+        return module.id;
+    }
+
+    getModule(id: ModuleId): Module {
+        if (this.tournament.modules.has(id)) {
+            return this.tournament.modules.get(id)!;
+        }
+        throw Error("Unknown Module with id: " + id);
+    }
+
+    getModules(ids: ModuleId[]): Module[] {
+        return ids.map(id => this.getModule(id));
     }
 }

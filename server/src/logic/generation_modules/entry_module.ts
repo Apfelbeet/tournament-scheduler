@@ -1,16 +1,16 @@
 import { Module} from "./module"
 import { Team } from "../../types/general_types";
-import { State, Structure } from "../../types/module_types";
-import { Tournament } from "../tournament";
+import { ModuleId, State, Structure } from "../../types/module_types";
 import { TournamentFacade } from "../tournament_facade";
 
 export default class Entry extends Module {
     
-    entryModule: Module;
+    entryModule: ModuleId;
 
     constructor(tournament: TournamentFacade, teams: Team[], entryModule: any) {
-        super(tournament ,null, teams, true, "entry");
-        this.entryModule = new entryModule.default(tournament, this.self(), this.downstream_teams, true);
+        super(tournament, null, teams, true, "entry");
+        this.tournament.registerNewModule(this);
+        this.entryModule = tournament.registerNewModule(new entryModule.default(tournament, this.id, this.downstream_teams, true));
         this.type = "entry"
     }
 
@@ -21,7 +21,7 @@ export default class Entry extends Module {
             label: this.label,
             visible: this.visible,
             state: this.state,
-            modules: [this.entryModule.structure()],
+            modules: [this.tournament.getModule(this.entryModule).structure()],
             games: [],
             down: [],
             up: [],
@@ -30,26 +30,21 @@ export default class Entry extends Module {
     }
 
     moduleBuilder() : {last: boolean, modules: Module[] | null} {
-        return {modules: [this.entryModule], last: true}
+        return {modules: [this.tournament.getModule(this.entryModule)], last: true}
     }
 
     onFinish() {
-        this.upstream_teams = this.entryModule.upstream_teams
+        this.upstream_teams = this.tournament.getModule(this.entryModule).upstream_teams
     }
 
     validInput() {
-        return this.entryModule.validInput();
+        return this.tournament.getModule(this.entryModule).validInput();
     }
 
     refreshGameState() {
-        if(this.entryModule.state !== State.FINISHED) {
+        if(this.tournament.getModule(this.entryModule).state !== State.FINISHED) {
            this.upstream_teams = []; 
         }
         super.refreshGameState();
-    }
-
-    //FIXME: ???
-    self(): Module {
-        return this;
     }
 }

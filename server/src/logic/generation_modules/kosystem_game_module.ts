@@ -2,6 +2,7 @@ import { Module } from "./module";
 import Game from "./game_module";
 import { Team } from "../../types/general_types";
 import { TournamentFacade } from "../tournament_facade";
+import { ModuleId } from "../../types/module_types";
 
 /**
  * KOSystemGame is an inner representation of a single game
@@ -10,7 +11,7 @@ export default class SimpleKOSystemGame extends Module {
     
     level: number;
 
-    constructor(tournament: TournamentFacade, master: Module, downstream_teams: Team[], level = 0) {
+    constructor(tournament: TournamentFacade, master: ModuleId, downstream_teams: Team[], level = 0) {
         super(tournament, master, downstream_teams, false, getLabelFromLevel(level));
         this.level = level;
         this.type = "ko-system-game";
@@ -20,15 +21,17 @@ export default class SimpleKOSystemGame extends Module {
     gameBuilder() : {last: boolean, games: Module[] | null} {
         if (this.modules.length === 0) {
             return {
-                games: [new Game(this.tournament, this, this.downstream_teams)],
+                games: [new Game(this.tournament, this.id, this.downstream_teams)],
                 last: true
             }
         } else {
+            const modules = this.tournament.getModules(this.modules);
+
             return {
                 games: [new Game(
                     this.tournament,
-                    this,
-                    [this.modules[0].upstream_teams[0], this.modules[1].upstream_teams[0]],
+                    this.id,
+                    [modules[0].upstream_teams[0], modules[1].upstream_teams[0]],
                 )],
                 last: true
             }
@@ -45,8 +48,8 @@ export default class SimpleKOSystemGame extends Module {
 
         return {
             modules: [
-                new SimpleKOSystemGame(this.tournament, this, a, this.level + 1),
-                new SimpleKOSystemGame(this.tournament, this, b, this.level + 1)
+                new SimpleKOSystemGame(this.tournament, this.id, a, this.level + 1),
+                new SimpleKOSystemGame(this.tournament, this.id, b, this.level + 1)
             ],
             last: true,
         }
@@ -55,7 +58,7 @@ export default class SimpleKOSystemGame extends Module {
     onFinish() {
         //Game sorts the player: Winner at index 0 and Loser at index 1
         //The parent module has to know what to do with this information
-        this.upstream_teams = this.games[0].upstream_teams;
+        this.upstream_teams = this.tournament.getModule(this.games[0]).upstream_teams;
     }
 
     validInput() {
