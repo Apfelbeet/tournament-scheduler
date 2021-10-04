@@ -33,7 +33,7 @@ export class Tournament {
 
         this.entry = new Entry(
             new TournamentFacade(this),
-            Array.from(this.teams.values()),
+            Array.from(this.teams.keys()),
             this.mode.init
         );
         if (this.entry.validInput()) {
@@ -145,7 +145,7 @@ export class Tournament {
             //It is sufficient to only check is after a result is set, because thats the only event
             //that can cause a game to end.
             if(this.entry!.upstream_teams.length > 0) {
-                this.winner = this.entry!.upstream_teams[0].id;
+                this.winner = this.entry!.upstream_teams[0];
             } else {
                 this.winner = undefined;
             }

@@ -1,6 +1,6 @@
 import { Module } from "./module";
 import Game from "./game_module";
-import { Team } from "../../types/general_types";
+import { Team, TeamId } from "../../types/general_types";
 import { TournamentFacade } from "../tournament_facade";
 import { ModuleId } from "../../types/module_types";
 
@@ -11,7 +11,7 @@ export default class SimpleGroupModule extends Module {
     constructor(
         tournament: TournamentFacade,
         master: ModuleId,
-        downstream_teams: Team[],
+        downstream_teams: TeamId[],
         visible: boolean = true,
         label: string = "Group"
     ) {

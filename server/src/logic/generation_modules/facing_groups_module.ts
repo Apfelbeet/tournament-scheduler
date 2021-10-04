@@ -1,4 +1,4 @@
-import { Team } from "../../types/general_types";
+import { Team, TeamId } from "../../types/general_types";
 import {
     addStats,
     compareStats,
@@ -15,7 +15,7 @@ export default class ExtendedGroupModule extends Module {
     constructor(
         tournament: TournamentFacade,
         master: ModuleId,
-        downstream_teams: Team[]
+        downstream_teams: TeamId[]
     ) {
         super(tournament, master, downstream_teams, true, "Clash Phase");
     }
@@ -117,9 +117,9 @@ export default class ExtendedGroupModule extends Module {
             if (game.state == State.FINISHED) {
                 const leadingStats = this.stats[this.stats.length - 2 * i - 2];
                 const losingStats = this.stats[this.stats.length - 2 * i - 1];
-                const winnerTeamFromGame = game.upstream_teams[0].id;
+                const winnerTeamFromGame = game.upstream_teams[0];
                 if (
-                    leadingStats.team.id !== winnerTeamFromGame ||
+                    leadingStats.team !== winnerTeamFromGame ||
                     compareStats(leadingStats, losingStats) > 0
                 ) {
                     this.stats[this.stats.length - 2 * i - 2] = losingStats;

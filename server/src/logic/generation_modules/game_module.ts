@@ -1,5 +1,5 @@
 import { Module } from "./module";
-import { Team } from "../../types/general_types";
+import { Team, TeamId } from "../../types/general_types";
 import { ModuleId, State } from "../../types/module_types";
 import { TournamentFacade } from "../tournament_facade";
 
@@ -7,7 +7,7 @@ import { TournamentFacade } from "../tournament_facade";
  * Game is an terminal module, it has no submodules and only one game between two teams.
  */
 export default class Game extends Module {
-    constructor(tournament: TournamentFacade, master: ModuleId, downstream_teams: Team[]) {
+    constructor(tournament: TournamentFacade, master: ModuleId, downstream_teams: TeamId[]) {
         super(tournament, master, downstream_teams);
         this.type = "game";
     }

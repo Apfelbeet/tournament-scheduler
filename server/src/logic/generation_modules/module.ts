@@ -1,4 +1,4 @@
-import { Team } from "../../types/general_types";
+import { TeamId } from "../../types/general_types";
 import { State, Structure, Stats, CachedStats, ModuleId } from "../../types/module_types";
 import { addStats, sortStats, subtractStats } from "../../util/util";
 import { TournamentFacade } from "../tournament_facade";
@@ -19,9 +19,9 @@ export class Module {
      * Downstream teams are first divided into the submodules.
      * The resulting upstream is then used to build "game" modules.
      */
-    downstream_teams: Team[];
+    downstream_teams: TeamId[];
 
-    upstream_teams: Team[];
+    upstream_teams: TeamId[];
 
     /**
      * Every Module as a state, that indicates how much of it is already resolved.
@@ -60,7 +60,7 @@ export class Module {
     constructor(
         tournament: TournamentFacade,
         master: ModuleId | null,
-        downstream_teams: any[],
+        downstream_teams: TeamId[],
         visible: boolean = true,
         label: string = "unnamed"
     ) {
@@ -163,7 +163,7 @@ export class Module {
         this.tournament.getModules(this.games).forEach((game: Module) =>
             game.downstream_teams.forEach((team) => {
                 if (
-                    this.stats?.findIndex((st) => st.team.id === team.id) === -1
+                    this.stats?.findIndex((st) => st.team === team) === -1
                 ) {
                     this.stats?.push({
                         team: team,
@@ -195,7 +195,7 @@ export class Module {
             if (cache_index !== -1 && game.changed) {
                 this.stats_cache.games[cache_index].stats?.forEach((st) => {
                     const index = this.stats.findIndex(
-                        (st2) => st2.team.id === st.team.id
+                        (st2) => st2.team === st.team
                     );
                     if (index !== -1) {
                         this.stats[index] = subtractStats(
@@ -214,7 +214,7 @@ export class Module {
             ) {
                 game.stats?.forEach((st) => {
                     const index = this.stats.findIndex(
-                        (st2) => st2.team.id === st.team.id
+                        (st2) => st2.team === st.team
                     );
                     if (index !== -1) {
                         this.stats[index] = addStats(this.stats[index], st);

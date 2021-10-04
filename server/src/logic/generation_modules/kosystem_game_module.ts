@@ -1,6 +1,6 @@
 import { Module } from "./module";
 import Game from "./game_module";
-import { Team } from "../../types/general_types";
+import { Team, TeamId } from "../../types/general_types";
 import { TournamentFacade } from "../tournament_facade";
 import { ModuleId } from "../../types/module_types";
 
@@ -11,7 +11,7 @@ export default class SimpleKOSystemGame extends Module {
     
     level: number;
 
-    constructor(tournament: TournamentFacade, master: ModuleId, downstream_teams: Team[], level = 0) {
+    constructor(tournament: TournamentFacade, master: ModuleId, downstream_teams: TeamId[], level = 0) {
         super(tournament, master, downstream_teams, false, getLabelFromLevel(level));
         this.level = level;
         this.type = "ko-system-game";
