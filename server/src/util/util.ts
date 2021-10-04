@@ -1,4 +1,3 @@
-import { Game } from "../logic/generation_modules/game_module";
 import { Module } from "../logic/generation_modules/module";
 import { State, Stats } from "../types/module_types";
 

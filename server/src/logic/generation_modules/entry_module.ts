@@ -3,7 +3,7 @@ import { Team } from "../../types/general_types";
 import { State, Structure } from "../../types/module_types";
 import { Tournament } from "../tournament";
 
-export class Entry extends Module {
+export default class Entry extends Module {
     
     entryModule: Module;
     tournament: Tournament;

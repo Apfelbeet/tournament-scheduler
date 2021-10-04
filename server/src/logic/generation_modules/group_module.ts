@@ -1,5 +1,5 @@
 import { Module } from "./module";
-import { Game } from "./game_module";
+import Game from "./game_module";
 import { Team } from "../../types/general_types";
 
 /**

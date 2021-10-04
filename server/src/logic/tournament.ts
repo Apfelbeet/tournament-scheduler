@@ -1,7 +1,7 @@
 import { randomKey } from "../util/util";
-import { Entry } from "./generation_modules/entry_module";
+import Entry from "./generation_modules/entry_module";
 import { Module } from "./generation_modules/module";
-import { Game } from "./generation_modules/game_module";
+import Game from "./generation_modules/game_module";
 import { Mode, Team, TeamId , Sync} from "../types/general_types";
 
 export function newSync(): Sync {

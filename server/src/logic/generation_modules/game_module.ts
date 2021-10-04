@@ -6,7 +6,7 @@ import * as logger from "../../util/logger";
 /**
  * Game is an terminal module, it has no submodules and only one game between two teams.
  */
-export class Game extends Module {
+export default class Game extends Module {
     constructor(master: Module, downstream_teams: Team[]) {
         super(master, downstream_teams);
         this.type = "game";

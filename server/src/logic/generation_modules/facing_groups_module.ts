@@ -5,10 +5,9 @@ import {
     sortStats,
     subtractStats,
 } from "../../util/util";
-import { Game } from "./game_module";
+import Game from "./game_module";
 import SimpleGroupModule from "./group_module";
 import { Module } from "./module";
-import * as logger from "../../util/logger";
 import { State } from "../../types/module_types";
 
 export default class ExtendedGroupModule extends Module {

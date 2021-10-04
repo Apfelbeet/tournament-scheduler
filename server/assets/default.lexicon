@@ -1,0 +1,26 @@
+[
+    {
+        "key": "entry",
+        "file": "entry_module"
+    },
+    {
+        "key": "facing_groups",
+        "file": "facing_groups_module"
+    },
+    {
+        "key": "game",
+        "file": "game_module"
+    },
+    {
+        "key": "group",
+        "file": "group_module"
+    },
+    {
+        "key": "kosystem",
+        "file": "kosystem_module"
+    },
+    {
+        "key": "kosystem_game",
+        "file": "kosystem_game_module"
+    }
+]

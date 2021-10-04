@@ -7,7 +7,7 @@ import { Structure } from "../types/module_types";
 import { OutOfSyncError } from "../util/errors";
 import * as socket from "../network/socket_connection";
 import * as logger from "../util/logger";
-import { Game } from "./generation_modules/game_module";
+import Game from "./generation_modules/game_module";
 
 const tournaments = new Map<string, Tournament>();
 let modes: Mode[] = [];
