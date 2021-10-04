@@ -7,6 +7,8 @@ export enum State {
     FINISHED = 3
 }
 
+export type ModuleId = number;
+
 export type Structure = {
     id: number, 
     type: string, 

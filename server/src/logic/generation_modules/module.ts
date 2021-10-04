@@ -27,7 +27,7 @@ export class Module {
      */
     state: State;
 
-    id: number;
+    id: ModuleId;
 
     label: string;
 
