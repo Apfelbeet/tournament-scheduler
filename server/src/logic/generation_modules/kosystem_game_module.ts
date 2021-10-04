@@ -1,6 +1,7 @@
 import { Module } from "./module";
 import Game from "./game_module";
 import { Team } from "../../types/general_types";
+import { TournamentFacade } from "../tournament_facade";
 
 /**
  * KOSystemGame is an inner representation of a single game
@@ -9,8 +10,8 @@ export default class SimpleKOSystemGame extends Module {
     
     level: number;
 
-    constructor(master: Module, downstream_teams: Team[], level = 0) {
-        super(master, downstream_teams, false, getLabelFromLevel(level));
+    constructor(tournament: TournamentFacade, master: Module, downstream_teams: Team[], level = 0) {
+        super(tournament, master, downstream_teams, false, getLabelFromLevel(level));
         this.level = level;
         this.type = "ko-system-game";
         this.visible = true;
@@ -19,12 +20,13 @@ export default class SimpleKOSystemGame extends Module {
     gameBuilder() : {last: boolean, games: Module[] | null} {
         if (this.modules.length === 0) {
             return {
-                games: [new Game(this, this.downstream_teams)],
+                games: [new Game(this.tournament, this, this.downstream_teams)],
                 last: true
             }
         } else {
             return {
                 games: [new Game(
+                    this.tournament,
                     this,
                     [this.modules[0].upstream_teams[0], this.modules[1].upstream_teams[0]],
                 )],
@@ -43,8 +45,8 @@ export default class SimpleKOSystemGame extends Module {
 
         return {
             modules: [
-                new SimpleKOSystemGame(this, a, this.level + 1),
-                new SimpleKOSystemGame(this, b, this.level + 1)
+                new SimpleKOSystemGame(this.tournament, this, a, this.level + 1),
+                new SimpleKOSystemGame(this.tournament, this, b, this.level + 1)
             ],
             last: true,
         }

@@ -1,11 +1,15 @@
 import { Team } from "../../types/general_types";
-import { State, Structure, Stats, CachedStats } from "../../types/module_types";
-import * as logger from "../../util/logger";
+import { State, Structure, Stats, CachedStats, ModuleId } from "../../types/module_types";
 import { addStats, sortStats, subtractStats } from "../../util/util";
+import { TournamentFacade } from "../tournament_facade";
+import Entry from "./entry_module";
 
 let id = 0;
 
 export class Module {
+    
+    tournament: TournamentFacade;
+    
     /**
      * The master node will be notified in the onFinish-Event.
      */
@@ -54,11 +58,13 @@ export class Module {
     type: string = "module";
 
     constructor(
+        tournament: TournamentFacade,
         master: Module | null,
         downstream_teams: any[],
         visible: boolean = true,
         label: string = "unnamed"
     ) {
+        this.tournament = tournament;
         this.master = master;
         this.downstream_teams = downstream_teams;
         this.state = State.PREINIT;

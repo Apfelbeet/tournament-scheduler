@@ -2,14 +2,15 @@ import { Module } from "./module";
 import Group from "./group_module";
 import { Team } from "../../types/general_types";
 import SimpleKOSystemGame from "./kosystem_game_module";
+import { TournamentFacade } from "../tournament_facade";
 
 /**
  * In KO-System the losing team discards after the game
  */
 export default class SimpleKOSystem extends Module {
     
-    constructor(master: Module, downstream_teams: Team[]) {
-        super(master, downstream_teams, true, "K.O. Phase");
+    constructor(tournament: TournamentFacade, master: Module, downstream_teams: Team[]) {
+        super(tournament, master, downstream_teams, true, "K.O. Phase");
         this.type = "ko-system";
     }
 
@@ -26,6 +27,7 @@ export default class SimpleKOSystem extends Module {
         return {
             games: [
                 new SimpleKOSystemGame(
+                    this.tournament,
                     this,
                     reordered,
                 )
@@ -38,15 +40,15 @@ export default class SimpleKOSystem extends Module {
         if (this.downstream_teams.length >= 4) {
             return {
                 modules: [
-                    new Group(this, this.downstream_teams.slice(0, this.downstream_teams.length / 2), true, "Group A"),
-                    new Group(this, this.downstream_teams.slice(this.downstream_teams.length / 2), true, "Group B")
+                    new Group(this.tournament, this, this.downstream_teams.slice(0, this.downstream_teams.length / 2), true, "Group A"),
+                    new Group(this.tournament, this, this.downstream_teams.slice(this.downstream_teams.length / 2), true, "Group B")
                 ],
                 last: true
             };
         } else if (this.downstream_teams.length > 1) {
             return {
                 modules: [
-                    new Group(this, this.downstream_teams.slice(0, this.downstream_teams.length)),
+                    new Group(this.tournament, this, this.downstream_teams.slice(0, this.downstream_teams.length)),
                 ],
                 last: true
             }

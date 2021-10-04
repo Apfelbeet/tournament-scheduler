@@ -9,10 +9,11 @@ import Game from "./game_module";
 import SimpleGroupModule from "./group_module";
 import { Module } from "./module";
 import { State } from "../../types/module_types";
+import { TournamentFacade } from "../tournament_facade";
 
 export default class ExtendedGroupModule extends Module {
-    constructor(master: Module, downstream_teams: Team[]) {
-        super(master, downstream_teams, true, "Clash Phase");
+    constructor(tournament: TournamentFacade, master: Module, downstream_teams: Team[]) {
+        super(tournament, master, downstream_teams, true, "Clash Phase");
     }
 
     gameBuilder(): { last: boolean; games: Module[] | null } {
@@ -21,7 +22,7 @@ export default class ExtendedGroupModule extends Module {
 
         const games = [];
         for (let i = Math.min(teams1.length, teams2.length) - 1; i >= 0; i--) {
-            games.push(new Game(this, [teams1[i], teams2[i]]));
+            games.push(new Game(this.tournament ,this, [teams1[i], teams2[i]]));
         }
 
         return {
@@ -35,6 +36,7 @@ export default class ExtendedGroupModule extends Module {
             last: true,
             modules: [
                 new SimpleGroupModule(
+                    this.tournament,
                     this,
                     this.downstream_teams.slice(
                         0,
@@ -44,6 +46,7 @@ export default class ExtendedGroupModule extends Module {
                     "Group A"
                 ),
                 new SimpleGroupModule(
+                    this.tournament,
                     this,
                     this.downstream_teams.slice(
                         this.downstream_teams.length / 2

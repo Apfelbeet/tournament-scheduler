@@ -1,18 +1,20 @@
 import { Module } from "./module";
 import Game from "./game_module";
 import { Team } from "../../types/general_types";
+import { TournamentFacade } from "../tournament_facade";
 
 /**
  * Group is the classic model of a group in which everybody plays against everybody
  */
 export default class SimpleGroupModule extends Module {
     constructor(
+        tournament: TournamentFacade,
         master: Module,
         downstream_teams: Team[],
         visible: boolean = true,
         label: string = "Group"
     ) {
-        super(master, downstream_teams, visible, label);
+        super(tournament, master, downstream_teams, visible, label);
         this.type = "group";
     }
 
@@ -26,14 +28,14 @@ export default class SimpleGroupModule extends Module {
             for (let j = 0; j < this.downstream_teams.length - 1 - i; j++) {
                 if (j % 2 === 0) {
                     games.push(
-                        new Game(this, [
+                        new Game(this.tournament, this, [
                             this.downstream_teams[i],
                             this.downstream_teams[j + i + 1],
                         ])
                     );
                 } else {
                     games.push(
-                        new Game(this, [
+                        new Game(this.tournament, this, [
                             this.downstream_teams[j + i + 1],
                             this.downstream_teams[i],
                         ])

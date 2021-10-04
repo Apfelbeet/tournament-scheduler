@@ -3,6 +3,7 @@ import Entry from "./generation_modules/entry_module";
 import { Module } from "./generation_modules/module";
 import Game from "./generation_modules/game_module";
 import { Mode, Team, TeamId , Sync} from "../types/general_types";
+import { TournamentFacade } from "./tournament_facade";
 
 export function newSync(): Sync {
     return randomKey(20);
@@ -28,9 +29,9 @@ export class Tournament {
         }
 
         this.entry = new Entry(
+            new TournamentFacade(this),
             Array.from(this.teams.values()),
-            this.mode.init,
-            this
+            this.mode.init
         );
         if (this.entry.validInput()) {
             this.entry.invoke();
