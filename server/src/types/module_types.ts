@@ -32,6 +32,6 @@ export type Stats = {
 }
 
 export type CachedStats = {
-    game: number,
+    game: ModuleId,
     stats: Stats[]
 }

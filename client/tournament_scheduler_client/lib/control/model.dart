@@ -71,8 +71,8 @@ class GameModel {
             json['id'],
             Storage.instance().getTeam(json['down'][0])?.name ?? "-",
             Storage.instance().getTeam(json['down'][1])?.name ?? "-",
-            resultA: json.containsKey('data') ? json['data']['a'] : null,
-            resultB: json.containsKey('data') ? json['data']['b'] : null);
+            resultA: json.containsKey('data') && json['data'].containsKey('result') ? json['data']['result']['a'] : null,
+            resultB: json.containsKey('data') && json['data'].containsKey('result') ? json['data']['result']['b'] : null);
 }
 
 ///

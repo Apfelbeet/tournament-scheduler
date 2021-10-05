@@ -46,7 +46,7 @@ export class Module {
         games: CachedStats[];
     };
 
-    data?: any;
+    additional_attributes: any;
 
     changed: boolean;
 
@@ -79,6 +79,7 @@ export class Module {
         };
         this.changed = false;
         this.stats = [];
+        this.additional_attributes = {};
     }
 
     /**
@@ -321,7 +322,7 @@ export class Module {
             down: this.downstream_teams,
             up: this.upstream_teams,
             stats: this.stats,
-            data: this.data,
+            data: this.additional_attributes,
         };
     }
 

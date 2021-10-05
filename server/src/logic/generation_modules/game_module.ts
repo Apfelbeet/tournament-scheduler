@@ -36,21 +36,21 @@ export default class Game extends Module {
     }
 
     composeStats() {
-        if (this.data !== undefined) {
+        if (this.additional_attributes.result !== undefined) {
             this.stats = [
                 {
                     team: this.downstream_teams[0],
-                    wins: this.data.a >= this.data.b ? 1 : 0,
-                    loses: this.data.a >= this.data.b ? 0 : 1,
-                    scored: this.data.a,
-                    conceded: this.data.b,
+                    wins: this.additional_attributes.result.a >= this.additional_attributes.result.b ? 1 : 0,
+                    loses: this.additional_attributes.result.a >= this.additional_attributes.result.b ? 0 : 1,
+                    scored: this.additional_attributes.result.a,
+                    conceded: this.additional_attributes.result.b,
                 },
                 {
                     team: this.downstream_teams[1],
-                    wins: this.data.a >= this.data.b ? 0 : 1,
-                    loses: this.data.a >= this.data.b ? 1 : 0,
-                    scored: this.data.b,
-                    conceded: this.data.a,
+                    wins: this.additional_attributes.result.a >= this.additional_attributes.result.b ? 0 : 1,
+                    loses: this.additional_attributes.result.a >= this.additional_attributes.result.b ? 1 : 0,
+                    scored: this.additional_attributes.result.b,
+                    conceded: this.additional_attributes.result.a,
                 },
             ];
         }
@@ -59,19 +59,19 @@ export default class Game extends Module {
     setResult(a: number, b: number) {
         const res = { a: a, b: b };
         if (
-            this.data !== undefined &&
-            JSON.stringify(this.data) !== JSON.stringify(res)
+            this.additional_attributes.result !== undefined &&
+            JSON.stringify(this.additional_attributes.result) !== JSON.stringify(res)
         ) {
             this.changed = true;
         }
-        this.data = res;
+        this.additional_attributes.result = res;
         this.refreshGameState();
     }
 
     onFinish() {
-        if (this.data !== undefined) {
+        if (this.additional_attributes.result !== undefined) {
             //Creating upstream
-            if (this.data.a >= this.data.b) {
+            if (this.additional_attributes.result.a >= this.additional_attributes.result.b) {
                 this.upstream_teams = [
                     this.downstream_teams[0],
                     this.downstream_teams[1],

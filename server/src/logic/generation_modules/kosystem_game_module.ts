@@ -8,12 +8,10 @@ import { ModuleId } from "../../types/module_types";
  * KOSystemGame is an inner representation of a single game
  */
 export default class SimpleKOSystemGame extends Module {
-    
-    level: number;
 
     constructor(tournament: TournamentFacade, master: ModuleId, downstream_teams: TeamId[], level = 0) {
         super(tournament, master, downstream_teams, false, getLabelFromLevel(level));
-        this.level = level;
+        this.additional_attributes.level = level;
         this.type = "ko-system-game";
         this.visible = true;
     }
@@ -48,8 +46,8 @@ export default class SimpleKOSystemGame extends Module {
 
         return {
             modules: [
-                new SimpleKOSystemGame(this.tournament, this.id, a, this.level + 1),
-                new SimpleKOSystemGame(this.tournament, this.id, b, this.level + 1)
+                new SimpleKOSystemGame(this.tournament, this.id, a, this.additional_attributes.level + 1),
+                new SimpleKOSystemGame(this.tournament, this.id, b, this.additional_attributes.level + 1)
             ],
             last: true,
         }
