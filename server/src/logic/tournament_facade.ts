@@ -17,6 +17,9 @@ export class TournamentFacade {
     }
 
     getModule(id: ModuleId): Module {
+        if (this.tournament.getEntry()?.id === id) {
+            return this.tournament.getEntry()!;
+        }
         if (this.tournament.modules.has(id)) {
             return this.tournament.modules.get(id)!;
         }

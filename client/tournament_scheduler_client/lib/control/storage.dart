@@ -1,6 +1,7 @@
 import 'dart:collection';
 import 'dart:convert';
 
+import 'package:flutter/material.dart';
 import 'package:tournament_scheduler_client/control/connection.dart';
 import 'package:tournament_scheduler_client/control/file.dart';
 import 'package:tournament_scheduler_client/control/model.dart';
@@ -151,8 +152,8 @@ class Storage {
               print("STATUS!");
               _setStatus(m["data"]);
               break;
-            case "structure":
-              print("STRUCTURE!");
+            case "modules":
+              print("MODULES!");
               _setModules(m["data"]);
               break;
           }
@@ -174,10 +175,12 @@ class Storage {
   }
 
   void _setModules(data) {
-    if (data != null) {
-      _tournament?.modules = _decodeModule(data["modules"][0], null);
-    } else {
-      _tournament?.modules = [];
+    _tournament?.games.clear();
+    _tournament?.modules.clear();
+    _tournament?.moduleToGame.clear();
+
+    if (_tournament != null && data != null && data.length > 0) {
+      _decodeModules(data);
     }
     gameNotifier.notify();
   }
@@ -211,49 +214,44 @@ class Storage {
     infoNotifier.notify();
   }
 
-  List<ModuleModel> _decodeModule(Map module, ModuleModel? parent) {
-    final List<Map> submodules = [];
-    final List<GameModel> games = [];
-    final ModuleModel? lastVisibleModel = module["visible"]
-        ? ModuleModel(
-            module["type"] as String,
-            module["label"] as String,
-            module.containsKey("stats")
-                ? (module["stats"] as List)
-                    .map<StatsModel>((st) => StatsModel.fromJson(st as Map<String, dynamic>)).toList(growable: false)
-                : null)
-        : parent;
-
-    module['modules'].forEach((element) {
-      if ((element["type"] as String) == "game") {
-        games.add(GameModel.fromJson(element));
-      } else {
-        submodules.add(element);
+  void _decodeModules(List<dynamic> modules) {
+    bool first = true;
+    for (Map<String, dynamic> module in modules) {
+      
+      if(first) {
+        _tournament!.entry = module["id"];
+        first = false;
       }
-    });
-
-    module['games'].forEach((element) {
-      if ((element["type"] as String) == "game") {
-        games.add(GameModel.fromJson(element));
-      } else {
-        submodules.add(element);
+        
+      _tournament!.modules[module["id"]] = ModuleModel.fromJson(module);
+      if(module["type"] == "game") {
+        _tournament!.games[module["id"]] = GameModel.fromJson(module);
       }
+    }
+
+    if(_tournament!.entry != null) {
+      _assignGamesToModule(_tournament!.entry!, null);
+    }
+
+  }
+
+  void _assignGamesToModule(int id, int? parent) {
+    final module = _tournament!.modules[id];
+    if(module == null) return;
+
+    final int par = parent == null || module.visible ? id : parent;
+
+    module.modules
+        .forEach((childId) {
+       if(_tournament!.games.containsKey(childId)) {
+         _tournament!.moduleToGame.putIfAbsent(par, () => []);
+         _tournament!.moduleToGame[par]!.add(childId);
+       }
+
+       if(_tournament!.modules.containsKey(childId)) {
+         _assignGamesToModule(childId, par);
+       }
     });
-
-    List<ModuleModel> decoded = submodules
-        .map((e) => _decodeModule(e, lastVisibleModel))
-        .fold([], (previousValue, e) {
-      previousValue.addAll(e);
-      return previousValue;
-    });
-
-    lastVisibleModel?.games.addAll(games);
-
-    if (lastVisibleModel != null &&
-        lastVisibleModel != parent &&
-        lastVisibleModel.games.length > 0) decoded.add(lastVisibleModel);
-
-    return decoded;
   }
 
   void notifyError(String message) {
@@ -302,8 +300,17 @@ class Storage {
 
   List<TeamModel> getTeams() => _tournament != null ? _tournament!.teams : [];
 
-  List<ModuleModel> getModules() =>
-      _tournament != null ? _tournament!.modules : [];
+  ModuleModel? getModule(int id) => _tournament?.modules[id];
+
+  GameModel? getGame(int id) => _tournament?.games[id];
+
+  List<GameModel> getGamesFromModule(ModuleModel module) {
+    return module.modules.map((id) => _tournament?.games[id]).where((m) => m != null).toList() as List<GameModel>;
+  }
+
+  Map<int, List<int>>? getModuleToGamesMap() {
+    return _tournament?.moduleToGame;
+  }
 
   int? getWinner() => _tournament?.winner;
 
@@ -378,7 +385,10 @@ class _TournamentState {
 
   ModeModel? activeMode;
   List<TeamModel> teams = [];
-  List<ModuleModel> modules = [];
+  Map<int, ModuleModel> modules = new Map();
+  Map<int, GameModel> games = new Map();
+  Map<int, List<int>> moduleToGame = new Map();
+  int? entry;
 
   TeamModel? getTeamById(int id) {
     for (int i = 0; i < teams.length; i++) {

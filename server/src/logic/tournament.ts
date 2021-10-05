@@ -4,7 +4,7 @@ import { Module } from "./generation_modules/module";
 import Game from "./generation_modules/game_module";
 import { Mode, Team, TeamId , Sync} from "../types/general_types";
 import { TournamentFacade } from "./tournament_facade";
-import { ModuleId } from "../types/module_types";
+import { ModuleId, Structure } from "../types/module_types";
 
 export function newSync(): Sync {
     return randomKey(20);
@@ -102,9 +102,9 @@ export class Tournament {
         this.modules.set(module.id, module);
     }
 
-    getStructure() {
+    getModuleStructures(): Structure[] {
         if (!this.isStarted()) throw new Error("No active tournament!");
-        return this.entry!.structure();
+        return [this.entry!.structure(), ...Array.from(this.modules.values()).map(m => m.structure())];
     }
 
     setMode(mode: Mode) {

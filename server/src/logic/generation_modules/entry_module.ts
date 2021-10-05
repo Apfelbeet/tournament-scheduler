@@ -9,7 +9,6 @@ export default class Entry extends Module {
 
     constructor(tournament: TournamentFacade, teams: TeamId[], entryModule: any) {
         super(tournament, null, teams, true, "entry");
-        this.tournament.registerNewModule(this);
         this.entryModule = tournament.registerNewModule(new entryModule.default(tournament, this.id, this.downstream_teams, true));
         this.type = "entry"
     }
@@ -21,7 +20,7 @@ export default class Entry extends Module {
             label: this.label,
             visible: this.visible,
             state: this.state,
-            modules: [this.tournament.getModule(this.entryModule).structure()],
+            modules: [this.entryModule],
             games: [],
             down: [],
             up: [],

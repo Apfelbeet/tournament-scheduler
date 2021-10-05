@@ -108,8 +108,8 @@ export function sendStructure(key: Key, syncNew: Sync, syncOld: Sync) {
         key,
         syncNew,
         syncOld,
-        "structure",
-        logic.getStructureFromTournament(key)
+        "modules",
+        logic.getModuleStructuresFromTournament(key)
     );
 }
 
@@ -122,7 +122,7 @@ export function sendAll(key: Key, connection: websocket.connection) {
             data: {
                 sync: logic.getTournament(key).sync,
                 teams: logic.getTeamsFromTournament(key),
-                modules: logic.getStructureFromTournament(key),
+                modules: logic.getModuleStructuresFromTournament(key),
                 status: logic.getStatusFromTournament(key),
             },
         })

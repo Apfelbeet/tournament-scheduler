@@ -23,12 +23,26 @@ class TeamModel {
 /// ModuleModel
 ///
 class ModuleModel {
-  final List<GameModel> games = [];
+  final List<int> modules;
   final String type;
   final String label;
   final List<StatsModel>? stats;
+  final bool visible;
 
-  ModuleModel(this.type, this.label, this.stats);
+  ModuleModel(this.type, this.label, this.modules, this.visible, this.stats);
+
+  ModuleModel.fromJson(Map<String, dynamic> json)
+      : this(
+            json["type"],
+            json["label"],
+            [...json["modules"], ...json["games"]],
+            json["visible"],
+            json.containsKey("stats")
+                ? (json["stats"] as List)
+                    .map<StatsModel>(
+                        (st) => StatsModel.fromJson(st as Map<String, dynamic>))
+                    .toList(growable: false)
+                : null);
 }
 
 class StatsModel {

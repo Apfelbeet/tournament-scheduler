@@ -17,8 +17,8 @@ export type Structure = {
     state: State, 
     stats?: Stats[],
     data: any,
-    modules: Structure[],
-    games: Structure[],
+    modules: ModuleId[],
+    games: ModuleId[],
     down: TeamId[],
     up: TeamId[],
 }
