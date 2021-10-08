@@ -1,4 +1,3 @@
-import { Game } from "../logic/generation_modules/game_module";
 import { Module } from "../logic/generation_modules/module";
 import { State, Stats } from "../types/module_types";
 
@@ -48,9 +47,9 @@ export function compareStats(a: Stats, b: Stats, games?: Module[]): number {
             let a_wins = 0;
             let b_wins = 0;
             games.filter(g => g.type === "game" && g.state === State.FINISHED).forEach(g => {
-                if (g.upstream_teams[0].id === a.team.id && g.upstream_teams[1].id === b.team.id) {
+                if (g.upstream_teams[0] === a.team && g.upstream_teams[1] === b.team) {
                     a_wins++;
-                } else if (g.upstream_teams[1].id === b.team.id && g.upstream_teams[0].id === a.team.id) {
+                } else if (g.upstream_teams[1] === b.team && g.upstream_teams[0] === a.team) {
                     b_wins++;
                 }
             });

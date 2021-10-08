@@ -17,11 +17,12 @@ class _GameViewState extends State<GameView> {
   Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.fromLTRB(5, 5, 5, 0),
-      child: Consumer<GameNotifier>(
-        builder: (context, n, c) => ListView(
-          children: _ModuleListTile.fromModels(Storage.instance().getModules()),
-        ),
-      ),
+      child: Consumer<GameNotifier>(builder: (context, n, c) {
+        final map = Storage.instance().getModuleToGamesMap();
+        return ListView(
+          children: map != null ? _ModuleListTile.fromModels(map) : [],
+        );
+      }),
     );
   }
 }
@@ -32,11 +33,23 @@ class _ModuleListTile extends StatelessWidget {
 
   _ModuleListTile(this.model, this.games);
 
-  _ModuleListTile.fromModel(ModuleModel model)
-      : this(model, _GameListTile.fromModels(model.games));
+  _ModuleListTile.fromModel(ModuleModel model, List<GameModel> games)
+      : this(model, _GameListTile.fromModels(games));
 
-  static List<_ModuleListTile> fromModels(List<ModuleModel> models) =>
-      models.map((e) => new _ModuleListTile.fromModel(e)).toList();
+  static List<_ModuleListTile> fromModels(Map<int, List<int>> models) =>
+      models.entries
+          .map((entry) {
+            final module = Storage.instance().getModule(entry.key);
+            final games = entry.value
+                .map((id) => Storage.instance().getGame(id))
+                .whereType<GameModel>()
+                .toList();
+            return module != null
+                ? _ModuleListTile.fromModel(module, games)
+                : null;
+          })
+          .whereType<_ModuleListTile>()
+          .toList();
 
   @override
   Widget build(BuildContext context) {
@@ -44,26 +57,29 @@ class _ModuleListTile extends StatelessWidget {
       padding: const EdgeInsets.fromLTRB(0, 0, 0, 5),
       child: Card(
         child: InkWell(
-
           onTap: model.stats == null
               ? null
               : () {
-            showModalBottomSheet<void>(
-                context: context, builder: (BuildContext context) {
-              return StatsView(model.stats!, model.label);
-            });
-          },
+                  showModalBottomSheet<void>(
+                      context: context,
+                      builder: (BuildContext context) {
+                        return StatsView(model.stats!, model.label);
+                      });
+                },
           child: Padding(
             padding: const EdgeInsets.fromLTRB(0, 10, 0, 5),
             child: Column(
               children: [
                 Padding(
                   padding: const EdgeInsets.fromLTRB(5, 5, 5, 10),
-                  child: Text(model.label, style: Theme.of(context).textTheme.headline6),
+                  child: Text(model.label,
+                      style: Theme.of(context).textTheme.headline6),
                 ),
                 Padding(
                   padding: const EdgeInsets.fromLTRB(5, 0, 5, 0),
-                  child: Divider(thickness: 2,),
+                  child: Divider(
+                    thickness: 2,
+                  ),
                 ),
                 ...games
               ],
@@ -151,7 +167,9 @@ class _GameListTileState extends State<_GameListTile> {
 
     list.add(Padding(
       padding: const EdgeInsets.fromLTRB(10, 0, 10, 0),
-      child: Divider(thickness: 1,),
+      child: Divider(
+        thickness: 1,
+      ),
     ));
     return list;
   }

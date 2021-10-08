@@ -1,4 +1,4 @@
-import {Team} from "./general_types"
+import {TeamId} from "./general_types"
 
 export enum State {
     PREINIT = 0,
@@ -6,6 +6,8 @@ export enum State {
     STARTED = 2,
     FINISHED = 3
 }
+
+export type ModuleId = number;
 
 export type Structure = {
     id: number, 
@@ -15,14 +17,14 @@ export type Structure = {
     state: State, 
     stats?: Stats[],
     data: any,
-    modules: Structure[],
-    games: Structure[],
-    down: Team[],
-    up: Team[],
+    modules: ModuleId[],
+    games: ModuleId[],
+    down: TeamId[],
+    up: TeamId[],
 }
 
 export type Stats = {
-    team: Team,
+    team: TeamId,
     wins: number,
     loses: number,
     scored: number,
@@ -30,6 +32,6 @@ export type Stats = {
 }
 
 export type CachedStats = {
-    game: number,
+    game: ModuleId,
     stats: Stats[]
 }

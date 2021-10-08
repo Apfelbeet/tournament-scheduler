@@ -31,7 +31,8 @@ class ServerLayer extends StatelessWidget {
           layer: 1,
           child: NotifierInit(
             child: Consumer<ServerNotifier>(
-                builder: (context, value, child) => ListView(
+                builder: (context, value, child) =>
+                    ListView(
                       children: Storage.instance()
                           .getKeys()
                           .map((e) => _keyToWidget(context, e))
@@ -42,8 +43,14 @@ class ServerLayer extends StatelessWidget {
   }
 }
 
-Widget _keyToWidget(BuildContext context, String key) => ListTile(
+Widget _keyToWidget(BuildContext context, String key) =>
+    ListTile(
       title: Text(key),
+      trailing: IconButton(
+        icon: Icon(Icons.delete),
+        onPressed:() {
+          Storage.instance().removeTournament(key);
+        },),
       onTap: () {
         ErrorMessageWidget.currentLayer++;
         Storage.instance().subscribe(key);
@@ -51,7 +58,7 @@ Widget _keyToWidget(BuildContext context, String key) => ListTile(
             context,
             MaterialPageRoute(
 
-                //Open new layer
+              //Open new layer
                 builder: (_) => TournamentLayer()));
       },
     );

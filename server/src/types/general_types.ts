@@ -25,14 +25,31 @@ export type UnparsedMode = {
 
 export type UnparsedConfiguration = {
     port: number;
+    database: {
+        host: string,
+        port: number,
+    }
+    lexicon: string;
     modes: UnparsedMode[];
     logTags: LogType[];
 }
 
+export type Lexicon = Map<String, typeof Module>;
+
 export type Configuration = {
     port: number;
+    database: {
+        host: string,
+        port: number,
+    };
+    lexicon: Lexicon;
     modes: Mode[];
     logTags: LogType[];
 };
 
-export type LogType = "info" | "warning" | "error" | "always" | "network"
+export type UnparsedLexiconEntry = {
+    type: string;
+    file: string;
+}
+
+export type LogType = "info" | "warning" | "error" | "always" | "network" | "database"

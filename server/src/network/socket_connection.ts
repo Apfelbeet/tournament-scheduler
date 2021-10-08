@@ -7,6 +7,7 @@ import { OutOfSyncError } from "../util/errors";
 import * as logger from "../util/logger";
 
 const subscriptions = new Map<Key, websocket.connection[]>();
+let connections: websocket.connection[] = []; 
 let httpServer;
 let wsServer;
 
@@ -22,7 +23,7 @@ export function init(port: number) {
     logger.success(`Socket is listening on ${port}!`);
 }
 
-export function originIsAllowed(origin: string): boolean {
+function originIsAllowed(origin: string): boolean {
     return true;
 }
 
@@ -34,6 +35,7 @@ export function onRequest(request: websocket.request) {
     }
 
     const connection = request.accept("echo-protocol", request.origin);
+    connections.push(connection);
     logger.log(`Connection accepted: ${connection.remoteAddress}`);
 
     connection.on("message", (message) => {
@@ -47,12 +49,14 @@ export function onRequest(request: websocket.request) {
                 parseReceivedMessage(json_message, connection);
             } catch (e) {
                 console.error((e as Error).message);
-            } 
+            }
         }
     });
 
     connection.on("close", (reasonCode, description) => {
         logger.log(`${connection.remoteAddress} disconnected!`);
+        unsubscribe(connection);
+        connections = connections.filter(con => con !== connection);
     });
 }
 
@@ -83,60 +87,65 @@ export function sendTournamentData(
     });
 }
 
-export function sendTeams(key: Key, syncNew: Sync, syncOld: Sync) {
+export async function sendTeams(key: Key, syncNew: Sync, syncOld: Sync) {
     sendTournamentData(
         key,
         syncNew,
         syncOld,
         "team",
-        logic.getTeamsFromTournament(key)
+        await logic.getTeamsFromTournament(key)
     );
 }
 
-export function sendStatus(key: Key, syncNew: Sync, syncOld: Sync) {
+export async function sendStatus(key: Key, syncNew: Sync, syncOld: Sync) {
     sendTournamentData(
         key,
         syncNew,
         syncOld,
         "status",
-        logic.getStatusFromTournament(key)
+        await logic.getStatusFromTournament(key)
     );
 }
 
-export function sendStructure(key: Key, syncNew: Sync, syncOld: Sync) {
+export async function sendStructure(key: Key, syncNew: Sync, syncOld: Sync) {
     sendTournamentData(
         key,
         syncNew,
         syncOld,
-        "structure",
-        logic.getStructureFromTournament(key)
+        "modules",
+        await logic.getModuleStructuresFromTournament(key)
     );
 }
 
-export function sendAll(key: Key, connection: websocket.connection) {
+export async function sendAll(key: Key, connection: websocket.connection) {
     send(
         connection,
         JSON.stringify({
             type: "allTournamentData",
             key: key,
             data: {
-                sync: logic.getTournament(key).sync,
-                teams: logic.getTeamsFromTournament(key),
-                modules: logic.getStructureFromTournament(key),
-                status: logic.getStatusFromTournament(key),
+                sync: (await logic.getTournament(key)).sync,
+                teams: await logic.getTeamsFromTournament(key),
+                modules: await logic.getModuleStructuresFromTournament(key),
+                status: await logic.getStatusFromTournament(key),
             },
         })
     );
 }
 
-export function sendTournaments(connection: websocket.connection) {
-    send(
-        connection,
-        JSON.stringify({
-            type: "tournaments",
-            data: logic.getTournaments(),
-        })
-    );
+export function sendTournaments(connection?: websocket.connection) {
+    if (connection === undefined) {
+        connections.forEach(con => sendTournaments(con));
+    } else {
+        send(
+            connection,
+            JSON.stringify({
+                type: "tournaments",
+                data: logic.getTournaments(),
+            })
+        );
+    }
+
 }
 
 export function sendModes(connection: websocket.connection) {
@@ -188,9 +197,15 @@ export function parseReceivedMessage(
                 logic.newTournamentWithKey(message.key);
             }
             sendTournaments(connection);
+        } else if (message.type === "removeTournament") {
+            /*
+        {type: "removeTournament", key: string}
+         */
+            logic.removeTournament(message.key);
+            sendTournaments();
         } else if (message.type === "getTournaments") {
             /*
-        {type: "getTournament"}
+        {type: "getTournaments"}
          */
             sendTournaments(connection);
         } else if (message.type === "getModes") {
@@ -232,7 +247,7 @@ export function parseReceivedMessage(
                 logic.tournamentExists(message.key) &&
                 subscriptions.has(message.key)
             ) {
-                subscriptions.get(message.key)!.filter((c) => c !== connection);
+                unsubscribe(connection, message.key);
                 logger.log(
                     `${connection.remoteAddress} unsubscribed from ${message.key}`
                 );
@@ -350,5 +365,35 @@ export function parseReceivedMessage(
             );
             sendError(connection, (e as Error).message);
         }
+    }
+}
+
+export function hasSubscription(key: Key) {
+    return subscriptions.has(key) && subscriptions.get(key)!.length > 0;
+}
+
+function unsubscribe(connection: websocket.connection, key?: Key) {
+    if (key === undefined) {
+        Array.from(subscriptions.keys()).forEach((k) =>
+            unsubscribe(connection, k)
+        );
+    } else {
+        subscriptions.set(
+            key,
+            subscriptions.get(key)!.filter((c) => c !== connection)
+        );
+        if (!subscriptions.has(key) || subscriptions.get(key)!.length === 0)
+            setTimeout(() => logic.unloadInactiveTournament(key), 60000);
+    }
+}
+
+export function removeTournament(key: Key) {
+    if (subscriptions.has(key)) {
+        subscriptions.get(key)?.forEach((con) => {
+            //TODO: There is no need to generally close the whole connection. But currently there is no way to tell the client, that this tournament does not longer exist.
+            unsubscribe(con);
+            con.close();
+        });
+        subscriptions.delete(key);
     }
 }

@@ -1,8 +1,11 @@
 import { randomKey } from "../util/util";
-import { Entry } from "./generation_modules/entry_module";
+import Entry from "./generation_modules/entry_module";
 import { Module } from "./generation_modules/module";
-import { Game } from "./generation_modules/game_module";
-import { Mode, Team, TeamId, Sync } from "../types/general_types";
+import Game from "./generation_modules/game_module";
+import { Mode, Team, TeamId , Sync} from "../types/general_types";
+import { TournamentFacade } from "./tournament_facade";
+import { ModuleId, Structure } from "../types/module_types";
+
 
 export function newSync(): Sync {
     return randomKey(20);
@@ -19,6 +22,9 @@ export class Tournament {
     new_team_id: TeamId = 0;
     winner?: TeamId;
 
+    modules: Map<ModuleId, Module> = new Map();
+    new_module_id: ModuleId = 0;
+
     invoke() {
         if (!this.mode) {
             throw new Error("No mode selected!");
@@ -28,10 +34,12 @@ export class Tournament {
         }
 
         this.entry = new Entry(
-            Array.from(this.teams.values()),
-            this.mode.init,
-            this
+            new TournamentFacade(this),
+            null,
+            Array.from(this.teams.keys()),
         );
+        this.entry.setEntryModule(this.mode.init);
+        
         if (this.entry.validInput()) {
             this.entry.invoke();
         } else {
@@ -45,6 +53,7 @@ export class Tournament {
     reset() {
         this.entry = undefined;
         this.winner = undefined;
+        this.modules = new Map();
     }
 
     addTeam(name: string) {
@@ -53,7 +62,7 @@ export class Tournament {
                 "Can't add any teams while the tournament is running!"
             );
 
-        const id = this.nextId();
+        const id = this.nextTeamId();
         this.teams.set(id, { name: name, id: id });
     }
 
@@ -91,13 +100,17 @@ export class Tournament {
         return Array.from(this.teams.values());
     }
 
-    nextId() {
+    nextTeamId() {
         return this.new_team_id++;
     }
 
-    getStructure() {
+    registerNewModule(module: Module) {
+        this.modules.set(module.id, module);
+    }
+
+    getModuleStructures(): Structure[] {
         if (!this.isStarted()) throw new Error("No active tournament!");
-        return this.entry!.structure();
+        return [this.entry!.structure(), ...Array.from(this.modules.values()).map(m => m.structure())];
     }
 
     setMode(mode: Mode) {
@@ -116,9 +129,9 @@ export class Tournament {
         return this.entry;
     }
 
-    search(id: number): Module | undefined {
+    search(id: ModuleId): Module | undefined {
         if (this.isStarted()) {
-            return this.entry!.search(id);
+            return this.modules.get(id);
         } else {
             throw new Error("tournament isn't active!");
         }
@@ -137,8 +150,8 @@ export class Tournament {
             //If the entry module has any teams in the upstream, we assume the game is over.
             //It is sufficient to only check is after a result is set, because thats the only event
             //that can cause a game to end.
-            if (this.entry!.upstream_teams.length > 0) {
-                this.winner = this.entry!.upstream_teams[0].id;
+            if(this.entry!.upstream_teams.length > 0) {
+                this.winner = this.entry!.upstream_teams[0];
             } else {
                 this.winner = undefined;
             }

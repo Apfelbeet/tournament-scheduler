@@ -1,56 +1,76 @@
-import { Module} from "./module"
-import { Team } from "../../types/general_types";
-import { State, Structure } from "../../types/module_types";
-import { Tournament } from "../tournament";
+import { Module } from "./module";
+import { TeamId } from "../../types/general_types";
+import { ModuleId, State, Structure } from "../../types/module_types";
+import { TournamentFacade } from "../tournament_facade";
 
-export class Entry extends Module {
-    
-    entryModule: Module;
-    tournament: Tournament;
-
-    constructor(teams: Team[], entryModule: any, tournament: Tournament) {
-        super(null, teams, true, "entry");
-        this.entryModule = new entryModule.default(this.self(), this.downstream_teams, true);
-        this.type = "entry"
-        this.tournament = tournament;
+export default class Entry extends Module {
+    constructor(
+        tournament: TournamentFacade,
+        master: ModuleId | null,
+        teams: TeamId[],
+    ) {
+        super(tournament, master, teams, "entry", true, "entry");
     }
 
-    structure() : Structure {
+
+    setEntryModule(
+        entryModule: any
+    ) {
+        this.additional_attributes.entryModule = this.tournament.registerNewModule(
+            new entryModule.default(
+                this.tournament,
+                this.id,
+                this.downstream_teams,
+                true
+            )
+        );
+    }
+
+    structure(): Structure {
         return {
             id: this.id,
             type: this.type,
             label: this.label,
             visible: this.visible,
             state: this.state,
-            modules: [this.entryModule.structure()],
+            modules: [this.additional_attributes.entryModule],
             games: [],
             down: [],
             up: [],
-            data: undefined
-        }
+            data: undefined,
+        };
     }
 
-    moduleBuilder() : {last: boolean, modules: Module[] | null} {
-        return {modules: [this.entryModule], last: true}
+    moduleBuilder(): { last: boolean; modules: Module[] | null } {
+        return {
+            modules: [
+                this.tournament.getModule(
+                    this.additional_attributes.entryModule
+                ),
+            ],
+            last: true,
+        };
     }
 
     onFinish() {
-        this.upstream_teams = this.entryModule.upstream_teams
+        this.upstream_teams = this.tournament.getModule(
+            this.additional_attributes.entryModule
+        ).upstream_teams;
     }
 
     validInput() {
-        return this.entryModule.validInput();
+        return this.tournament
+            .getModule(this.additional_attributes.entryModule)
+            .validInput();
     }
 
     refreshGameState() {
-        if(this.entryModule.state !== State.FINISHED) {
-           this.upstream_teams = []; 
+        if (
+            this.tournament.getModule(this.additional_attributes.entryModule)
+                .state !== State.FINISHED
+        ) {
+            this.upstream_teams = [];
         }
         super.refreshGameState();
-    }
-
-    //FIXME: ???
-    self(): Module {
-        return this;
     }
 }
