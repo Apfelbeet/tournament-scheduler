@@ -22,7 +22,7 @@ export function init(port: number) {
     logger.success(`Socket is listening on ${port}!`);
 }
 
-export function originIsAllowed(origin: string): boolean {
+function originIsAllowed(origin: string): boolean {
     return true;
 }
 
@@ -53,6 +53,7 @@ export function onRequest(request: websocket.request) {
 
     connection.on("close", (reasonCode, description) => {
         logger.log(`${connection.remoteAddress} disconnected!`);
+        unsubscribe(connection);
     });
 }
 
@@ -232,7 +233,7 @@ export function parseReceivedMessage(
                 logic.tournamentExists(message.key) &&
                 subscriptions.has(message.key)
             ) {
-                subscriptions.get(message.key)!.filter((c) => c !== connection);
+                unsubscribe(connection, message.key);
                 logger.log(
                     `${connection.remoteAddress} unsubscribed from ${message.key}`
                 );
@@ -352,3 +353,17 @@ export function parseReceivedMessage(
         }
     }
 }
+
+export function hasSubscription(key: Key) {
+    return subscriptions.has(key) && subscriptions.get(key)!.length > 0;
+}
+
+function unsubscribe(connection: websocket.connection, key?: Key) {
+    if (key === undefined) {
+        Array.from(subscriptions.keys()).forEach(k => unsubscribe(connection, k))
+    } else {
+        subscriptions.set(key, subscriptions.get(key)!.filter((c) => c !== connection));
+        if(!subscriptions.has(key) || subscriptions.get(key)!.length === 0)
+            setTimeout(() => logic.unloadInactiveTournament(key), 60000);
+    }
+} 

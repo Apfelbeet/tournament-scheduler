@@ -239,3 +239,11 @@ export async function setResult(
     }
     database.storeTournament(key, t);
 }
+
+export async function unloadInactiveTournament(key: Key) {
+    if (!socket.hasSubscription(key) && tournaments.has(key)) {
+        logger.log(`${key}: Unload tournament data`);
+        database.storeTournament(key, await getTournament(key));
+        tournaments.delete(key);
+    }
+}
