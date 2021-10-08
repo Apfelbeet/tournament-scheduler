@@ -1,10 +1,7 @@
 import { TeamId } from "../../types/general_types";
-import { State, Structure, Stats, CachedStats, ModuleId } from "../../types/module_types";
+import { State, Structure, Stats, CachedStats, ModuleId} from "../../types/module_types";
 import { addStats, sortStats, subtractStats } from "../../util/util";
 import { TournamentFacade } from "../tournament_facade";
-import Entry from "./entry_module";
-
-let id: ModuleId = 0;
 
 export class Module {
     
@@ -55,20 +52,21 @@ export class Module {
      * This can help to filter for certain modules and can be used by the UI to make different representations of the modules.
      * Therefore, if you want to give the module special treatment, you should rename this attribute uniquely.
      */
-    type: string = "module";
+    type: string;
 
     constructor(
         tournament: TournamentFacade,
         master: ModuleId | null,
-        downstream_teams: TeamId[],
+        teams: TeamId[],
+        type: string,
         visible: boolean = true,
         label: string = "unnamed"
     ) {
         this.tournament = tournament;
         this.master = master;
-        this.downstream_teams = downstream_teams;
+        this.downstream_teams = teams;
         this.state = State.PREINIT;
-        this.id = id++;
+        this.id = tournament.newModuleId();
         this.label = label;
         this.visible = visible;
         this.modules = [];
@@ -80,6 +78,7 @@ export class Module {
         this.changed = false;
         this.stats = [];
         this.additional_attributes = {};
+        this.type = type;
     }
 
     /**

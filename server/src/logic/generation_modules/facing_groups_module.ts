@@ -15,9 +15,9 @@ export default class ExtendedGroupModule extends Module {
     constructor(
         tournament: TournamentFacade,
         master: ModuleId,
-        downstream_teams: TeamId[]
+        teams: TeamId[]
     ) {
-        super(tournament, master, downstream_teams, true, "Clash Phase");
+        super(tournament, master, teams, "facing_groups", true, "Clash Phase");
     }
 
     gameBuilder(): { last: boolean; games: Module[] | null } {

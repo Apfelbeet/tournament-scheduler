@@ -11,12 +11,11 @@ export default class SimpleGroupModule extends Module {
     constructor(
         tournament: TournamentFacade,
         master: ModuleId,
-        downstream_teams: TeamId[],
+        teams: TeamId[],
         visible: boolean = true,
         label: string = "Group"
     ) {
-        super(tournament, master, downstream_teams, visible, label);
-        this.type = "group";
+        super(tournament, master, teams, "group" ,visible, label);
     }
 
     /**

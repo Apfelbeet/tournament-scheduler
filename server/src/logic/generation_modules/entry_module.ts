@@ -1,19 +1,24 @@
 import { Module } from "./module";
-import { Team, TeamId } from "../../types/general_types";
+import { TeamId } from "../../types/general_types";
 import { ModuleId, State, Structure } from "../../types/module_types";
 import { TournamentFacade } from "../tournament_facade";
 
 export default class Entry extends Module {
     constructor(
         tournament: TournamentFacade,
+        master: ModuleId | null,
         teams: TeamId[],
+    ) {
+        super(tournament, master, teams, "entry", true, "entry");
+    }
+
+
+    setEntryModule(
         entryModule: any
     ) {
-        super(tournament, null, teams, true, "entry");
-        this.type = "entry";
-        this.additional_attributes.entryModule = tournament.registerNewModule(
+        this.additional_attributes.entryModule = this.tournament.registerNewModule(
             new entryModule.default(
-                tournament,
+                this.tournament,
                 this.id,
                 this.downstream_teams,
                 true

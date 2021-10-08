@@ -22,6 +22,7 @@ export class Tournament {
     winner?: TeamId;
 
     modules: Map<ModuleId, Module> = new Map();
+    new_module_id: ModuleId = 0;
 
     invoke() {
         if (!this.mode) {
@@ -33,9 +34,11 @@ export class Tournament {
 
         this.entry = new Entry(
             new TournamentFacade(this),
+            null,
             Array.from(this.teams.keys()),
-            this.mode.init
         );
+        this.entry.setEntryModule(this.mode.init);
+        
         if (this.entry.validInput()) {
             this.entry.invoke();
         } else

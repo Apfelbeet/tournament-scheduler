@@ -1,4 +1,4 @@
-import {Team, TeamId} from "./general_types"
+import {TeamId} from "./general_types"
 
 export enum State {
     PREINIT = 0,

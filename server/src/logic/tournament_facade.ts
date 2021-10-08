@@ -29,4 +29,8 @@ export class TournamentFacade {
     getModules(ids: ModuleId[]): Module[] {
         return ids.map(id => this.getModule(id));
     }
+
+    newModuleId() {
+        return this.tournament.new_module_id++;
+    }
 }

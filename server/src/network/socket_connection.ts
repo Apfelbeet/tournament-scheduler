@@ -83,47 +83,47 @@ export function sendTournamentData(
     });
 }
 
-export function sendTeams(key: Key, syncNew: Sync, syncOld: Sync) {
+export async function sendTeams(key: Key, syncNew: Sync, syncOld: Sync) {
     sendTournamentData(
         key,
         syncNew,
         syncOld,
         "team",
-        logic.getTeamsFromTournament(key)
+        await logic.getTeamsFromTournament(key)
     );
 }
 
-export function sendStatus(key: Key, syncNew: Sync, syncOld: Sync) {
+export async function sendStatus(key: Key, syncNew: Sync, syncOld: Sync) {
     sendTournamentData(
         key,
         syncNew,
         syncOld,
         "status",
-        logic.getStatusFromTournament(key)
+        await logic.getStatusFromTournament(key)
     );
 }
 
-export function sendStructure(key: Key, syncNew: Sync, syncOld: Sync) {
+export async function sendStructure(key: Key, syncNew: Sync, syncOld: Sync) {
     sendTournamentData(
         key,
         syncNew,
         syncOld,
         "modules",
-        logic.getModuleStructuresFromTournament(key)
+        await logic.getModuleStructuresFromTournament(key)
     );
 }
 
-export function sendAll(key: Key, connection: websocket.connection) {
+export async function sendAll(key: Key, connection: websocket.connection) {
     send(
         connection,
         JSON.stringify({
             type: "allTournamentData",
             key: key,
             data: {
-                sync: logic.getTournament(key).sync,
-                teams: logic.getTeamsFromTournament(key),
-                modules: logic.getModuleStructuresFromTournament(key),
-                status: logic.getStatusFromTournament(key),
+                sync: (await logic.getTournament(key)).sync,
+                teams: await logic.getTeamsFromTournament(key),
+                modules: await logic.getModuleStructuresFromTournament(key),
+                status: await logic.getStatusFromTournament(key),
             },
         })
     );
