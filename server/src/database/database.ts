@@ -37,17 +37,21 @@ export async function getTournamentKeys(): Promise<Key[]> {
 }
 
 export async function storeTournament(key: Key, tournament: Tournament) {
+    const data: string = JSON.stringify(instancer.imageOfTournament(tournament));
+    logger.database(`${key}: Store tournament data:\n${data}`);
     redis_client.set(
         key,
-        JSON.stringify(instancer.imageOfTournament(tournament))
+        data
     );
 }
 
 export async function loadTournament(key: Key): Promise<Tournament> {
+    logger.log(`${key}: Loading data from database!`);
     return new Promise((res, rej) => {
         redis_client.get(key, (err, string_data) => {
             if (err) rej(err);
             else if (string_data !== null) {
+                logger.database(`${key}: Received tournament data:\n${string_data}`)
                 const image: TournamentImage = JSON.parse(string_data);
                 res(instancer.instanceTournament(image));
             } else {

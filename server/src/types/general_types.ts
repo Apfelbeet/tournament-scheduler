@@ -52,4 +52,4 @@ export type UnparsedLexiconEntry = {
     file: string;
 }
 
-export type LogType = "info" | "warning" | "error" | "always" | "network"
+export type LogType = "info" | "warning" | "error" | "always" | "network" | "database"

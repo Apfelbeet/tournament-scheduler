@@ -35,6 +35,10 @@ export function net(message: string) {
     write(message, "network");
 }
 
+export function database(message: string) {
+    write(message, "database");
+}
+
 export function load() {
     loaded = true;
     config.getLoggingTags().forEach((tag: LogType) => tags.set(tag, true))
