@@ -6,6 +6,7 @@ import { Mode, Team, TeamId , Sync} from "../types/general_types";
 import { TournamentFacade } from "./tournament_facade";
 import { ModuleId, Structure } from "../types/module_types";
 
+
 export function newSync(): Sync {
     return randomKey(20);
 }
@@ -41,10 +42,12 @@ export class Tournament {
         
         if (this.entry.validInput()) {
             this.entry.invoke();
-        } else
+        } else {
+            this.entry = undefined;
             throw new Error(
                 "Selected mode has issues with the current configuration!"
             );
+        }
     }
 
     reset() {
@@ -77,7 +80,7 @@ export class Tournament {
         if (!name) {
             throw new Error("invalid name!");
         }
-        this.teams.set(id, {id: id, name: name});
+        this.teams.set(id, { id: id, name: name });
     }
 
     removeTeam(id: TeamId) {
@@ -135,7 +138,7 @@ export class Tournament {
     };
 
     setResult(game_id: number, resultA: number, resultB: number) {
-        if (typeof game_id == "number" && typeof resultA == "number"  && typeof resultB == "number") {
+        if (typeof game_id == "number" && typeof resultA == "number" && typeof resultB == "number") {
             const game = this.search(game_id);
 
             if (game === undefined || game.type !== "game") {
@@ -155,12 +158,12 @@ export class Tournament {
         } else {
             throw new Error(
                 "incomplete data: {id: " +
-                    game_id +
-                    ", resultA: " +
-                    resultA +
-                    ", resultB: " +
-                    resultB +
-                    "}"
+                game_id +
+                ", resultA: " +
+                resultA +
+                ", resultB: " +
+                resultB +
+                "}"
             );
         }
     }
