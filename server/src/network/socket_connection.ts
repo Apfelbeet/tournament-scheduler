@@ -7,6 +7,7 @@ import { OutOfSyncError } from "../util/errors";
 import * as logger from "../util/logger";
 
 const subscriptions = new Map<Key, websocket.connection[]>();
+let connections: websocket.connection[] = []; 
 let httpServer;
 let wsServer;
 
@@ -34,6 +35,7 @@ export function onRequest(request: websocket.request) {
     }
 
     const connection = request.accept("echo-protocol", request.origin);
+    connections.push(connection);
     logger.log(`Connection accepted: ${connection.remoteAddress}`);
 
     connection.on("message", (message) => {
@@ -47,13 +49,14 @@ export function onRequest(request: websocket.request) {
                 parseReceivedMessage(json_message, connection);
             } catch (e) {
                 console.error((e as Error).message);
-            } 
+            }
         }
     });
 
     connection.on("close", (reasonCode, description) => {
         logger.log(`${connection.remoteAddress} disconnected!`);
         unsubscribe(connection);
+        connections = connections.filter(con => con !== connection);
     });
 }
 
@@ -130,14 +133,19 @@ export async function sendAll(key: Key, connection: websocket.connection) {
     );
 }
 
-export function sendTournaments(connection: websocket.connection) {
-    send(
-        connection,
-        JSON.stringify({
-            type: "tournaments",
-            data: logic.getTournaments(),
-        })
-    );
+export function sendTournaments(connection?: websocket.connection) {
+    if (connection === undefined) {
+        connections.forEach(con => sendTournaments(con));
+    } else {
+        send(
+            connection,
+            JSON.stringify({
+                type: "tournaments",
+                data: logic.getTournaments(),
+            })
+        );
+    }
+
 }
 
 export function sendModes(connection: websocket.connection) {
@@ -189,9 +197,15 @@ export function parseReceivedMessage(
                 logic.newTournamentWithKey(message.key);
             }
             sendTournaments(connection);
+        } else if (message.type === "removeTournament") {
+            /*
+        {type: "removeTournament", key: string}
+         */
+            logic.removeTournament(message.key);
+            sendTournaments();
         } else if (message.type === "getTournaments") {
             /*
-        {type: "getTournament"}
+        {type: "getTournaments"}
          */
             sendTournaments(connection);
         } else if (message.type === "getModes") {
@@ -360,10 +374,26 @@ export function hasSubscription(key: Key) {
 
 function unsubscribe(connection: websocket.connection, key?: Key) {
     if (key === undefined) {
-        Array.from(subscriptions.keys()).forEach(k => unsubscribe(connection, k))
+        Array.from(subscriptions.keys()).forEach((k) =>
+            unsubscribe(connection, k)
+        );
     } else {
-        subscriptions.set(key, subscriptions.get(key)!.filter((c) => c !== connection));
-        if(!subscriptions.has(key) || subscriptions.get(key)!.length === 0)
+        subscriptions.set(
+            key,
+            subscriptions.get(key)!.filter((c) => c !== connection)
+        );
+        if (!subscriptions.has(key) || subscriptions.get(key)!.length === 0)
             setTimeout(() => logic.unloadInactiveTournament(key), 60000);
     }
-} 
+}
+
+export function removeTournament(key: Key) {
+    if (subscriptions.has(key)) {
+        subscriptions.get(key)?.forEach((con) => {
+            //TODO: There is no need to generally close the whole connection. But currently there is no way to tell the client, that this tournament does not longer exist.
+            unsubscribe(con);
+            con.close();
+        });
+        subscriptions.delete(key);
+    }
+}

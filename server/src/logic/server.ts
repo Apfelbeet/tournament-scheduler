@@ -43,6 +43,16 @@ export function newTournament(): Key {
     return newTournamentWithKey(key);
 }
 
+export async function removeTournament(key: Key) {
+    if (tournamentExists(key)) {
+        database.removeTournament(key);
+        tournaments.delete(key);
+        existing_tournaments = existing_tournaments.filter(k => k !== key);
+        socket.removeTournament(key);
+        logger.log(`${key} removed!`);
+    }
+}
+
 export function tournamentExists(key: Key): boolean {
     return existing_tournaments.includes(key);
 }

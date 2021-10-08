@@ -60,3 +60,8 @@ export async function loadTournament(key: Key): Promise<Tournament> {
         });
     });
 }
+
+export async function removeTournament(key: Key) {
+    redis_client.del(key, (err, res) => {
+        if (err) logger.error(err.message)});
+}
