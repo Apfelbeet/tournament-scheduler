@@ -349,6 +349,8 @@ class Storage {
   void createTournament(String name) =>
       _connection?.send('{"type":"createTournament","key":"$name"}');
 
+  void removeTournament(String key) => _connection?.send('{"type":"removeTournament","key":"$key"}');
+
   void startTournament() => _connection?.send(
       '{"type":"start","key":"${_server!.activeKey}","sync":"${_tournament!.sync}"}');
 
