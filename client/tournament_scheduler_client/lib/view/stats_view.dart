@@ -22,11 +22,13 @@ class StatsView extends StatelessWidget {
           ),
           Divider(thickness: 2,),
           DataTable(
-            columnSpacing: 40,
+            columnSpacing: 25,
             columns: [
               DataColumn(label: Text("")),
+              DataColumn(label: Text("P"), numeric: true),
               DataColumn(label: Text("W"), numeric: true),
               DataColumn(label: Text("L"), numeric: true),
+              DataColumn(label: Text("D"), numeric: true),
               DataColumn(label: Text("+"), numeric: true),
               DataColumn(label: Text("-"), numeric: true)
             ],
@@ -49,8 +51,10 @@ DataRow generateRow(StatsModel st, BuildContext context) {
           style: Theme.of(context).textTheme.subtitle2,
         ),
       ),
+      tile(st.points.toString()),
       tile(st.wins.toString()),
       tile(st.loses.toString()),
+      tile(st.draws.toString()),
       tile(st.scored.toString()),
       tile(st.conceded.toString()),
     ],

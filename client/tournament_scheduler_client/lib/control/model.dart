@@ -46,12 +46,12 @@ class ModuleModel {
 }
 
 class StatsModel {
-  final int team, wins, loses, scored, conceded;
+  final int team, wins, loses, scored, conceded, points, draws;
 
-  StatsModel(this.team, this.wins, this.loses, this.scored, this.conceded);
+  StatsModel(this.team, this.points, this.wins, this.loses, this.draws ,this.scored, this.conceded);
 
   StatsModel.fromJson(Map<String, dynamic> json)
-      : this(json['team'], json['wins'], json['loses'], json['scored'],
+      : this(json['team'], json['points'], json['wins'], json['loses'], json['draws'], json['scored'],
             json['conceded']);
 }
 
