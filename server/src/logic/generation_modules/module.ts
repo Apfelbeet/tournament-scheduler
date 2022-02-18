@@ -1,6 +1,6 @@
 import { TeamId } from "../../types/general_types";
-import { State, Structure, Stats, CachedStats, ModuleId} from "../../types/module_types";
-import { addStats, sortStats, subtractStats } from "../../util/util";
+import { State, Structure, CachedStats, ModuleId} from "../../types/module_types";
+import { addStats, sortStats, subtractStats, Stats, emptyStats} from "../../types/datatypes/stats";
 import { TournamentFacade } from "../tournament_facade";
 
 export class Module {
@@ -88,46 +88,25 @@ export class Module {
      */
     onFinish() {}
 
-    updateModules() {
-        if (this.state === State.FINISHED) {
-            this.upstream_teams = [];
-        }
-        this.games = [];
-        this.stats = [];
-        this.state = State.INIT;
-        this.changed = true;
-    }
-
-    updateGames() {
-        this.state = State.STARTED;
-        this.changed = true;
-    }
-
     /**
      * Generate submodules. Submodule will be generated before the actual games of this module
      */
-    moduleBuilder(): { last: boolean; modules: Module[] | null } {
-        return { modules: null, last: true };
+    moduleBuilder(): Module[] {
+        return [];
     }
 
     /**
      * Generate inner modules/games. Games will be generated, if all submodules are finished.
      */
-    gameBuilder(): { last: boolean; games: Module[] | null } {
-        return { games: null, last: true };
+    gameBuilder(): Module[]  {
+        return [];
     }
 
     /**
      * Generating submodules and invoking them.
      */
     resolveSubModules() {
-        while (true) {
-            const result = this.moduleBuilder();
-            if (result.modules != null) {
-                this.modules = [...this.modules, ...result.modules.map(m => this.tournament.registerNewModule(m))];
-            }
-            if (result.last !== false) break;
-        }
+        this.modules = this.moduleBuilder().map(m => this.tournament.registerNewModule(m));
         this.modules.forEach((e) => this.tournament.getModule(e).invoke());
     }
 
@@ -135,15 +114,7 @@ export class Module {
      * Generating games and invoking them.
      */
     resolveGames() {
-        while (true) {
-            const result = this.gameBuilder();
-            if (result.games != null) {
-                //cache teams in games for stats generation
-
-                this.games = [...this.games, ...result.games.map(m => this.tournament.registerNewModule(m))];
-            }
-            if (result.last !== false) break;
-        }
+        this.games = this.gameBuilder().map(m => this.tournament.registerNewModule(m));
         this.games.forEach((e) => this.tournament.getModule(e).invoke());
     }
 
@@ -151,34 +122,28 @@ export class Module {
      * Finishing up the current module
      */
     finish() {
+        this.changed = true;
         this.onFinish();
         if (this.master !== null)
-            this.tournament.getModule(this.master).refreshGameState();
+            this.tournament.getModule(this.master).notify();
     }
 
     invokeStats() {
         this.stats_cache = {
             games: [],
         };
+
         this.tournament.getModules(this.games).forEach((game: Module) =>
             game.downstream_teams.forEach((team) => {
-                if (
-                    this.stats?.findIndex((st) => st.team === team) === -1
-                ) {
-                    this.stats?.push({
-                        team: team,
-                        wins: 0,
-                        loses: 0,
-                        scored: 0,
-                        conceded: 0,
-                    });
+                if (this.stats?.findIndex((st) => st.team === team) === -1) {
+                    this.stats?.push(emptyStats(team));
                 }
             })
         );
     }
 
     /*
-     * This is a default implementation, if it is not sufficient you're supposed to overwrite it.
+     * This is a default implementation. If it is not sufficient, you're supposed to overwrite it.
      * WARNING: If a team is not part of a module in games, then it won't show up in the stats.
      */
     composeStats(sort : boolean = true) {
@@ -234,6 +199,7 @@ export class Module {
         });
 
         //TODO: Merge this into the previous code, to avoid explicit sorting.
+        //TODO: Why does this not sort?
         if(sort) sortStats(this.stats, games);
     }
 
@@ -243,65 +209,35 @@ export class Module {
     invoke() {
         this.state = State.INIT;
         this.resolveSubModules();
-        this.refreshGameState();
+        this.notify();
     }
 
-    refreshGameState() {
-        //
-        //Track changes in submodules and games
-        //
-        const clear = (list: ModuleId[]) =>
-            this.tournament.getModules(list).forEach((m) => (m.changed = false));
+    notify() {
+        //Currently we just ignore changed submodules
+        resetClearFlags(this.modules, this.tournament);
+        
 
-        switch (this.state) {
-            case State.STARTED:
-                if (this.modules.some((value) => this.tournament.getModule(value).changed)) {
-                    this.updateModules();
-                }
-                break;
-
-            case State.FINISHED:
-                if (this.modules.some((value) => this.tournament.getModule(value).changed)) {
-                    this.updateModules();
-                }
-
-                if (this.games.some((value) => this.tournament.getModule(value).changed)) {
-                    this.updateGames();
-                }
-                break;
-        }
-
-        if (this.changed) {
-            this.composeStats();
-        }
-
-        clear(this.games);
-        clear(this.modules);
-
-        if (this.changed && this.state == State.FINISHED) {
-            this.finish();
-        } else if (this.changed) {
-            if (this.master !== null)
-                this.tournament.getModule(this.master).refreshGameState();
-        }
-
-        //
-        //Generating Modules based on state:
-        //
         if (this.state === State.INIT) {
-            if (this.tournament.getModules(this.modules).every((value) => value.state === State.FINISHED)) {
+            if (allModulesFinished(this.modules, this.tournament)) {
                 this.state = State.STARTED;
                 this.resolveGames();
                 this.invokeStats();
             }
+
         }
 
-        if (this.state == State.STARTED) {
-            this.composeStats();
-            if (this.tournament.getModules(this.games).every((value) => value.state === State.FINISHED)) {
+
+        if (this.state >= State.STARTED) {
+            if (moduleChanged(this.games, this.tournament)) {
+                this.composeStats();
+                resetClearFlags(this.games, this.tournament);
+            }
+
+            if (this.state === State.FINISHED || allModulesFinished(this.games, this.tournament)) {
                 this.state = State.FINISHED;
                 this.finish();
             }
+
         }
     }
 
@@ -331,4 +267,16 @@ export class Module {
     validInput(): boolean {
         return true;
     }
+}
+
+function allModulesFinished(modules: ModuleId[], tournament: TournamentFacade): boolean {
+    return tournament.getModules(modules).every((value) => value.state === State.FINISHED);
+}
+
+function moduleChanged(modules: ModuleId[], tournament: TournamentFacade): boolean {
+    return modules.some((value) => tournament.getModule(value).changed)
+}
+
+function resetClearFlags(modules: ModuleId[], tournament: TournamentFacade): void {
+    tournament.getModules(modules).forEach((m) => (m.changed = false));
 }

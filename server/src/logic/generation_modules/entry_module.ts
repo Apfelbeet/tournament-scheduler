@@ -41,15 +41,8 @@ export default class Entry extends Module {
         };
     }
 
-    moduleBuilder(): { last: boolean; modules: Module[] | null } {
-        return {
-            modules: [
-                this.tournament.getModule(
-                    this.additional_attributes.entryModule
-                ),
-            ],
-            last: true,
-        };
+    moduleBuilder(): Module[] {
+        return [this.tournament.getModule(this.additional_attributes.entryModule)];
     }
 
     onFinish() {
@@ -64,13 +57,13 @@ export default class Entry extends Module {
             .validInput();
     }
 
-    refreshGameState() {
+    notify() {
         if (
             this.tournament.getModule(this.additional_attributes.entryModule)
                 .state !== State.FINISHED
         ) {
             this.upstream_teams = [];
         }
-        super.refreshGameState();
+        super.notify();
     }
 }

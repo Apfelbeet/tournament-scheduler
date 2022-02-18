@@ -1,10 +1,5 @@
-import { Team, TeamId } from "../../types/general_types";
-import {
-    addStats,
-    compareStats,
-    sortStats,
-    subtractStats,
-} from "../../util/util";
+import { TeamId } from "../../types/general_types";
+import { flatCompareStats, sortStats } from "../../types/datatypes/stats";
 import Game from "./game_module";
 import SimpleGroupModule from "./group_module";
 import { Module } from "./module";
@@ -20,7 +15,7 @@ export default class ExtendedGroupModule extends Module {
         super(tournament, master, teams, "facing_groups", true, "Clash Phase");
     }
 
-    gameBuilder(): { last: boolean; games: Module[] | null } {
+    gameBuilder(): Module[] {
         const teams1 = this.tournament.getModule(
             this.modules[0]
         ).upstream_teams;
@@ -35,16 +30,11 @@ export default class ExtendedGroupModule extends Module {
             );
         }
 
-        return {
-            last: true,
-            games: games,
-        };
+        return games;
     }
 
-    moduleBuilder(): { last: boolean; modules: Module[] | null } {
-        return {
-            last: true,
-            modules: [
+    moduleBuilder(): Module[] {
+        return [
                 new SimpleGroupModule(
                     this.tournament,
                     this.id,
@@ -64,8 +54,7 @@ export default class ExtendedGroupModule extends Module {
                     true,
                     "Group B"
                 ),
-            ],
-        };
+            ];
     }
 
     invokeStats() {
@@ -112,6 +101,9 @@ export default class ExtendedGroupModule extends Module {
         }
 
         super.composeStats(false);
+
+        //TODO: I have absolutely no idea what this does. A refactored or at
+        //least commented version, would be appropriate. 
         for (let i = this.games.length - 1; i >= 0; i--) {
             const game = this.tournament.getModule(this.games[i]);
             if (game.state == State.FINISHED) {
@@ -120,7 +112,7 @@ export default class ExtendedGroupModule extends Module {
                 const winnerTeamFromGame = game.upstream_teams[0];
                 if (
                     leadingStats.team !== winnerTeamFromGame ||
-                    compareStats(leadingStats, losingStats) > 0
+                    flatCompareStats(leadingStats, losingStats) > 0
                 ) {
                     this.stats[this.stats.length - 2 * i - 2] = losingStats;
                     this.stats[this.stats.length - 2 * i - 1] = leadingStats;

@@ -1,6 +1,6 @@
 import { Module } from "./module";
 import Group from "./group_module";
-import { Team, TeamId } from "../../types/general_types";
+import { TeamId } from "../../types/general_types";
 import SimpleKOSystemGame from "./kosystem_game_module";
 import { TournamentFacade } from "../tournament_facade";
 import { ModuleId } from "../../types/module_types";
@@ -17,7 +17,7 @@ export default class SimpleKOSystem extends Module {
         super(tournament, master, teams, "kosystem", true, "K.O. Phase");
     }
 
-    gameBuilder(): { last: boolean; games: Module[] | null } {
+    gameBuilder(): Module[] {
         const teams = this.modules
             .map((id) =>
                 this.tournament.getModule(id).upstream_teams.slice(0, 2)
@@ -30,56 +30,47 @@ export default class SimpleKOSystem extends Module {
             reordered.push(teams[teams.length - i - 1]);
         }
 
-        return {
-            games: [
-                new SimpleKOSystemGame(this.tournament, this.id, reordered),
-            ],
-            last: true,
-        };
+        return [
+            new SimpleKOSystemGame(this.tournament, this.id, reordered),
+        ];
     }
 
-    moduleBuilder(): { last: boolean; modules: Module[] | null } {
+    moduleBuilder(): Module[] {
         if (this.downstream_teams.length >= 4) {
-            return {
-                modules: [
-                    new Group(
-                        this.tournament,
-                        this.id,
-                        this.downstream_teams.slice(
-                            0,
-                            this.downstream_teams.length / 2
-                        ),
-                        true,
-                        "Group A"
+            return [
+                new Group(
+                    this.tournament,
+                    this.id,
+                    this.downstream_teams.slice(
+                        0,
+                        this.downstream_teams.length / 2
                     ),
-                    new Group(
-                        this.tournament,
-                        this.id,
-                        this.downstream_teams.slice(
-                            this.downstream_teams.length / 2
-                        ),
-                        true,
-                        "Group B"
+                    true,
+                    "Group A"
+                ),
+                new Group(
+                    this.tournament,
+                    this.id,
+                    this.downstream_teams.slice(
+                        this.downstream_teams.length / 2
                     ),
-                ],
-                last: true,
-            };
+                    true,
+                    "Group B"
+                ),
+            ];
         } else if (this.downstream_teams.length > 1) {
-            return {
-                modules: [
-                    new Group(
-                        this.tournament,
-                        this.id,
-                        this.downstream_teams.slice(
-                            0,
-                            this.downstream_teams.length
-                        )
-                    ),
-                ],
-                last: true,
-            };
+            return [
+                new Group(
+                    this.tournament,
+                    this.id,
+                    this.downstream_teams.slice(
+                        0,
+                        this.downstream_teams.length
+                    )
+                ),
+            ];
         } else {
-            return { modules: null, last: true };
+            return [];
         }
     }
 

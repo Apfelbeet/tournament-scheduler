@@ -1,6 +1,6 @@
 import { Module } from "./module";
 import Game from "./game_module";
-import { Team, TeamId } from "../../types/general_types";
+import { TeamId } from "../../types/general_types";
 import { TournamentFacade } from "../tournament_facade";
 import { ModuleId } from "../../types/module_types";
 
@@ -26,32 +26,24 @@ export default class SimpleKOSystemGame extends Module {
         this.visible = true;
     }
 
-    gameBuilder(): { last: boolean; games: Module[] | null } {
+    gameBuilder(): Module[] {
         if (this.modules.length === 0) {
-            return {
-                games: [
-                    new Game(this.tournament, this.id, this.downstream_teams),
-                ],
-                last: true,
-            };
+            return [new Game(this.tournament, this.id, this.downstream_teams)];
         } else {
             const modules = this.tournament.getModules(this.modules);
 
-            return {
-                games: [
-                    new Game(this.tournament, this.id, [
-                        modules[0].upstream_teams[0],
-                        modules[1].upstream_teams[0],
-                    ]),
-                ],
-                last: true,
-            };
+            return [
+                new Game(this.tournament, this.id, [
+                    modules[0].upstream_teams[0],
+                    modules[1].upstream_teams[0],
+                ]),
+            ];
         }
     }
 
-    moduleBuilder(): { last: boolean; modules: Module[] | null } {
+    moduleBuilder(): Module[] {
         if (this.downstream_teams.length <= 2) {
-            return { modules: null, last: true };
+            return [];
         }
 
         const a = this.downstream_teams.slice(
@@ -63,23 +55,20 @@ export default class SimpleKOSystemGame extends Module {
             this.downstream_teams.length
         );
 
-        return {
-            modules: [
-                new SimpleKOSystemGame(
-                    this.tournament,
-                    this.id,
-                    a,
-                    this.additional_attributes.level + 1
-                ),
-                new SimpleKOSystemGame(
-                    this.tournament,
-                    this.id,
-                    b,
-                    this.additional_attributes.level + 1
-                ),
-            ],
-            last: true,
-        };
+        return [
+            new SimpleKOSystemGame(
+                this.tournament,
+                this.id,
+                a,
+                this.additional_attributes.level + 1
+            ),
+            new SimpleKOSystemGame(
+                this.tournament,
+                this.id,
+                b,
+                this.additional_attributes.level + 1
+            ),
+        ];
     }
 
     onFinish() {

@@ -175,7 +175,7 @@ export function send(connection: websocket.connection, message: string) {
     connection.sendUTF(message);
 }
 
-export function parseReceivedMessage(
+export async function parseReceivedMessage(
     message: ClientMessage,
     connection: websocket.connection
 ) {
@@ -262,7 +262,7 @@ export function parseReceivedMessage(
             key: <tournamentKey>
             }
          */
-            sendAll(message.key, connection);
+            await sendAll(message.key, connection);
         } else if (message.type === "start") {
             /*
         {
@@ -271,7 +271,7 @@ export function parseReceivedMessage(
         sync: <Int>
         }
          */
-            logic.startTournament(message.key, message.sync);
+            await logic.startTournament(message.key, message.sync);
         } else if (message.type === "reset") {
             /*
         {
@@ -280,7 +280,7 @@ export function parseReceivedMessage(
         sync: <Int>
         }
          */
-            logic.resetTournament(message.key, message.sync);
+            await logic.resetTournament(message.key, message.sync);
         } else if (message.type === "addTeam") {
             /*
         {
@@ -290,7 +290,7 @@ export function parseReceivedMessage(
         name: <String>
         }
          */
-            logic.addTeamToTournament(message.key, message.sync, message.name);
+            await logic.addTeamToTournament(message.key, message.sync, message.name);
         } else if (message.type === "editTeam") {
             /*
         {
@@ -302,7 +302,7 @@ export function parseReceivedMessage(
         }
          */
 
-            logic.editTeamInTournament(
+            await logic.editTeamInTournament(
                 message.key,
                 message.sync,
                 parseInt(message.id, 10),
@@ -317,7 +317,7 @@ export function parseReceivedMessage(
         id: <Int>
         }
          */
-            logic.removeTeamFromTournament(
+            await logic.removeTeamFromTournament(
                 message.key,
                 message.sync,
                 parseInt(message.id, 10)
@@ -331,7 +331,7 @@ export function parseReceivedMessage(
         id: <Int>
         }
          */
-            logic.setModeOfTournament(
+            await logic.setModeOfTournament(
                 message.key,
                 message.sync,
                 parseInt(message.id, 10)
@@ -347,7 +347,7 @@ export function parseReceivedMessage(
         resultB: <Int>
         }
          */
-            logic.setResult(
+            await logic.setResult(
                 message.key,
                 message.sync,
                 parseInt(message.gameId, 10),

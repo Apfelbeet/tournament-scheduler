@@ -1,3 +1,4 @@
+import { Stats } from "./datatypes/stats";
 import {TeamId} from "./general_types"
 
 export enum State {
@@ -21,14 +22,6 @@ export type Structure = {
     games: ModuleId[],
     down: TeamId[],
     up: TeamId[],
-}
-
-export type Stats = {
-    team: TeamId,
-    wins: number,
-    loses: number,
-    scored: number,
-    conceded: number,
 }
 
 export type CachedStats = {

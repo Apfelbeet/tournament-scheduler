@@ -39,6 +39,10 @@ export function database(message: string) {
     write(message, "database");
 }
 
+export function debug(message: string) {
+    write(message, "debug");
+}
+
 export function load() {
     loaded = true;
     config.getLoggingTags().forEach((tag: LogType) => tags.set(tag, true))

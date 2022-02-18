@@ -1,8 +1,8 @@
 import { Module } from "./module";
-import Game from "./game_module";
-import { Team, TeamId } from "../../types/general_types";
+import { TeamId } from "../../types/general_types";
 import { TournamentFacade } from "../tournament_facade";
 import { ModuleId } from "../../types/module_types";
+import DrawGame from "./draw_game_module";
 
 /**
  * Group is the classic model of a group in which everybody plays against everybody
@@ -22,20 +22,20 @@ export default class SimpleGroupModule extends Module {
      * Generate games, every team vs every team.
      * (currently the order of teams is boring/bad and should be changed)
      */
-    gameBuilder(): { last: boolean; games: Module[] | null } {
+    gameBuilder(): Module[] {
         const games = [];
         for (let i = 0; i < this.downstream_teams.length; i++) {
             for (let j = 0; j < this.downstream_teams.length - 1 - i; j++) {
                 if (j % 2 === 0) {
                     games.push(
-                        new Game(this.tournament, this.id, [
+                        new DrawGame(this.tournament, this.id, [
                             this.downstream_teams[i],
                             this.downstream_teams[j + i + 1],
                         ])
                     );
                 } else {
                     games.push(
-                        new Game(this.tournament, this.id, [
+                        new DrawGame(this.tournament, this.id, [
                             this.downstream_teams[j + i + 1],
                             this.downstream_teams[i],
                         ])
@@ -54,7 +54,7 @@ export default class SimpleGroupModule extends Module {
             shuffled.push(games[Math.floor(games.length / 2)]);
         }
 
-        return { games: shuffled, last: true };
+        return shuffled;
     }
 
     /**
