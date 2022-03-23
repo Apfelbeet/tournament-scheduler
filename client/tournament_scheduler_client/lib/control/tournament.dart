@@ -28,6 +28,15 @@ class Tournament {
   }
 
   void _onTournamentEvent(TournamentEvent e) {
+    // When receiving an update event, which is based on another state,
+    // we want to reload the whole state.
+    if (e.syncOld != state.sync &&
+        e.whichEvent() != TournamentEvent_Event.error) {
+      server.messenger.showError("Reloading!");
+      reload();
+      return;
+    }
+
     switch (e.whichEvent()) {
       case TournamentEvent_Event.status:
         applyChange(sync: e.sync, status: e.status);
@@ -51,10 +60,11 @@ class Tournament {
     }
   }
 
-  applyChange({required String sync,
-    TournamentStatusData? status,
-    TournamentTeamData? teams,
-    TournamentStructureData? structure}) {
+  applyChange(
+      {required String sync,
+      TournamentStatusData? status,
+      TournamentTeamData? teams,
+      TournamentStructureData? structure}) {
     TournamentState newState = state.copyWith(sync: sync);
     List<EventChannel> channels = [];
 
@@ -65,10 +75,9 @@ class Tournament {
 
     if (status != null) {
       final activeMode =
-      server.state.modes.firstWhere((element) => status.mode == element.id);
+          server.state.modes.firstWhere((element) => status.mode == element.id);
       final TeamData? winnerTeam = status.hasWinner()
-          ?
-      newState.teams.firstWhere((element) => status.winner == element.id)
+          ? newState.teams.firstWhere((element) => status.winner == element.id)
           : null;
 
       newState = newState.copyWith(
@@ -80,20 +89,17 @@ class Tournament {
       channels.add(statusEvents);
     }
 
-
     if (structure != null) {
-      final newStructureState = StructureState.fromEventData(structure.structures, state.teams);
+      final newStructureState =
+          StructureState.fromEventData(structure.structures, state.teams);
       newState = state.copyWith(
-          structure: newStructureState,
-          resetStructure: newStructureState == null,
+        structure: newStructureState,
+        resetStructure: newStructureState == null,
       );
       channels.add(gameEvents);
     }
 
     state = newState;
-    for (EventChannel channel in channels)
-      channel.raise();
+    for (EventChannel channel in channels) channel.raise();
   }
 }
-
-
