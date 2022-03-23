@@ -1,13 +1,15 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
-import 'package:tournament_scheduler_client/control/model.dart';
-import 'package:tournament_scheduler_client/control/storage.dart';
+import 'package:tournament_scheduler_client/control/grpc/proto_logic_api.dart';
+import 'package:tournament_scheduler_client/control/tournament.dart';
+import 'package:provider/provider.dart';
+
 
 class StatsView extends StatelessWidget {
-  final List<StatsModel> stats;
+  final List<Stats> stats;
   final String label;
+  final Tournament tournament;
 
-  StatsView(this.stats, this.label);
+  StatsView(this.stats, this.label, this.tournament);
 
   @override
   Widget build(BuildContext context) {
@@ -33,7 +35,7 @@ class StatsView extends StatelessWidget {
               DataColumn(label: Text("-"), numeric: true)
             ],
             rows: stats
-                .map<DataRow>((st) => generateRow(st, context))
+                .map<DataRow>((st) => generateRow(st, context, tournament))
                 .toList(growable: true),
           ),
         ],
@@ -42,12 +44,12 @@ class StatsView extends StatelessWidget {
   }
 }
 
-DataRow generateRow(StatsModel st, BuildContext context) {
+DataRow generateRow(Stats st, BuildContext context, Tournament tournament) {
   return DataRow(
     cells: [
       DataCell(
         Text(
-          Storage.instance().getTeam(st.team)?.name ?? "",
+          tournament.state.getTeamById(st.team).name,
           style: Theme.of(context).textTheme.subtitle2,
         ),
       ),

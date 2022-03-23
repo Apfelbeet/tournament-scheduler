@@ -1,54 +1,62 @@
+import 'package:provider/provider.dart';
+import 'package:tournament_scheduler_client/control/event_builder.dart';
+import 'package:tournament_scheduler_client/control/grpc/proto_logic_api.dart';
 import 'package:tournament_scheduler_client/control/model.dart';
-import 'package:tournament_scheduler_client/control/notifier.dart';
-import 'package:tournament_scheduler_client/control/storage.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:provider/provider.dart';
+import 'package:tournament_scheduler_client/control/tournament.dart';
 import 'package:tournament_scheduler_client/view/stats_view.dart';
 
-class GameView extends StatefulWidget {
-  @override
-  State<StatefulWidget> createState() => _GameViewState();
-}
+import '../control/tournament_state.dart';
 
-class _GameViewState extends State<GameView> {
+class GameView extends StatelessWidget {
+  final Tournament tournament;
+
+  GameView(this.tournament);
+
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(5, 5, 5, 0),
-      child: Consumer<GameNotifier>(builder: (context, n, c) {
-        final map = Storage.instance().getModuleToGamesMap();
-        return ListView(
-          children: map != null ? _ModuleListTile.fromModels(map) : [],
-        );
-      }),
-    );
+    return EventBuilder(
+        channel: tournament.gameEvents,
+        builder: (context) {
+          final map = tournament.state.structure?.moduleToGames;
+          return Padding(
+              padding: const EdgeInsets.fromLTRB(5, 5, 5, 0),
+              child: ListView(
+                children: map != null
+                    ? ModuleListTile.fromModels(
+                        map, tournament.state.structure!, tournament)
+                    : [],
+              ));
+        });
   }
 }
 
-class _ModuleListTile extends StatelessWidget {
-  final ModuleModel model;
+class ModuleListTile extends StatelessWidget {
+  final StructureData model;
   final List<_GameListTile> games;
+  final Tournament tournament;
 
-  _ModuleListTile(this.model, this.games);
+  ModuleListTile(this.model, this.games, this.tournament);
 
-  _ModuleListTile.fromModel(ModuleModel model, List<GameModel> games)
-      : this(model, _GameListTile.fromModels(games));
+  ModuleListTile.fromModel(
+      StructureData model, List<GameModel> games, Tournament tournament)
+      : this(model, _GameListTile.fromModels(games), tournament);
 
-  static List<_ModuleListTile> fromModels(Map<int, List<int>> models) =>
+  static List<ModuleListTile> fromModels(Map<int, List<int>> models,
+          StructureState state, Tournament tournament) =>
       models.entries
           .map((entry) {
-            final module = Storage.instance().getModule(entry.key);
+            final module = state.getModule(entry.key);
             final games = entry.value
-                .map((id) => Storage.instance().getGame(id))
+                .map((id) => state.getGame(id))
                 .whereType<GameModel>()
                 .toList();
             return module != null
-                ? _ModuleListTile.fromModel(module, games)
+                ? ModuleListTile.fromModel(module, games, tournament)
                 : null;
           })
-          .whereType<_ModuleListTile>()
+          .whereType<ModuleListTile>()
           .toList();
 
   @override
@@ -57,23 +65,30 @@ class _ModuleListTile extends StatelessWidget {
       padding: const EdgeInsets.fromLTRB(0, 0, 0, 5),
       child: Card(
         child: InkWell(
-          onTap: model.stats == null
-              ? null
-              : () {
-                  showModalBottomSheet<void>(
-                      context: context,
-                      builder: (BuildContext context) {
-                        return StatsView(model.stats!, model.label);
-                      });
-                },
+          onTap: () {
+            showModalBottomSheet<void>(
+                context: context,
+                builder: (BuildContext context) {
+                  return StatsView(model.stats, model.label, tournament);
+                });
+          },
           child: Padding(
             padding: const EdgeInsets.fromLTRB(0, 10, 0, 5),
             child: Column(
               children: [
                 Padding(
-                  padding: const EdgeInsets.fromLTRB(5, 5, 5, 10),
-                  child: Text(model.label,
-                      style: Theme.of(context).textTheme.headline6),
+                  padding: const EdgeInsets.fromLTRB(15, 5, 15, 5),
+                  child: Row(
+                    children: [
+                      Expanded(child: Text("")),
+                      Align(
+                        alignment: Alignment.center,
+                        child: Text(model.label,
+                            style: Theme.of(context).textTheme.headline6),
+                      ),
+                      Expanded(child: Align(child: Icon(Icons.bar_chart), alignment: Alignment.centerRight,)),
+                    ],
+                  ),
                 ),
                 Padding(
                   padding: const EdgeInsets.fromLTRB(5, 0, 5, 0),
@@ -105,6 +120,8 @@ class _GameListTileState extends State<_GameListTile> {
   }
 
   List<Widget> components(BuildContext context) {
+    Tournament tournament = context.read<Tournament>();
+
     var list = <Widget>[
       ListTile(
           title: Text("${widget.model.teamA} : ${widget.model.teamB}"),
@@ -148,16 +165,15 @@ class _GameListTileState extends State<_GameListTile> {
               IconButton(
                 icon: Icon(Icons.arrow_forward),
                 onPressed: () {
+                  final int scoreA = int.parse(
+                      _controllerA.text.isEmpty ? "0" : _controllerA.text);
+                  final int scoreB = int.parse(
+                      _controllerB.text.isEmpty ? "0" : _controllerB.text);
+
+                  tournament.server.api.tournamentAPI.setResult(tournament.key,
+                      tournament.state.sync, widget.model.id, scoreA, scoreB);
                   setState(() {
                     _expanded = false;
-                    Storage.instance().setResult(
-                        widget.model.id,
-                        int.parse(_controllerA.text.isEmpty
-                            ? "0"
-                            : _controllerA.text),
-                        int.parse(_controllerB.text.isEmpty
-                            ? "0"
-                            : _controllerB.text));
                   });
                 },
               )

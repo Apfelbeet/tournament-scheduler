@@ -128,7 +128,7 @@ async function useSync(key: Key, sync: Sync): Promise<[Key, Key]> {
     return [t.sync, (t.sync = newSync())];
 }
 
-export async function addTeamToTournament(key: Key, sync: Sync, name: string) {
+export async function addTeamToTournament(key: Key, sync: Sync, name: string): Promise<[Sync, Sync]> {
     const t: Tournament = await getTournament(key);
     await checkSync(key, sync);
     if (!name) {
@@ -138,11 +138,11 @@ export async function addTeamToTournament(key: Key, sync: Sync, name: string) {
     }
 
     t.addTeam(name);
-    const [osk, sk] = await useSync(key, sync);
+    const syncs = await useSync(key, sync);
 
     logger.log(`added team: ${name} to ${key}`);
     database.storeTournament(key, t);
-    socket.sendTeams(key, sk, osk);
+    return syncs;
 }
 
 export async function editTeamInTournament(
@@ -150,23 +150,23 @@ export async function editTeamInTournament(
     sync: Sync,
     teamId: TeamId,
     name: string
-) {
+): Promise<[Sync, Sync]> {
     await checkSync(key, sync);
     const t: Tournament = await getTournament(key);
 
     t.editTeam(teamId, name);
-    const [osk, sk] = await useSync(key, sync);
+    const syncs = await useSync(key, sync);
 
     logger.log(`${key}: change team name from ${teamId} to ${name}`);
     database.storeTournament(key, t);
-    socket.sendTeams(key, sk, osk);
+    return syncs;
 }
 
 export async function removeTeamFromTournament(
     key: Key,
     sync: Sync,
     id: TeamId
-) {
+): Promise<[Sync, Sync]> {
     await checkSync(key, sync);
     const t: Tournament = await getTournament(key);
 
@@ -177,46 +177,44 @@ export async function removeTeamFromTournament(
     }
 
     t.removeTeam(id);
-    const [osk, sk] = await useSync(key, sync);
+    const syncs = await useSync(key, sync);
 
     logger.log(`removed team: ${id} from ${key}`);
     database.storeTournament(key, t);
-    socket.sendTeams(key, sk, osk);
+    return syncs
 }
 
-export async function setModeOfTournament(key: Key, sync: Sync, mode: number) {
+export async function setModeOfTournament(key: Key, sync: Sync, mode: number): Promise<[Sync, Sync]> {
     checkSync(key, sync);
     const t: Tournament = await getTournament(key);
     t.setMode(getMode(mode));
-    const [osk, sk] = await useSync(key, sync);
+    const syncs = await useSync(key, sync);
 
     logger.log(`set mode of ${key} to ${mode}`);
     database.storeTournament(key, t);
-    socket.sendStatus(key, sk, osk);
+    return syncs;
 }
 
-export async function startTournament(key: Key, sync: Sync) {
+export async function startTournament(key: Key, sync: Sync): Promise<[Sync, Sync]> {
     checkSync(key, sync);
     const t: Tournament = await getTournament(key);
     t.invoke();
-    const [osk, sk] = await useSync(key, sync);
+    const syncs = await useSync(key, sync);
 
     logger.success(`${key} started!`);
     database.storeTournament(key, t);
-    socket.sendStatus(key, sk, osk);
-    socket.sendStructure(key, sk, sk);
+    return syncs;
 }
 
-export async function resetTournament(key: Key, sync: Sync) {
+export async function resetTournament(key: Key, sync: Sync): Promise<[Sync, Sync]> {
     await checkSync(key, sync);
     const t: Tournament = await getTournament(key);
     t.reset();
-    const [osk, sk] = await useSync(key, sync);
+    const syncs = await useSync(key, sync);
 
     logger.success(`${key} stopped!`);
     database.storeTournament(key, t);
-    socket.sendStatus(key, sk, osk);
-    socket.sendStructure(key, sk, sk);
+    return syncs
 }
 
 export async function setResult(
@@ -225,12 +223,12 @@ export async function setResult(
     game_id: number,
     resultA: number,
     resultB: number
-) {
+): Promise<[Sync, Sync]> {
     await checkSync(key, sync);
     const t: Tournament = await getTournament(key);
     const ow = t.winner;
     t.setResult(game_id, resultA, resultB);
-    const [osk, sk] = await useSync(key, sync);
+    const syncs = await useSync(key, sync);
 
     const game: Game = t.search(game_id) as Game;
     logger.log(
@@ -240,14 +238,14 @@ export async function setResult(
             t.getTeam(game.upstream_teams[1])?.name ?? ""
         }")`
     );
-    socket.sendStructure(key, sk, osk);
+    
 
     if (t.winner !== ow) {
         if (t.winner !== undefined)
             logger.success(`${key}: ${t.getTeam(t.winner!)!.name} wins!`);
-        socket.sendStatus(key, sk, sk);
     }
     database.storeTournament(key, t);
+    return syncs;
 }
 
 export async function unloadInactiveTournament(key: Key) {

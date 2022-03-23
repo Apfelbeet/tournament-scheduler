@@ -17,7 +17,7 @@ export type Structure = {
     visible: boolean, 
     state: State, 
     stats?: Stats[],
-    data: any,
+    data?: object,
     modules: ModuleId[],
     games: ModuleId[],
     down: TeamId[],

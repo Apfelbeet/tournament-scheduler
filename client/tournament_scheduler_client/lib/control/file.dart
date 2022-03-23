@@ -5,16 +5,13 @@ import 'package:path_provider/path_provider.dart';
 
 class FileSystem {
 
-  static loadAsJsonData(String path) {
-      return _loadPath(path).then((file) {
+  static Future<Map<String, dynamic>?> loadAsJsonData(String path) async {
+    final file = await _loadPath(path);
 
-        String raw = file.readAsStringSync();
-
-        if(raw.isNotEmpty)
-          return jsonDecode(raw);
-        else
-          return [];
-      });
+    final String raw = await file.readAsString();
+    if(raw.isNotEmpty)
+      return jsonDecode(raw);
+    return null;
   }
 
   static Future<File> _loadPath(String path) async {

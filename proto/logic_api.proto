@@ -1,0 +1,178 @@
+syntax = "proto3";
+
+package logicAPI;
+
+service ServerAPI {
+    rpc createTournament(TournamentCreate) returns (Acknowledgment);
+    rpc removeTournament(TournamentAccess) returns (Acknowledgment);
+    rpc getTournaments(Empty) returns (TournamentDetailsList);
+    rpc getModes(Empty) returns (Modes);
+    
+    rpc connect(Empty) returns (stream ServerEvent);
+    rpc disconnect(Empty) returns (Acknowledgment);
+}
+
+service TournamentAPI {
+
+    rpc subscribe(TournamentAccess) returns (stream TournamentEvent);
+    rpc unsubscribe(TournamentAccess) returns (Acknowledgment);
+    rpc load(TournamentAccess) returns (ResponseTournamentData);
+    rpc start(TournamentAccess) returns (Acknowledgment);
+    rpc reset(TournamentAccess) returns (Acknowledgment);
+    rpc addTeam(TeamAdd) returns (Acknowledgment);
+    rpc editTeam(TeamEdit) returns (Acknowledgment);
+    rpc removeTeam(TeamRemove) returns (Acknowledgment);
+    rpc setMode(SetMode) returns (Acknowledgment);
+    rpc setResult(SetResult) returns (Acknowledgment);
+}
+
+message Empty {}
+
+message Acknowledgment {
+    enum Status {
+        OK = 0;
+        ERRROR = 1;
+        SYNC_ERROR = 2;
+    }
+    Status status = 1;
+    string message = 2;
+}
+
+message TournamentCreate {
+    string key = 1;
+}
+
+message TournamentAccess {
+    string key = 1;
+    string sync = 2;
+}
+
+
+message TournamentDetailsList {
+    repeated string keys = 1;
+}
+
+message Mode {
+    int32 id = 1;
+    string title = 2;
+    string description = 3;
+}
+
+message Modes {
+    repeated Mode modes = 1;
+}
+
+message ResponseTournamentData {
+    oneof response {
+        TournamentData data = 1;
+        string error = 2;
+    }
+}
+
+message TournamentData {
+    string key = 1;
+    string sync = 2;
+    TournamentStatusData status = 3;
+    TournamentTeamData teams = 4;
+    TournamentStructureData structure = 5;
+}
+
+message ServerEvent {
+    oneof event {
+        TournamentDetailsList tournaments = 1;
+        string error = 2;
+    }
+}
+
+message TournamentEvent {
+    string key = 1;
+    string sync = 2;
+    string syncOld = 3;
+    oneof event {
+        TournamentStatusData status = 4;
+        TournamentTeamData teams = 5;
+        TournamentStructureData structure = 6;
+        string error = 7;
+    }
+}
+
+message TeamAdd {
+    TournamentAccess access = 1;
+    string name = 2;
+}
+
+message TeamEdit {
+    TournamentAccess access = 1;
+    int32 id = 2;
+    string name = 3;
+}
+
+message TeamRemove {
+    TournamentAccess access = 1;
+    int32 id = 2;
+}
+
+message SetMode {
+    TournamentAccess access = 1;
+    int32 id = 2;
+}
+
+message SetResult {
+    TournamentAccess access = 1;
+    GameData game = 2;
+}
+
+message GameData {
+    int32 id = 1;
+    int32 score_a = 2;
+    int32 score_b = 3;
+}
+
+message TournamentStatusData {
+    bool started = 1;
+    int32 mode = 2;
+    int32 winner = 3;
+}
+
+message TournamentTeamData {
+    repeated TeamData teams = 1;
+}
+
+message TeamData {
+    int32 id = 1;
+    string name = 2;
+}
+
+message TournamentStructureData {
+    repeated StructureData structures = 1;
+}
+
+message StructureData {
+    int32 id = 1;
+    string type = 2;
+    string label = 3;
+    bool visible = 4;
+    // enum State {
+    //     PREINIT = 0;
+    //     INIT = 1; 
+    //     STARTED = 2;
+    //     FINISHED = 3;
+    // }
+    int32 state = 5;
+    repeated Stats stats = 6;
+    string data = 7;
+    repeated int32 modules = 8;
+    repeated int32 games = 9;
+    repeated int32 down = 10;
+    repeated int32 up = 11;
+}
+
+message Stats {
+    int32 team = 1;
+    int32 points = 2;
+    int32 wins = 3;
+    int32 loses = 4;
+    int32 draws = 5;
+    int32 scored = 6;
+    int32 conceded = 7;
+}

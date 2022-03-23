@@ -1,7 +1,3 @@
-import 'dart:async';
-
-import 'package:tournament_scheduler_client/control/storage.dart';
-import 'package:web_socket_channel/io.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
 
 class SocketConnection {
@@ -22,11 +18,12 @@ class SocketConnection {
 
   }
 
-  void send(String message) {
+  Future<dynamic> send(String message) async {
     channel?.sink.add(message);
   }
 
   void disconnect() {
     channel?.sink.close();
   }
+
 }

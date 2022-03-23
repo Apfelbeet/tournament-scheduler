@@ -1,6 +1,7 @@
 import * as config from "./logic/server_config";
 import * as server from "./logic/server";
-import * as socket from "./network/socket_connection"
+import * as socket from "./network/socket_connection";
+import * as grpc_connection from "./network/grpc_connection";
 import * as logger from "./util/logger";
 import * as database from "./database/database"
 
@@ -14,8 +15,10 @@ config.refresh().then((_) => {
     database.init(async () => {
         logger.log("Initializing Tournament-Server ..."); 
         await server.init();
-        logger.log("Initializing Socket-Server ...");
-        socket.init(config.getPort());
+        // logger.log("Initializing Socket-Server ...");
+        // socket.init(config.getPort());
+        logger.log("Initializing gRPC-Server ...");
+        grpc_connection.init(config.getPort());
     });
 
 
