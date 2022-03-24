@@ -50,8 +50,6 @@ class GrpcAPI {
   listenOnStream<T extends GeneratedMessage>(ResponseStream<T> serverEventStream, EventHandler<T> onEvent) async{
     try {
       await for (T event in serverEventStream) {
-        debugPrint("EVENT:");
-        debugPrint(event.toProto3Json().toString());
         onEvent(event);
       }
     } catch (e) {

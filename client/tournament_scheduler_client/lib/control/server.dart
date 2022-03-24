@@ -31,7 +31,6 @@ class Server {
   }
 
   void _onServerEvent(ServerEvent e) {
-    debugPrint(e.toProto3Json().toString());
     switch (e.whichEvent()) {
       case ServerEvent_Event.tournaments:
         state = state.copyWith(previewTournaments: e.tournaments.keys);
