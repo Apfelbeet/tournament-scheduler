@@ -3,7 +3,6 @@ import 'package:grpc/grpc.dart';
 import 'package:protobuf/protobuf.dart';
 import 'package:tournament_scheduler_client/control/grpc/server_api.dart';
 import 'package:tournament_scheduler_client/control/grpc/tournament_api.dart';
-import 'package:tournament_scheduler_client/navigation/app_router.dart';
 import './proto_logic_api.dart';
 
 typedef EventHandler<T> = void Function(T event);
@@ -45,6 +44,10 @@ class GrpcAPI {
   Future<void> subscribeTournament(String key, EventHandler<TournamentEvent> onTournamentEvent) async{
     final tournamentEventStream = tournamentAPI.subscribe(key);
     listenOnStream<TournamentEvent>(tournamentEventStream, onTournamentEvent);
+  }
+
+  void unsubscribeTournament(String key) {
+    tournamentAPI.unsubscribe(key);
   }
 
   listenOnStream<T extends GeneratedMessage>(ResponseStream<T> serverEventStream, EventHandler<T> onEvent) async{

@@ -71,7 +71,7 @@ class _TeamViewTileState extends State<_TeamViewTile> {
                     icon: write ? Icon(Icons.arrow_forward) : Icon(Icons.edit),
                     onPressed: () {
                       if (write && controller.text.isNotEmpty) {
-                        tournament.server.api.tournamentAPI.editTeam(
+                        tournament.editTeam(
                             tournament.key,
                             tournament.state.sync,
                             widget.model.id,
@@ -86,7 +86,7 @@ class _TeamViewTileState extends State<_TeamViewTile> {
                 IconButton(
                   icon: Icon(Icons.close),
                   onPressed: () {
-                    tournament.server.api.tournamentAPI.removeTeam(
+                    tournament.removeTeam(
                         tournament.key, tournament.state.sync, widget.model.id);
                   },
                 ),
@@ -149,8 +149,7 @@ class _NewTeamTileState extends State<_NewTeamTile> {
     Tournament tournament = context.read<Tournament>();
     if (controller.text.isNotEmpty) {
       setState(() {
-        tournament.server.api.tournamentAPI
-            .addTeam(tournament.key, tournament.state.sync, controller.text);
+        tournament.addTeam(tournament.key, tournament.state.sync, controller.text);
         controller.clear();
         write = false;
       });

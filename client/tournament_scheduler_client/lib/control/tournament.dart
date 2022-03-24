@@ -19,6 +19,7 @@ class Tournament {
   }
 
   Future<void> reload() async {
+    server.messenger.showLoading();
     final TournamentData data = (await server.api.tournamentAPI.load(key)).data;
     applyChange(
         sync: data.sync,
@@ -32,7 +33,6 @@ class Tournament {
     // we want to reload the whole state.
     if (e.syncOld != state.sync &&
         e.whichEvent() != TournamentEvent_Event.error) {
-      server.messenger.showError("Reloading!");
       reload();
       return;
     }
@@ -101,5 +101,59 @@ class Tournament {
 
     state = newState;
     for (EventChannel channel in channels) channel.raise();
+  }
+
+  String processAcknowledgement(Server server, Acknowledgment acknowledgment) {
+    switch(acknowledgment.status) {
+      case Acknowledgment_Status.OK:
+        server.messenger.showOk();
+        break;
+      case Acknowledgment_Status.ERRROR:
+        server.messenger.showError(acknowledgment.message);
+        break;
+      case Acknowledgment_Status.SYNC_ERROR:
+        reload();
+        break;
+    }
+    return acknowledgment.message;
+  }
+
+  void addTeam(String key, String sync, String name) async {
+    final ack = await server.api.tournamentAPI.addTeam(key, sync, name);
+    processAcknowledgement(server, ack);
+  }
+
+  void editTeam(String key, String sync, int id, String name) async {
+    final ack = await server.api.tournamentAPI.editTeam(key, sync, id ,name);
+    processAcknowledgement(server, ack);
+  }
+
+  void removeTeam(String key, String sync, int id) async {
+    final ack = await server.api.tournamentAPI.removeTeam(key, sync, id);
+    processAcknowledgement(server, ack);
+  }
+
+  void setMode(String key, String sync, int id) async {
+    final ack = await server.api.tournamentAPI.setMode(key, sync, id);
+    processAcknowledgement(server, ack);
+  }
+
+  void setResult(String key, String sync, int id, int scoreA, int scoreB) async {
+    final ack = await server.api.tournamentAPI.setResult(key, sync, id, scoreA, scoreB);
+    processAcknowledgement(server, ack);
+  }
+
+  void start(String key, String sync) async {
+    final ack = await server.api.tournamentAPI.start(key, sync);
+    processAcknowledgement(server, ack);
+  }
+
+  void reset(String key, String sync) async {
+    final ack = await server.api.tournamentAPI.reset(key, sync);
+    processAcknowledgement(server, ack);
+  }
+
+  void unsubscribe(String key) async {
+    server.api.tournamentAPI.unsubscribe(key);
   }
 }

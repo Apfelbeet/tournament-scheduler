@@ -34,7 +34,7 @@ class _ModeViewTile extends StatelessWidget {
       title: Text(this.model.title),
       subtitle: Text(this.model.description),
       onTap: () {
-        tournament.server.api.tournamentAPI.setMode(
+        tournament.setMode(
             tournament.key, tournament.state.sync, model.id);
       },
       selected: tournament.state.activeMode.id == model.id,

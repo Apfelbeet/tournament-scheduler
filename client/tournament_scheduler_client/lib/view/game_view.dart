@@ -170,7 +170,7 @@ class _GameListTileState extends State<_GameListTile> {
                   final int scoreB = int.parse(
                       _controllerB.text.isEmpty ? "0" : _controllerB.text);
 
-                  tournament.server.api.tournamentAPI.setResult(tournament.key,
+                  tournament.setResult(tournament.key,
                       tournament.state.sync, widget.model.id, scoreA, scoreB);
                   setState(() {
                     _expanded = false;

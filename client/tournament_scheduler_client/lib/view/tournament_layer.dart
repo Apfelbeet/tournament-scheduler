@@ -45,9 +45,9 @@ class TournamentLayer extends StatelessWidget {
                                   ? Icons.stop
                                   : Icons.play_arrow),
                               onPressed: () => tournament.state.started
-                                  ? tournament.server.api.tournamentAPI.reset(
+                                  ? tournament.reset(
                                       tournament.key, tournament.state.sync)
-                                  : tournament.server.api.tournamentAPI.start(
+                                  : tournament.start(
                                       tournament.key, tournament.state.sync));
                         })
                   ],
@@ -60,7 +60,7 @@ class TournamentLayer extends StatelessWidget {
   }
 
   Future<bool> _onPop() async {
-    tournament.server.api.tournamentAPI.unsubscribe(tournament.key);
+    tournament.server.api.unsubscribeTournament(tournament.key);
     return true;
   }
 }
