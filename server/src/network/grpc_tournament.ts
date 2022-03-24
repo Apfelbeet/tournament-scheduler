@@ -20,6 +20,7 @@ import {
 } from "./grpc_util";
 import {
     connections,
+    removeClosedSubscriptions,
     sendTournamentEvent,
     subscriptions,
 } from "./grpc_connection";
@@ -272,6 +273,11 @@ export default class TournamentAPI implements TournamentAPIHandlers {
             }
             logger.log(`${access.key}: ${call.getPeer()} subscribed.`);
             subscriptions.get(access.key)?.push(call);
+
+            call.on("close", () => {
+                logger.error("HELLO CLOSE!")
+                removeClosedSubscriptions(access.key!);
+            });
         }
     }
 
@@ -285,19 +291,19 @@ export default class TournamentAPI implements TournamentAPIHandlers {
             callback(null, ack_error("Bad Arguments!"));
         } else {
             if (subscriptions.has(access.key)) {
-                const c = subscriptions
+
+                subscriptions
                     .get(access.key)!
-                    .filter((connection) => {
+                    .forEach((connection) => {
                         if (connection.getPeer() === call.getPeer()) {
                             connection.end();
+                            connection.destroy();
                             logger.log(
                                 `${access.key}: ${connection.getPeer()} unsubscribed.`
                             );
-                            return false;
                         }
-                        return true;
                     });
-                subscriptions.set(access.key, c);
+                
                 callback(null, ack_succ());
             } else {
                 callback(null, ack_error(`${access.key} is unknown.`));

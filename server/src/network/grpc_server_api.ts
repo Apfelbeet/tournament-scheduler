@@ -5,20 +5,17 @@ import { ServerAPIHandlers } from "../../generated/proto/logicAPI/ServerAPI";
 import { Acknowledgment, _logicAPI_Acknowledgment_Status } from "../../generated/proto/logicAPI/Acknowledgment";
 import { Modes } from "../../generated/proto/logicAPI/Modes";
 import {
-    TournamentAccess,
     TournamentAccess__Output,
 } from "../../generated/proto/logicAPI/TournamentAccess";
 import { TournamentCreate__Output } from "../../generated/proto/logicAPI/TournamentCreate";
 import { TournamentDetailsList } from "../../generated/proto/logicAPI/TournamentDetailsList";
 import * as logger from "../util/logger";
 import { ack_error, ack_succ, errorWrapperAck } from "./grpc_util";
-import { Key } from "../types/general_types";
-import { TournamentEvent } from "../../generated/proto/logicAPI/TournamentEvent";
 import {
     connections,
     sendServerEvent,
-    repalceConnections,
     subscriptions,
+    removeClosedConnections,
 } from "./grpc_connection";
 import { ServerEvent } from "../../generated/proto/logicAPI/ServerEvent";
 import { Empty__Output } from "../../generated/proto/logicAPI/Empty";
@@ -90,21 +87,22 @@ export default class ServerAPI implements ServerAPIHandlers {
 
     connect(call: ServerWritableStream<Empty__Output, ServerEvent>) {
         connections.push(call);
+        call.on("close", () => {
+            removeClosedConnections();
+        });
         logger.log(`New Connection with ${call.getPeer()}.`);
     }
 
     disconnect(call: IN<Empty__Output, Acknowledgment>, callback: OUT<Acknowledgment>) {
-        const newList = connections.filter(connection => {
+        connections.forEach(connection => {
             if (connection.getPeer() === call.getPeer()) {
                 connection.end();
+                connection.destroy();
                 logger.log(`Connection to ${connection.getPeer()} closed!`);
-                return false;
             }
-            return true;
-        })
+        });
 
-        repalceConnections(newList);
-
+        removeClosedConnections();
         callback(null, ack_succ());
     }
 }
@@ -112,3 +110,7 @@ export default class ServerAPI implements ServerAPIHandlers {
 function sendTournaments() {
     sendServerEvent({ tournaments: { keys: logic.getTournaments() } });
 }
+
+
+
+
