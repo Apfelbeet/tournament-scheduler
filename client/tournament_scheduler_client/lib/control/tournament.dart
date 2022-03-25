@@ -65,6 +65,7 @@ class Tournament {
       TournamentStatusData? status,
       TournamentTeamData? teams,
       TournamentStructureData? structure}) {
+
     TournamentState newState = state.copyWith(sync: sync);
     List<EventChannel> channels = [];
 
@@ -92,7 +93,7 @@ class Tournament {
     if (structure != null) {
       final newStructureState =
           StructureState.fromEventData(structure.structures, state.teams);
-      newState = state.copyWith(
+      newState = newState.copyWith(
         structure: newStructureState,
         resetStructure: newStructureState == null,
       );
