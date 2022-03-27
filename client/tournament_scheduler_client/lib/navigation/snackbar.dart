@@ -10,8 +10,14 @@ extension ScaffoldMessengerStateExtension on ScaffoldMessengerState {
 
   void showOk() {
     showSnackBar(SnackBar(
-      content: Text("OK!"),
-      backgroundColor: Colors.greenAccent,
+      duration: Duration(seconds: 1),
+      content: Row(
+        children: [
+          Expanded(child: Text("")),
+          Icon(Icons.check_circle, color: Colors.green,),
+        ],
+      ),
+      backgroundColor: Colors.black.withOpacity(1),
     ));
   }
 
