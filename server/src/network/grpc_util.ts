@@ -25,9 +25,9 @@ export function ack_succ(): Acknowledgment {
     }
 }
 
-export function errorWrapperAck(callback: OUT<Acknowledgment>, run: (() => void)) {
+export async function errorWrapperAck(callback: OUT<Acknowledgment>, run: (() => void)) {
     try {
-        run();
+        await run();
     } catch (e) {
         if (e instanceof OutOfSyncError) {
             //TODO: pass connection id for logging
