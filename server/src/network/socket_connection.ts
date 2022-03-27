@@ -7,7 +7,7 @@ import { OutOfSyncError } from "../util/errors";
 import * as logger from "../util/logger";
 
 const subscriptions = new Map<Key, websocket.connection[]>();
-let connections: websocket.connection[] = []; 
+let connections: websocket.connection[] = [];
 let httpServer;
 let wsServer;
 
@@ -56,7 +56,7 @@ export function onRequest(request: websocket.request) {
     connection.on("close", (reasonCode, description) => {
         logger.log(`${connection.remoteAddress} disconnected!`);
         unsubscribe(connection);
-        connections = connections.filter(con => con !== connection);
+        connections = connections.filter((con) => con !== connection);
     });
 }
 
@@ -135,7 +135,7 @@ export async function sendAll(key: Key, connection: websocket.connection) {
 
 export function sendTournaments(connection?: websocket.connection) {
     if (connection === undefined) {
-        connections.forEach(con => sendTournaments(con));
+        connections.forEach((con) => sendTournaments(con));
     } else {
         send(
             connection,
@@ -145,7 +145,6 @@ export function sendTournaments(connection?: websocket.connection) {
             })
         );
     }
-
 }
 
 export function sendModes(connection: websocket.connection) {
@@ -201,7 +200,7 @@ export async function parseReceivedMessage(
             /*
         {type: "removeTournament", key: string}
          */
-            logic.removeTournament(message.key);
+            await logic.removeTournament(message.key);
             sendTournaments();
         } else if (message.type === "getTournaments") {
             /*
@@ -271,7 +270,12 @@ export async function parseReceivedMessage(
         sync: <Int>
         }
          */
-            await logic.startTournament(message.key, message.sync);
+            const [osk, sk] = await logic.startTournament(
+                message.key,
+                message.sync
+            );
+            sendStatus(message.key, sk, osk);
+            sendStructure(message.key, sk, sk);
         } else if (message.type === "reset") {
             /*
         {
@@ -280,7 +284,12 @@ export async function parseReceivedMessage(
         sync: <Int>
         }
          */
-            await logic.resetTournament(message.key, message.sync);
+            const [osk, sk] = await logic.resetTournament(
+                message.key,
+                message.sync
+            );
+            sendStatus(message.key, sk, osk);
+            sendStructure(message.key, sk, sk);
         } else if (message.type === "addTeam") {
             /*
         {
@@ -290,7 +299,12 @@ export async function parseReceivedMessage(
         name: <String>
         }
          */
-            await logic.addTeamToTournament(message.key, message.sync, message.name);
+            const [osk, sk] = await logic.addTeamToTournament(
+                message.key,
+                message.sync,
+                message.name
+            );
+            sendTeams(message.key, sk, osk);
         } else if (message.type === "editTeam") {
             /*
         {
@@ -302,12 +316,13 @@ export async function parseReceivedMessage(
         }
          */
 
-            await logic.editTeamInTournament(
+            const [osk, sk] = await logic.editTeamInTournament(
                 message.key,
                 message.sync,
                 parseInt(message.id, 10),
                 message.name
             );
+            sendTeams(message.key, sk, osk);
         } else if (message.type === "removeTeam") {
             /*
         {
@@ -317,11 +332,12 @@ export async function parseReceivedMessage(
         id: <Int>
         }
          */
-            await logic.removeTeamFromTournament(
+            const [osk, sk] = await logic.removeTeamFromTournament(
                 message.key,
                 message.sync,
                 parseInt(message.id, 10)
             );
+            sendTeams(message.key, sk, osk);
         } else if (message.type === "setMode") {
             /*
         {
@@ -331,11 +347,12 @@ export async function parseReceivedMessage(
         id: <Int>
         }
          */
-            await logic.setModeOfTournament(
+            const [osk, sk] = await logic.setModeOfTournament(
                 message.key,
                 message.sync,
                 parseInt(message.id, 10)
             );
+            sendStatus(message.key, sk, osk);
         } else if (message.type === "setResult") {
             /*
         {
@@ -347,13 +364,15 @@ export async function parseReceivedMessage(
         resultB: <Int>
         }
          */
-            await logic.setResult(
+            const [osk, sk] = await logic.setResult(
                 message.key,
                 message.sync,
                 parseInt(message.gameId, 10),
                 parseInt(message.resultA, 10),
                 parseInt(message.resultB)
             );
+            sendStructure(message.key, sk, osk);
+            sendStatus(message.key, sk, sk);
         }
     } catch (e) {
         if (e instanceof OutOfSyncError) {

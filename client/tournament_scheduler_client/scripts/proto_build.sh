@@ -1,0 +1,1 @@
+protoc --dart_out=grpc:./../lib/generated/proto/ --proto_path=./../../../proto/ logic_api.proto

@@ -1,44 +1,48 @@
-import 'package:tournament_scheduler_client/control/model.dart';
-import 'package:tournament_scheduler_client/control/notifier.dart';
-import 'package:tournament_scheduler_client/control/storage.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:tournament_scheduler_client/control/event_builder.dart';
+import 'package:tournament_scheduler_client/control/grpc/proto_logic_api.dart';
+import 'package:tournament_scheduler_client/control/tournament.dart';
 import 'package:provider/provider.dart';
 
-class TeamView extends StatefulWidget {
-  @override
-  State<StatefulWidget> createState() => _TeamViewState();
-}
+class TeamView extends StatelessWidget {
+  final Tournament tournament;
 
-class _TeamViewState extends State<TeamView> {
+  TeamView(this.tournament);
+
   @override
   Widget build(BuildContext context) {
-    return Consumer<TeamNotifier>(
-        builder: (context, n, c) => Consumer<InfoNotifier>(
-              builder: (context, n, c) => ListView(
-                children: _tiles(),
-              ),
-            ));
+    return EventBuilder(
+        channel: tournament.statusEvents,
+        builder: (context) {
+          return EventBuilder(
+              channel: tournament.teamEvents,
+              builder: (context) {
+                debugPrint("BUILD!");
+                return ListView(
+                  children: _tiles(),
+                );
+              });
+        });
   }
 
   List<Widget> _tiles() {
     List<Widget> list = [];
-    list.addAll(_TeamViewTile.fromModels(Storage.instance().getTeams()));
-    if (Storage.instance().isStarted() != true) list.add(_NewTeamTile());
+    list.addAll(_TeamViewTile.fromModels(tournament.state.teams));
+    if (!tournament.state.started) list.add(_NewTeamTile());
     return list;
   }
 }
 
 class _TeamViewTile extends StatefulWidget {
-  final TeamModel model;
+  final TeamData model;
 
-  _TeamViewTile(this.model);
+  _TeamViewTile({key: Key, required this.model}) : super(key: key);
 
   @override
   _TeamViewTileState createState() => _TeamViewTileState();
 
-  static List<_TeamViewTile> fromModels(List<TeamModel> teams) {
-    return teams.map((e) => _TeamViewTile(e)).toList();
+  static List<_TeamViewTile> fromModels(List<TeamData> teams) {
+    return teams.map((e) => _TeamViewTile(key: UniqueKey(), model: e)).toList();
   }
 }
 
@@ -46,35 +50,50 @@ class _TeamViewTileState extends State<_TeamViewTile> {
   bool write = false;
   TextEditingController controller = new TextEditingController();
 
+
+  _TeamViewTileState();
+
   @override
   Widget build(BuildContext context) {
+    Tournament tournament = context.read<Tournament>();
+
     return ListTile(
-      title: write ? TextField(controller: controller, autofocus: true,) : Text(widget.model.name),
-      trailing: Storage.instance().isStarted() != true
+      title: write
+          ? TextField(
+              controller: controller,
+              autofocus: true,
+            )
+          : Text(widget.model.name),
+      trailing: !tournament.state.started
           ? Wrap(
               children: [
                 IconButton(
-                  icon: write ? Icon(Icons.arrow_forward) : Icon(Icons.edit),
-                  onPressed: () {
-                    if (write && controller.text.isNotEmpty) {
-                      Storage.instance().editTeam(widget.model.id, controller.text);
-                    } else {
-                      controller.text = widget.model.name;
-                    }
-                    setState(() {
-                      write = !write;
-                    });
-                  }),
+                    icon: write ? Icon(Icons.arrow_forward) : Icon(Icons.edit),
+                    onPressed: () {
+                      if (write && controller.text.isNotEmpty) {
+                        tournament.editTeam(
+                            tournament.key,
+                            tournament.state.sync,
+                            widget.model.id,
+                            controller.text);
+                      } else {
+                        controller.text = widget.model.name;
+                      }
+                      setState(() {
+                        write = !write;
+                      });
+                    }),
                 IconButton(
-                  icon: Icon(Icons.delete),
+                  icon: Icon(Icons.close),
                   onPressed: () {
-                    Storage.instance().removeTeam(widget.model.id);
+                    tournament.removeTeam(
+                        tournament.key, tournament.state.sync, widget.model.id);
                   },
                 ),
               ],
             )
           : null,
-      selected: Storage.instance().getWinner() == widget.model.id,
+      selected: tournament.state.winnerTeam?.id == widget.model.id,
     );
   }
 }
@@ -127,9 +146,10 @@ class _NewTeamTileState extends State<_NewTeamTile> {
   }
 
   _submit(BuildContext context) {
+    Tournament tournament = context.read<Tournament>();
     if (controller.text.isNotEmpty) {
       setState(() {
-        Storage.instance().addTeam(controller.text);
+        tournament.addTeam(tournament.key, tournament.state.sync, controller.text);
         controller.clear();
         write = false;
       });

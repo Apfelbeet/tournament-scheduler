@@ -1,43 +1,47 @@
-import 'package:tournament_scheduler_client/control/model.dart';
-import 'package:tournament_scheduler_client/control/notifier.dart';
-import 'package:tournament_scheduler_client/control/storage.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:tournament_scheduler_client/control/event_builder.dart';
+import 'package:tournament_scheduler_client/control/tournament.dart';
+
+import '../control/grpc/proto_logic_api.dart';
+
 
 class ModeView extends StatelessWidget {
+  final Tournament tournament;
+
+  ModeView(this.tournament);
+
   @override
   Widget build(BuildContext context) {
-
-    return Consumer<ModeNotifier> (
-      builder: (context, n, c) => ListView(
-        children: _ModeViewTile.fromModels(Storage.instance().getModes()),
-      ),
-    );
+    return EventBuilder(channel: tournament.statusEvents,
+        builder: (context) =>
+        ListView(
+            children: _ModeViewTile.fromModels(tournament.server.state.modes)));
   }
 }
 
 class _ModeViewTile extends StatelessWidget {
-  final ModeModel model;
+  final Mode model;
 
   _ModeViewTile(this.model);
 
   @override
   Widget build(BuildContext context) {
-    final Storage st = Storage.instance();
+    Tournament tournament = context.read<Tournament>();
 
     return ListTile(
-      enabled: !(st.isStarted() ?? true),
+      enabled: !tournament.state.started,
       title: Text(this.model.title),
       subtitle: Text(this.model.description),
       onTap: () {
-        st.setActiveMode(model.id);
+        tournament.setMode(
+            tournament.key, tournament.state.sync, model.id);
       },
-      selected: st.getActiveMode() != null && st.getActiveMode()!.id == model.id,
+      selected: tournament.state.activeMode.id == model.id,
     );
   }
 
-  static List<_ModeViewTile> fromModels(List<ModeModel> modes) {
+  static List<_ModeViewTile> fromModels(List<Mode> modes) {
     return modes.map((e) => _ModeViewTile(e)).toList();
   }
 }
