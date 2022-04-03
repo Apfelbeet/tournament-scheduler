@@ -30,6 +30,7 @@ import { RemovePermissionKey__Output } from "../../generated/proto/logicAPI/Remo
 import { SetPermission__Output } from "../../generated/proto/logicAPI/SetPermission";
 import { Permission as PERMISSION, Sync, TournamentAccess } from "../types/tournament_types";
 import { KeyPermissionPairs } from "../../generated/proto/logicAPI/KeyPermissionPairs";
+import { TournamentEventType as TET} from "../types/api_types";
 
 export default class TournamentAPI implements TournamentAPIHandlers {
     [name: string]: grpc.UntypedHandleCall;
@@ -52,7 +53,7 @@ export default class TournamentAPI implements TournamentAPIHandlers {
                     name
                 );
                 callback(null, ack_succ());
-                sendTeams(access, sk);
+                send([TET.TEAMS], access, sk);
             }
         });
     }
@@ -78,7 +79,7 @@ export default class TournamentAPI implements TournamentAPIHandlers {
                     name
                 );
                 callback(null, ack_succ());
-                sendTeams(access, sk);
+                send([TET.TEAMS], access, sk);
             }
         });
     }
@@ -101,7 +102,7 @@ export default class TournamentAPI implements TournamentAPIHandlers {
                     id
                 );
                 callback(null, ack_succ());
-                sendTeams(access, sk);
+                send([TET.TEAMS], access, sk);
             }
         });
     }
@@ -160,7 +161,7 @@ export default class TournamentAPI implements TournamentAPIHandlers {
                     id
                 );
                 callback(null, ack_succ());
-                sendStatus(access, sk);
+                send([TET.STATUS], access, sk);
             }
         });
     }
@@ -188,8 +189,7 @@ export default class TournamentAPI implements TournamentAPIHandlers {
                     game.scoreB
                 );
                 callback(null, ack_succ());
-                sendStructure(access, sk);
-                sendStatus(access, sk);
+                send([TET.STATUS, TET.STRUCTURE], access, sk);
             }
         });
     }
@@ -206,8 +206,7 @@ export default class TournamentAPI implements TournamentAPIHandlers {
                 access,
             );
             callback(null, ack_succ());
-            sendStatus(access, sk);
-            sendStructure(access, sk);
+            send([TET.STATUS, TET.STRUCTURE], access, sk);
         });
     }
 
@@ -223,9 +222,7 @@ export default class TournamentAPI implements TournamentAPIHandlers {
                 access
             );
             callback(null, ack_succ());
-            sendStatus(access, sk);
-            sendStructure(access, sk);
-            
+            send([TET.STATUS, TET.STRUCTURE], access, sk);
         });
     }
 
@@ -348,37 +345,44 @@ export default class TournamentAPI implements TournamentAPIHandlers {
             callback(null, {permission: PERMISSION.NONE});
         }
     }
-
-
 }
 
-async function sendTeams(access: TournamentAccess, syncNew: Sync) {
-    sendTournamentEvent(access.key, {
-        key: access.key,
-        sync: syncNew,
-        syncOld: access.sync,
-        teams: { teams: await logic.getTeamsFromTournament(access) },
-    });
+async function send(types: TET[], access: TournamentAccess, syncNew: Sync) {
+    let currentOldSync: Sync = access.sync;
+
+    for (let type of types) {
+        switch (type) {
+            case TET.STATUS:
+                sendTournamentEvent(access.key, {
+                    key: access.key,
+                    sync: syncNew,
+                    syncOld: currentOldSync,
+                    status: await logic.getStatusFromTournament(access),
+                });
+                break;
+            case TET.TEAMS:
+                sendTournamentEvent(access.key, {
+                    key: access.key,
+                    sync: syncNew,
+                    syncOld: currentOldSync,
+                    teams: { teams: await logic.getTeamsFromTournament(access) },
+                });
+                break;
+            case TET.STRUCTURE:
+                sendTournamentEvent(access.key, {
+                    key: access.key,
+                    sync: syncNew,
+                    syncOld: currentOldSync,
+                    structure: {
+                        structures: convertStructure(
+                            await logic.getModuleStructuresFromTournament(access)
+                        ),
+                    },
+                });
+                break;
+        }
+
+        currentOldSync = syncNew;
+    } 
 }
 
-async function sendStatus(access: TournamentAccess, syncNew: Sync) {
-    sendTournamentEvent(access.key, {
-        key: access.key,
-        sync: syncNew,
-        syncOld: access.sync,
-        status: await logic.getStatusFromTournament(access),
-    });
-}
-
-async function sendStructure(access: TournamentAccess, syncNew: Sync) {
-    sendTournamentEvent(access.key, {
-        key: access.key,
-        sync: syncNew,
-        syncOld: access.sync,
-        structure: {
-            structures: convertStructure(
-                await logic.getModuleStructuresFromTournament(access)
-            ),
-        },
-    });
-}
