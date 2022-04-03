@@ -5,14 +5,22 @@ import { Tournament } from "../logic/tournament";
 import { TournamentFacade } from "../logic/tournament_facade";
 import { Mode, Team } from "../types/general_types";
 import Entry from "../logic/generation_modules/entry_module";
+import { Permission } from "../types/tournament_types";
 
-function instanceModule(tournament: TournamentFacade, data: ModuleImage): Module {
+function instanceModule(
+    tournament: TournamentFacade,
+    data: ModuleImage
+): Module {
     const moduleFile = config.getLexicon().get(data.type);
     if (moduleFile === undefined) {
         throw Error(`Can not load "${data.type}"!`);
     } else {
-        const module = new (moduleFile as any).default(tournament, data.master, data.downstream_teams) as Module;
-        
+        const module = new (moduleFile as any).default(
+            tournament,
+            data.master,
+            data.downstream_teams
+        ) as Module;
+
         for (const [key, value] of Object.entries(data)) {
             (module as any)[key] = value;
         }
@@ -34,20 +42,21 @@ function imageOfModule(module: Module): ModuleImage {
         state: module.state,
         visible: module.visible,
         label: module.label,
-        additional_attributes: module.additional_attributes
+        additional_attributes: module.additional_attributes,
     };
 }
 
 export function instanceTournament(data: TournamentImage): Tournament {
     const tournament = new Tournament();
     const facade = new TournamentFacade(tournament);
-    
+
     tournament.sync = data.sync;
     if (data.entry !== undefined)
         tournament.entry = instanceModule(facade, data.entry!) as Entry;
-    
+
     if (data.mode !== undefined) {
-        const mode = config.getModes()
+        const mode = config
+            .getModes()
             .find((mode: Mode) => mode.id === data.mode);
         tournament.mode = mode;
     }
@@ -58,7 +67,9 @@ export function instanceTournament(data: TournamentImage): Tournament {
 
     tournament.winner = data.winner;
 
-    data.modules.forEach((mi: ModuleImage) => tournament.modules.set(mi.id, instanceModule(facade, mi)));
+    data.modules.forEach((mi: ModuleImage) =>
+        tournament.modules.set(mi.id, instanceModule(facade, mi))
+    );
 
     tournament.new_module_id = data.new_module_id;
 
@@ -73,7 +84,7 @@ export function imageOfTournament(t: Tournament): TournamentImage {
         teams: Array.from(t.teams.values()),
         new_team_id: t.new_team_id,
         winner: t.winner,
-        modules: Array.from(t.modules.values()).map(m => imageOfModule(m)),
+        modules: Array.from(t.modules.values()).map((m) => imageOfModule(m)),
         new_module_id: t.new_module_id,
-    }
+    };
 }

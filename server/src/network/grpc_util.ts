@@ -4,6 +4,8 @@ import { OutOfSyncError } from "../util/errors";
 import * as logger from "../util/logger";
 import { Structure } from "../types/module_types";
 import { StructureData } from "../../generated/proto/logicAPI/StructureData";
+import { TournamentAccess } from "../types/tournament_types";
+import { TournamentAccess__Output } from "../../generated/proto/logicAPI/TournamentAccess";
 
 
 export function ack_error(message: string): Acknowledgment {
@@ -56,4 +58,15 @@ export function convertStructure(structures?: Structure[]): StructureData[] | un
             up: st.up,
         }
     });
+}
+
+export function convertAccess(access?: TournamentAccess__Output): TournamentAccess {
+    if (access === undefined || access.key === undefined || access.permissionKeys === undefined || access.sync === undefined)
+        throw new Error("Missing keys for access!");
+    else
+        return {
+            key: access.key,
+            sync: access.sync,
+            permissionKeys: access.permissionKeys,
+        };
 }

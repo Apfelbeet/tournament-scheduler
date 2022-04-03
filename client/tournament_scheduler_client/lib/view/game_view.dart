@@ -86,7 +86,11 @@ class ModuleListTile extends StatelessWidget {
                         child: Text(model.label,
                             style: Theme.of(context).textTheme.headline6),
                       ),
-                      Expanded(child: Align(child: Icon(Icons.bar_chart), alignment: Alignment.centerRight,)),
+                      Expanded(
+                          child: Align(
+                        child: Icon(Icons.bar_chart),
+                        alignment: Alignment.centerRight,
+                      )),
                     ],
                   ),
                 ),
@@ -170,8 +174,7 @@ class _GameListTileState extends State<_GameListTile> {
                   final int scoreB = int.parse(
                       _controllerB.text.isEmpty ? "0" : _controllerB.text);
 
-                  tournament.setResult(tournament.key,
-                      tournament.state.sync, widget.model.id, scoreA, scoreB);
+                  tournament.setResult(widget.model.id, scoreA, scoreB);
                   setState(() {
                     _expanded = false;
                   });

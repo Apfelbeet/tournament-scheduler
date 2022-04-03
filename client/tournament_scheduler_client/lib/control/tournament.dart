@@ -1,5 +1,7 @@
+import 'package:flutter/cupertino.dart';
 import 'package:tournament_scheduler_client/control/event_builder.dart';
 import 'package:tournament_scheduler_client/control/grpc/proto_logic_api.dart';
+import 'package:tournament_scheduler_client/control/perferences.dart';
 import 'package:tournament_scheduler_client/control/server.dart';
 import 'package:tournament_scheduler_client/control/tournament_state.dart';
 import 'package:tournament_scheduler_client/navigation/snackbar.dart';
@@ -7,6 +9,7 @@ import 'package:tournament_scheduler_client/navigation/snackbar.dart';
 class Tournament {
   final String key;
   final Server server;
+  late List<String> permissionKeys;
 
   TournamentState state;
 
@@ -16,16 +19,41 @@ class Tournament {
 
   Tournament(this.key, this.server, this.state) {
     server.api.subscribeTournament(key, _onTournamentEvent);
+    this.permissionKeys = Preferences.getPermissionKeys(key);
   }
 
   Future<void> reload() async {
     server.messenger.showLoading();
-    final TournamentData data = (await server.api.tournamentAPI.load(key)).data;
+    final TournamentData data = (await server.api.tournamentAPI.load(_access)).data;
     applyChange(
         sync: data.sync,
         status: data.status,
         teams: data.teams,
         structure: data.structure);
+  }
+
+  static Future<TournamentState> loadInitialState(Server server, String key) async {
+    final TournamentAccess access = TournamentAccess(
+      key: key,
+      sync: "",
+      permissionKeys: Preferences.getPermissionKeys(key),
+    );
+
+
+    final response = await server.api.tournamentAPI.load(access);
+
+    switch(response.whichResponse()) {
+      case ResponseTournamentData_Response.data:
+        final TournamentData data = response.data;
+        final TournamentState state = TournamentState.initial(data, server.state.modes);
+        return state;
+      case ResponseTournamentData_Response.error:
+        throw Exception("${response.error}");
+      case ResponseTournamentData_Response.notSet:
+        throw Exception("Server didn't send any data!");
+    }
+
+
   }
 
   void _onTournamentEvent(TournamentEvent e) {
@@ -65,7 +93,6 @@ class Tournament {
       TournamentStatusData? status,
       TournamentTeamData? teams,
       TournamentStructureData? structure}) {
-
     TournamentState newState = state.copyWith(sync: sync);
     List<EventChannel> channels = [];
 
@@ -105,7 +132,7 @@ class Tournament {
   }
 
   String processAcknowledgement(Server server, Acknowledgment acknowledgment) {
-    switch(acknowledgment.status) {
+    switch (acknowledgment.status) {
       case Acknowledgment_Status.OK:
         server.messenger.showOk();
         break;
@@ -119,42 +146,54 @@ class Tournament {
     return acknowledgment.message;
   }
 
-  void addTeam(String key, String sync, String name) async {
-    final ack = await server.api.tournamentAPI.addTeam(key, sync, name);
+  TournamentAccess get _access => TournamentAccess(
+      key: key, sync: state.sync, permissionKeys: permissionKeys);
+
+  void addTeam(String name) async {
+    final ack = await server.api.tournamentAPI.addTeam(_access, name);
     processAcknowledgement(server, ack);
   }
 
-  void editTeam(String key, String sync, int id, String name) async {
-    final ack = await server.api.tournamentAPI.editTeam(key, sync, id ,name);
+  void editTeam(int id, String name) async {
+    final ack = await server.api.tournamentAPI.editTeam(_access, id, name);
     processAcknowledgement(server, ack);
   }
 
-  void removeTeam(String key, String sync, int id) async {
-    final ack = await server.api.tournamentAPI.removeTeam(key, sync, id);
+  void removeTeam(int id) async {
+    final ack = await server.api.tournamentAPI.removeTeam(_access, id);
     processAcknowledgement(server, ack);
   }
 
-  void setMode(String key, String sync, int id) async {
-    final ack = await server.api.tournamentAPI.setMode(key, sync, id);
+  void setMode(int id) async {
+    final ack = await server.api.tournamentAPI.setMode(_access, id);
     processAcknowledgement(server, ack);
   }
 
-  void setResult(String key, String sync, int id, int scoreA, int scoreB) async {
-    final ack = await server.api.tournamentAPI.setResult(key, sync, id, scoreA, scoreB);
+  void setResult(int id, int scoreA, int scoreB) async {
+    final ack =
+        await server.api.tournamentAPI.setResult(_access, id, scoreA, scoreB);
     processAcknowledgement(server, ack);
   }
 
-  void start(String key, String sync) async {
-    final ack = await server.api.tournamentAPI.start(key, sync);
+  void start() async {
+    final ack = await server.api.tournamentAPI.start(_access);
     processAcknowledgement(server, ack);
   }
 
-  void reset(String key, String sync) async {
-    final ack = await server.api.tournamentAPI.reset(key, sync);
+  void reset() async {
+    final ack = await server.api.tournamentAPI.reset(_access);
     processAcknowledgement(server, ack);
   }
 
-  void unsubscribe(String key) async {
+  void unsubscribe() async {
     server.api.tournamentAPI.unsubscribe(key);
+  }
+
+  Future<PERMISSION> getCurrentPermission() {
+    return server.api.tournamentAPI.getPermission(_access);
+  }
+
+  void closeTournament() {
+    server.api.serverAPI.removeTournament(_access);
   }
 }

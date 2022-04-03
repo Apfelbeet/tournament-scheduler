@@ -3,7 +3,7 @@ syntax = "proto3";
 package logicAPI;
 
 service ServerAPI {
-    rpc createTournament(TournamentCreate) returns (Acknowledgment);
+    rpc createTournament(TournamentCreate) returns (TournamentCreateAcknowledgment);
     rpc removeTournament(TournamentAccess) returns (Acknowledgment);
     rpc getTournaments(Empty) returns (TournamentDetailsList);
     rpc getModes(Empty) returns (Modes);
@@ -24,6 +24,12 @@ service TournamentAPI {
     rpc removeTeam(TeamRemove) returns (Acknowledgment);
     rpc setMode(SetMode) returns (Acknowledgment);
     rpc setResult(SetResult) returns (Acknowledgment);
+    
+    rpc getPermissionOfKey(PermissionQuery) returns (Permission);
+    rpc getPermission(TournamentAccess) returns (Permission);
+    rpc getPermissionManagement(TournamentAccess) returns (KeyPermissionPairs);
+    rpc setPermission(SetPermission) returns (Acknowledgment);
+    rpc removePermissionKey(RemovePermissionKey) returns (Acknowledgment);
 }
 
 message Empty {}
@@ -38,6 +44,13 @@ message Acknowledgment {
     string message = 2;
 }
 
+message TournamentCreateAcknowledgment {
+    oneof response {
+        string error = 1;
+        TournamentAccess access = 2;
+    }
+}
+
 message TournamentCreate {
     string key = 1;
 }
@@ -45,6 +58,7 @@ message TournamentCreate {
 message TournamentAccess {
     string key = 1;
     string sync = 2;
+    repeated string permissionKeys = 3;
 }
 
 
@@ -175,4 +189,45 @@ message Stats {
     int32 draws = 5;
     int32 scored = 6;
     int32 conceded = 7;
+}
+
+enum PERMISSION {
+    NONE = 0;
+    READ_ONLY = 1;
+    EDIT = 2;
+    MOD = 3;
+    OWNER = 4;
+}
+
+message Permission {
+    PERMISSION permission = 1;
+}
+
+message PermissionQuery {
+    TournamentAccess access = 1;
+    string permissionKey = 2;
+}
+
+message PermissionKeys {
+    repeated string permissionKeys = 1;
+}
+
+message KeyPermissionPair {
+    string key = 1;
+    PERMISSION permission = 2;
+}
+
+message KeyPermissionPairs {
+    repeated KeyPermissionPair pairs = 1;
+}
+
+message SetPermission {
+    TournamentAccess access = 1;
+    string permissionKey = 2;
+    PERMISSION permission = 3;
+}
+
+message RemovePermissionKey {
+    TournamentAccess access = 1;
+    string permissionKey = 2;
 }

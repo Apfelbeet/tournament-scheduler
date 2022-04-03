@@ -1,6 +1,8 @@
+
 import { Stats } from "./datatypes/stats";
-import { Sync, Team, TeamId } from "./general_types";
+import { Team, TeamId } from "./general_types";
 import { ModuleId, State } from "./module_types";
+import { Permission, PermissionKey, Sync } from "./tournament_types";
 
 export type ModuleImage = {
     id: ModuleId,

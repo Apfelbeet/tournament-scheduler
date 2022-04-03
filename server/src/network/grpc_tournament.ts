@@ -11,20 +11,25 @@ import { TournamentAccess__Output } from "../../generated/proto/logicAPI/Tournam
 import { TournamentAPIHandlers } from "../../generated/proto/logicAPI/TournamentAPI";
 import { TournamentEvent } from "../../generated/proto/logicAPI/TournamentEvent";
 import * as logic from "../logic/server";
-import { Key, Sync } from "../types/general_types";
 import {
     ack_error,
     ack_succ,
     errorWrapperAck,
     convertStructure,
+    convertAccess,
 } from "./grpc_util";
 import {
-    connections,
     removeClosedSubscriptions,
     sendTournamentEvent,
     subscriptions,
 } from "./grpc_connection";
 import * as logger from "../util/logger";
+import { Permission } from "../../generated/proto/logicAPI/PERMISSION";
+import { PermissionQuery__Output } from "../../generated/proto/logicAPI/PermissionQuery";
+import { RemovePermissionKey__Output } from "../../generated/proto/logicAPI/RemovePermissionKey";
+import { SetPermission__Output } from "../../generated/proto/logicAPI/SetPermission";
+import { Permission as PERMISSION, Sync, TournamentAccess } from "../types/tournament_types";
+import { KeyPermissionPairs } from "../../generated/proto/logicAPI/KeyPermissionPairs";
 
 export default class TournamentAPI implements TournamentAPIHandlers {
     [name: string]: grpc.UntypedHandleCall;
@@ -34,24 +39,20 @@ export default class TournamentAPI implements TournamentAPIHandlers {
         callback: OUT<Acknowledgment>
     ) {
         errorWrapperAck(callback, async () => {
-            const access = call.request.access;
+            const access = convertAccess(call.request.access);
             const name = call.request.name;
 
             if (
-                access === undefined ||
-                name === undefined ||
-                access.key === undefined ||
-                access.sync === undefined
+                name === undefined
             ) {
                 callback(null, ack_error("Bad Arguments!"));
             } else {
                 const [osk, sk] = await logic.addTeamToTournament(
-                    access.key,
-                    access.sync,
+                    convertAccess(access),
                     name
                 );
                 callback(null, ack_succ());
-                sendTeams(access.key, sk, osk);
+                sendTeams(access, sk);
             }
         });
     }
@@ -61,27 +62,23 @@ export default class TournamentAPI implements TournamentAPIHandlers {
         callback: OUT<Acknowledgment>
     ) {
         errorWrapperAck(callback, async () => {
-            const access = call.request.access;
+            const access = convertAccess(call.request.access);
             const name = call.request.name;
             const id = call.request.id;
 
             if (
-                access === undefined ||
                 name === undefined ||
-                id === undefined ||
-                access.key === undefined ||
-                access.sync === undefined
+                id === undefined
             ) {
                 callback(null, ack_error("Bad Arguments!"));
             } else {
                 const [osk, sk] = await logic.editTeamInTournament(
-                    access.key,
-                    access.sync,
+                    access,
                     id,
                     name
                 );
                 callback(null, ack_succ());
-                sendTeams(access.key, sk, osk);
+                sendTeams(access, sk);
             }
         });
     }
@@ -91,24 +88,20 @@ export default class TournamentAPI implements TournamentAPIHandlers {
         callback: OUT<Acknowledgment>
     ) {
         errorWrapperAck(callback, async () => {
-            const access = call.request.access;
+            const access = convertAccess(call.request.access);
             const id = call.request.id;
 
             if (
-                access === undefined ||
-                id === undefined ||
-                access.key === undefined ||
-                access.sync === undefined
+                id === undefined
             ) {
                 callback(null, ack_error("Bad Arguments!"));
             } else {
                 const [osk, sk] = await logic.removeTeamFromTournament(
-                    access.key,
-                    access.sync,
+                    access,
                     id
                 );
                 callback(null, ack_succ());
-                sendTeams(access.key, sk, osk);
+                sendTeams(access, sk);
             }
         });
     }
@@ -118,23 +111,23 @@ export default class TournamentAPI implements TournamentAPIHandlers {
         callback: OUT<ResponseTournamentData>
     ) {
         try {
-            const access = call.request;
+            const access = convertAccess(call.request);
 
-            if (access === undefined || access.key === undefined) {
+            if (access === undefined) {
                 callback(null, { error: "Bad Arguments!" });
             } else {
                 const tournament = await logic.getTournament(access.key);
 
                 const stru = convertStructure(
-                    await logic.getModuleStructuresFromTournament(access.key)
+                    await logic.getModuleStructuresFromTournament(access)
                 );
 
                 const data = {
                     key: access.key,
                     sync: tournament.sync,
-                    status: await logic.getStatusFromTournament(access.key),
+                    status: await logic.getStatusFromTournament(access),
                     teams: {
-                        teams: await logic.getTeamsFromTournament(access.key),
+                        teams: await logic.getTeamsFromTournament(access),
                     },
                     structure: {
                         structures: stru !== undefined ? stru : [],
@@ -144,6 +137,7 @@ export default class TournamentAPI implements TournamentAPIHandlers {
                 callback(null, { data: data });
             }
         } catch (e) {
+            logger.error((e as Error).message);
             callback(null, { error: (e as Error).message });
         }
     }
@@ -153,24 +147,20 @@ export default class TournamentAPI implements TournamentAPIHandlers {
         callback: OUT<Acknowledgment>
     ) {
         errorWrapperAck(callback, async () => {
-            const access = call.request.access;
+            const access = convertAccess(call.request.access);
             const id = call.request.id;
 
             if (
-                access === undefined ||
-                id === undefined ||
-                access.key === undefined ||
-                access.sync === undefined
+                id === undefined
             ) {
                 callback(null, ack_error("Bad Arguments!"));
             } else {
                 const [osk, sk] = await logic.setModeOfTournament(
-                    access.key,
-                    access.sync,
+                    access,
                     id
                 );
                 callback(null, ack_succ());
-                sendStatus(access.key, sk, osk);
+                sendStatus(access, sk);
             }
         });
     }
@@ -180,13 +170,10 @@ export default class TournamentAPI implements TournamentAPIHandlers {
         callback: OUT<Acknowledgment>
     ) {
         errorWrapperAck(callback, async () => {
-            const access = call.request.access;
+            const access = convertAccess(call.request.access);
             const game = call.request.game;
 
             if (
-                access === undefined ||
-                access.key === undefined ||
-                access.sync === undefined ||
                 game === undefined ||
                 game.id === undefined ||
                 game.scoreA === undefined ||
@@ -195,15 +182,14 @@ export default class TournamentAPI implements TournamentAPIHandlers {
                 callback(null, ack_error("Bad Arguments!"));
             } else {
                 const [osk, sk] = await logic.setResult(
-                    access.key,
-                    access.sync,
+                    access,
                     game.id,
                     game.scoreA,
                     game.scoreB
                 );
                 callback(null, ack_succ());
-                sendStructure(access.key, sk, osk);
-                sendStatus(access.key, sk, sk);
+                sendStructure(access, sk);
+                sendStatus(access, sk);
             }
         });
     }
@@ -213,23 +199,15 @@ export default class TournamentAPI implements TournamentAPIHandlers {
         callback: OUT<Acknowledgment>
     ) {
         errorWrapperAck(callback, async () => {
-            const access = call.request;
+            const access = convertAccess(call.request);
 
-            if (
-                access === undefined ||
-                access.key === undefined ||
-                access.sync === undefined
-            ) {
-                callback(null, ack_error("Bad Arguments!"));
-            } else {
-                const [osk, sk] = await logic.startTournament(
-                    access.key,
-                    access.sync
-                );
-                callback(null, ack_succ());
-                sendStatus(access.key, sk, osk);
-                sendStructure(access.key, sk, sk);
-            }
+
+            const [osk, sk] = await logic.startTournament(
+                access,
+            );
+            callback(null, ack_succ());
+            sendStatus(access, sk);
+            sendStructure(access, sk);
         });
     }
 
@@ -238,23 +216,16 @@ export default class TournamentAPI implements TournamentAPIHandlers {
         callback: OUT<Acknowledgment>
     ) {
         errorWrapperAck(callback, async () => {
-            const access = call.request;
+            const access = convertAccess(call.request);
 
-            if (
-                access === undefined ||
-                access.key === undefined ||
-                access.sync === undefined
-            ) {
-                callback(null, ack_error("Bad Arguments!"));
-            } else {
-                const [osk, sk] = await logic.resetTournament(
-                    access.key,
-                    access.sync
-                );
-                callback(null, ack_succ());
-                sendStatus(access.key, sk, osk);
-                sendStructure(access.key, sk, sk);
-            }
+
+            const [osk, sk] = await logic.resetTournament(
+                access
+            );
+            callback(null, ack_succ());
+            sendStatus(access, sk);
+            sendStructure(access, sk);
+            
         });
     }
 
@@ -275,7 +246,6 @@ export default class TournamentAPI implements TournamentAPIHandlers {
             subscriptions.get(access.key)?.push(call);
 
             call.on("close", () => {
-                logger.error("HELLO CLOSE!")
                 removeClosedSubscriptions(access.key!);
             });
         }
@@ -310,34 +280,104 @@ export default class TournamentAPI implements TournamentAPIHandlers {
             }
         }        
     }
+
+    setPermission(call: IN<SetPermission__Output, Acknowledgment>, callback: OUT<Acknowledgment>) {
+        errorWrapperAck(callback, async () => {
+            const access = convertAccess(call.request.access);
+            const permissionKey = call.request.permissionKey;
+            const permission = call.request.permission;
+
+            if (permission === undefined || permissionKey === undefined) {
+                throw new Error("Bad arguments!");
+            } else {
+                await logic.setPermission(access, permissionKey, permission);
+                callback(null, ack_succ());
+            }
+        });
+    }
+
+    async removePermissionKey(call: IN<RemovePermissionKey__Output, Acknowledgment>, callback: OUT<Acknowledgment>) {
+        errorWrapperAck(callback, async () => {
+            const access = convertAccess(call.request.access);
+            const permissionKey = call.request.permissionKey;
+
+            if (permissionKey === undefined) {
+                throw new Error("Bad arguments!");
+            } else {
+                await logic.removePermission(access, permissionKey);
+                callback(null, ack_succ());
+            }
+        });
+    }
+
+    async getPermission(call: IN<TournamentAccess__Output, Permission>, callback: OUT<Permission>) {
+        try {
+            const access = convertAccess(call.request);
+            const permission = await logic.getPermission(access);
+            callback(null, { permission: permission });
+        } catch (e) {
+            logger.error(`API Error ${(e as Error).message}`);
+            callback(null, {permission: PERMISSION.NONE});
+        }
+    }
+
+    async getPermissionManagement(call: IN<TournamentAccess__Output, KeyPermissionPairs>, callback: OUT<KeyPermissionPairs>) {
+        try {
+            const access = convertAccess(call.request);
+            const pairs = await logic.getPermissionKeys(access);
+            callback(null, {pairs: pairs.map(([k, p]) => { return {key: k, permission: p}})});
+        } catch (e) {
+            logger.error(`API Error ${(e as Error).message}`);
+            callback(null, {pairs: []});
+        }
+    }
+
+    async getPermissionOfKey(call: IN<PermissionQuery__Output, Permission>, callback: OUT<Permission>) {
+        try {
+            const access = convertAccess(call.request.access);
+            const permissionKey = call.request.permissionKey;
+
+            if (permissionKey === undefined)
+                throw new Error("Bad arguments!");
+            else {
+                const permission = await logic.getPermissionOfKey(access, permissionKey);
+                callback(null, { permission: permission });
+            }
+        } catch (e) {
+            logger.error(`API Error ${(e as Error).message}`);
+            callback(null, {permission: PERMISSION.NONE});
+        }
+    }
+
+
 }
 
-async function sendTeams(key: Key, syncNew: Sync, syncOld: Sync) {
-    sendTournamentEvent(key, {
-        key: key,
+async function sendTeams(access: TournamentAccess, syncNew: Sync) {
+    sendTournamentEvent(access.key, {
+        key: access.key,
         sync: syncNew,
-        syncOld: syncOld,
-        teams: { teams: await logic.getTeamsFromTournament(key) },
+        syncOld: access.sync,
+        teams: { teams: await logic.getTeamsFromTournament(access) },
     });
 }
 
-async function sendStatus(key: Key, syncNew: Sync, syncOld: Sync) {
-    sendTournamentEvent(key, {
-        key: key,
+async function sendStatus(access: TournamentAccess, syncNew: Sync) {
+    sendTournamentEvent(access.key, {
+        key: access.key,
         sync: syncNew,
-        syncOld: syncOld,
-        status: await logic.getStatusFromTournament(key),
+        syncOld: access.sync,
+        status: await logic.getStatusFromTournament(access),
     });
 }
 
-async function sendStructure(key: Key, syncNew: Sync, syncOld: Sync) {
-    sendTournamentEvent(key, {
-        key: key,
+async function sendStructure(access: TournamentAccess, syncNew: Sync) {
+    sendTournamentEvent(access.key, {
+        key: access.key,
         sync: syncNew,
-        syncOld: syncOld,
+        syncOld: access.sync,
         structure: {
             structures: convertStructure(
-                await logic.getModuleStructuresFromTournament(key)
+                await logic.getModuleStructuresFromTournament(access)
             ),
         },
     });

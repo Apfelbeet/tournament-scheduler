@@ -10,7 +10,7 @@ import {
 import { TournamentCreate__Output } from "../../generated/proto/logicAPI/TournamentCreate";
 import { TournamentDetailsList } from "../../generated/proto/logicAPI/TournamentDetailsList";
 import * as logger from "../util/logger";
-import { ack_error, ack_succ, errorWrapperAck } from "./grpc_util";
+import { ack_error, ack_succ, convertAccess, errorWrapperAck } from "./grpc_util";
 import {
     connections,
     sendServerEvent,
@@ -19,25 +19,29 @@ import {
 } from "./grpc_connection";
 import { ServerEvent } from "../../generated/proto/logicAPI/ServerEvent";
 import { Empty__Output } from "../../generated/proto/logicAPI/Empty";
+import { TournamentCreateAcknowledgment } from "../../generated/proto/logicAPI/TournamentCreateAcknowledgment";
+import { TournamentAccess } from "../types/tournament_types";
 
 export default class ServerAPI implements ServerAPIHandlers {
     [name: string]: grpc.UntypedHandleCall;
 
     createTournament(
-        call: IN<TournamentCreate__Output, Acknowledgment>,
-        callback: OUT<Acknowledgment>
+        call: IN<TournamentCreate__Output, TournamentCreateAcknowledgment>,
+        callback: OUT<TournamentCreateAcknowledgment>
     ) {
-        errorWrapperAck(callback, () => {
+        try {
             const key = call.request.key;
-
+            let access: TournamentAccess;
             if (key === undefined) {
-                callback(null, ack_error("Unspecified key!"));
+                access = logic.newTournament();
             } else {
-                logic.newTournamentWithKey(key);
-                callback(null, ack_succ());
-                sendTournaments();
+                access = logic.newTournamentWithKey(key);
             }
-        });
+            callback(null, {access: access});
+            sendTournaments();
+        } catch (e) {
+            callback(null, { error: (e as Error).message });
+        }
     }
 
     removeTournament(
@@ -45,19 +49,19 @@ export default class ServerAPI implements ServerAPIHandlers {
         callback: OUT<Acknowledgment>
     ) {
         errorWrapperAck(callback, async () => {
-            const key = call.request.key;
+            const access = convertAccess(call.request);
 
-            if (key === undefined) {
+            if (access.key === undefined) {
                 callback(null, ack_error("Unspecified key!"));
             } else {
-                await logic.removeTournament(key);
+                await logic.removeTournament(access);
 
-                subscriptions.get(key)?.forEach((call) => {
+                subscriptions.get(access.key)?.forEach((call) => {
                     call.write({ error: "Tournament closed!" });
                     call.end();
                 });
 
-                subscriptions.set(key, []);
+                subscriptions.set(access.key, []);
                 callback(null, ack_succ());
                 sendTournaments();
             }

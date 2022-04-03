@@ -43,13 +43,7 @@ class ServerLayer extends StatelessWidget {
         await Navigator.of(context).openTournamentCreation();
 
     if (tc != null) {
-      final Acknowledgment ack =
-          await server.api.serverAPI.serverStub.createTournament(tc);
-      if (ack.status == Acknowledgment_Status.OK) {
-        ScaffoldMessenger.of(context).showOk();
-      } else {
-        ScaffoldMessenger.of(context).showError(ack.message);
-      }
+      server.createTournament(tc.key);
     }
   }
 }
@@ -66,28 +60,14 @@ class TournamentPreview extends StatelessWidget {
     return ListTile(
       title: Text(name),
       onTap: () async {
-        final TournamentData data =
-            (await server.api.tournamentAPI.load(name)).data;
-        TournamentState state =
-            TournamentState.initial(data, server.state.modes);
-        Tournament tournament = new Tournament(name, server, state);
-
-        Navigator.of(context).openTournament(tournament);
+        try{
+          TournamentState state = await Tournament.loadInitialState(server, name);
+          Tournament tournament = new Tournament(name, server, state);
+          Navigator.of(context).openTournament(tournament);
+        } on Exception catch (e){
+          server.messenger.showError(e.toString());
+        }
       },
-      trailing: IconButton(
-          icon: const Icon(Icons.close),
-          onPressed: () async {
-            final Acknowledgment ack = await context
-                .read<Server>()
-                .api
-                .serverAPI
-                .serverStub
-                .removeTournament(TournamentAccess(key: name));
-            if (ack.status == Acknowledgment_Status.OK)
-              ScaffoldMessenger.of(context).showOk();
-            else
-              ScaffoldMessenger.of(context).showError(ack.message);
-          }),
     );
   }
 }

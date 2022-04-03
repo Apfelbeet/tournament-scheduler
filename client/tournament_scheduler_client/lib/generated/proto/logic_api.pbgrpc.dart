@@ -14,11 +14,12 @@ import 'logic_api.pb.dart' as $0;
 export 'logic_api.pb.dart';
 
 class ServerAPIClient extends $grpc.Client {
-  static final _$createTournament =
-      $grpc.ClientMethod<$0.TournamentCreate, $0.Acknowledgment>(
-          '/logicAPI.ServerAPI/createTournament',
-          ($0.TournamentCreate value) => value.writeToBuffer(),
-          ($core.List<$core.int> value) => $0.Acknowledgment.fromBuffer(value));
+  static final _$createTournament = $grpc.ClientMethod<$0.TournamentCreate,
+          $0.TournamentCreateAcknowledgment>(
+      '/logicAPI.ServerAPI/createTournament',
+      ($0.TournamentCreate value) => value.writeToBuffer(),
+      ($core.List<$core.int> value) =>
+          $0.TournamentCreateAcknowledgment.fromBuffer(value));
   static final _$removeTournament =
       $grpc.ClientMethod<$0.TournamentAccess, $0.Acknowledgment>(
           '/logicAPI.ServerAPI/removeTournament',
@@ -48,7 +49,7 @@ class ServerAPIClient extends $grpc.Client {
       $core.Iterable<$grpc.ClientInterceptor>? interceptors})
       : super(channel, options: options, interceptors: interceptors);
 
-  $grpc.ResponseFuture<$0.Acknowledgment> createTournament(
+  $grpc.ResponseFuture<$0.TournamentCreateAcknowledgment> createTournament(
       $0.TournamentCreate request,
       {$grpc.CallOptions? options}) {
     return $createUnaryCall(_$createTournament, request, options: options);
@@ -88,13 +89,14 @@ abstract class ServerAPIServiceBase extends $grpc.Service {
   $core.String get $name => 'logicAPI.ServerAPI';
 
   ServerAPIServiceBase() {
-    $addMethod($grpc.ServiceMethod<$0.TournamentCreate, $0.Acknowledgment>(
+    $addMethod($grpc.ServiceMethod<$0.TournamentCreate,
+            $0.TournamentCreateAcknowledgment>(
         'createTournament',
         createTournament_Pre,
         false,
         false,
         ($core.List<$core.int> value) => $0.TournamentCreate.fromBuffer(value),
-        ($0.Acknowledgment value) => value.writeToBuffer()));
+        ($0.TournamentCreateAcknowledgment value) => value.writeToBuffer()));
     $addMethod($grpc.ServiceMethod<$0.TournamentAccess, $0.Acknowledgment>(
         'removeTournament',
         removeTournament_Pre,
@@ -132,7 +134,8 @@ abstract class ServerAPIServiceBase extends $grpc.Service {
         ($0.Acknowledgment value) => value.writeToBuffer()));
   }
 
-  $async.Future<$0.Acknowledgment> createTournament_Pre($grpc.ServiceCall call,
+  $async.Future<$0.TournamentCreateAcknowledgment> createTournament_Pre(
+      $grpc.ServiceCall call,
       $async.Future<$0.TournamentCreate> request) async {
     return createTournament(call, await request);
   }
@@ -162,7 +165,7 @@ abstract class ServerAPIServiceBase extends $grpc.Service {
     return disconnect(call, await request);
   }
 
-  $async.Future<$0.Acknowledgment> createTournament(
+  $async.Future<$0.TournamentCreateAcknowledgment> createTournament(
       $grpc.ServiceCall call, $0.TournamentCreate request);
   $async.Future<$0.Acknowledgment> removeTournament(
       $grpc.ServiceCall call, $0.TournamentAccess request);
@@ -225,6 +228,32 @@ class TournamentAPIClient extends $grpc.Client {
           '/logicAPI.TournamentAPI/setResult',
           ($0.SetResult value) => value.writeToBuffer(),
           ($core.List<$core.int> value) => $0.Acknowledgment.fromBuffer(value));
+  static final _$getPermissionOfKey =
+      $grpc.ClientMethod<$0.PermissionQuery, $0.Permission>(
+          '/logicAPI.TournamentAPI/getPermissionOfKey',
+          ($0.PermissionQuery value) => value.writeToBuffer(),
+          ($core.List<$core.int> value) => $0.Permission.fromBuffer(value));
+  static final _$getPermission =
+      $grpc.ClientMethod<$0.TournamentAccess, $0.Permission>(
+          '/logicAPI.TournamentAPI/getPermission',
+          ($0.TournamentAccess value) => value.writeToBuffer(),
+          ($core.List<$core.int> value) => $0.Permission.fromBuffer(value));
+  static final _$getPermissionManagement =
+      $grpc.ClientMethod<$0.TournamentAccess, $0.KeyPermissionPairs>(
+          '/logicAPI.TournamentAPI/getPermissionManagement',
+          ($0.TournamentAccess value) => value.writeToBuffer(),
+          ($core.List<$core.int> value) =>
+              $0.KeyPermissionPairs.fromBuffer(value));
+  static final _$setPermission =
+      $grpc.ClientMethod<$0.SetPermission, $0.Acknowledgment>(
+          '/logicAPI.TournamentAPI/setPermission',
+          ($0.SetPermission value) => value.writeToBuffer(),
+          ($core.List<$core.int> value) => $0.Acknowledgment.fromBuffer(value));
+  static final _$removePermissionKey =
+      $grpc.ClientMethod<$0.RemovePermissionKey, $0.Acknowledgment>(
+          '/logicAPI.TournamentAPI/removePermissionKey',
+          ($0.RemovePermissionKey value) => value.writeToBuffer(),
+          ($core.List<$core.int> value) => $0.Acknowledgment.fromBuffer(value));
 
   TournamentAPIClient($grpc.ClientChannel channel,
       {$grpc.CallOptions? options,
@@ -284,6 +313,36 @@ class TournamentAPIClient extends $grpc.Client {
   $grpc.ResponseFuture<$0.Acknowledgment> setResult($0.SetResult request,
       {$grpc.CallOptions? options}) {
     return $createUnaryCall(_$setResult, request, options: options);
+  }
+
+  $grpc.ResponseFuture<$0.Permission> getPermissionOfKey(
+      $0.PermissionQuery request,
+      {$grpc.CallOptions? options}) {
+    return $createUnaryCall(_$getPermissionOfKey, request, options: options);
+  }
+
+  $grpc.ResponseFuture<$0.Permission> getPermission($0.TournamentAccess request,
+      {$grpc.CallOptions? options}) {
+    return $createUnaryCall(_$getPermission, request, options: options);
+  }
+
+  $grpc.ResponseFuture<$0.KeyPermissionPairs> getPermissionManagement(
+      $0.TournamentAccess request,
+      {$grpc.CallOptions? options}) {
+    return $createUnaryCall(_$getPermissionManagement, request,
+        options: options);
+  }
+
+  $grpc.ResponseFuture<$0.Acknowledgment> setPermission(
+      $0.SetPermission request,
+      {$grpc.CallOptions? options}) {
+    return $createUnaryCall(_$setPermission, request, options: options);
+  }
+
+  $grpc.ResponseFuture<$0.Acknowledgment> removePermissionKey(
+      $0.RemovePermissionKey request,
+      {$grpc.CallOptions? options}) {
+    return $createUnaryCall(_$removePermissionKey, request, options: options);
   }
 }
 
@@ -363,6 +422,42 @@ abstract class TournamentAPIServiceBase extends $grpc.Service {
         false,
         ($core.List<$core.int> value) => $0.SetResult.fromBuffer(value),
         ($0.Acknowledgment value) => value.writeToBuffer()));
+    $addMethod($grpc.ServiceMethod<$0.PermissionQuery, $0.Permission>(
+        'getPermissionOfKey',
+        getPermissionOfKey_Pre,
+        false,
+        false,
+        ($core.List<$core.int> value) => $0.PermissionQuery.fromBuffer(value),
+        ($0.Permission value) => value.writeToBuffer()));
+    $addMethod($grpc.ServiceMethod<$0.TournamentAccess, $0.Permission>(
+        'getPermission',
+        getPermission_Pre,
+        false,
+        false,
+        ($core.List<$core.int> value) => $0.TournamentAccess.fromBuffer(value),
+        ($0.Permission value) => value.writeToBuffer()));
+    $addMethod($grpc.ServiceMethod<$0.TournamentAccess, $0.KeyPermissionPairs>(
+        'getPermissionManagement',
+        getPermissionManagement_Pre,
+        false,
+        false,
+        ($core.List<$core.int> value) => $0.TournamentAccess.fromBuffer(value),
+        ($0.KeyPermissionPairs value) => value.writeToBuffer()));
+    $addMethod($grpc.ServiceMethod<$0.SetPermission, $0.Acknowledgment>(
+        'setPermission',
+        setPermission_Pre,
+        false,
+        false,
+        ($core.List<$core.int> value) => $0.SetPermission.fromBuffer(value),
+        ($0.Acknowledgment value) => value.writeToBuffer()));
+    $addMethod($grpc.ServiceMethod<$0.RemovePermissionKey, $0.Acknowledgment>(
+        'removePermissionKey',
+        removePermissionKey_Pre,
+        false,
+        false,
+        ($core.List<$core.int> value) =>
+            $0.RemovePermissionKey.fromBuffer(value),
+        ($0.Acknowledgment value) => value.writeToBuffer()));
   }
 
   $async.Stream<$0.TournamentEvent> subscribe_Pre($grpc.ServiceCall call,
@@ -415,6 +510,33 @@ abstract class TournamentAPIServiceBase extends $grpc.Service {
     return setResult(call, await request);
   }
 
+  $async.Future<$0.Permission> getPermissionOfKey_Pre(
+      $grpc.ServiceCall call, $async.Future<$0.PermissionQuery> request) async {
+    return getPermissionOfKey(call, await request);
+  }
+
+  $async.Future<$0.Permission> getPermission_Pre($grpc.ServiceCall call,
+      $async.Future<$0.TournamentAccess> request) async {
+    return getPermission(call, await request);
+  }
+
+  $async.Future<$0.KeyPermissionPairs> getPermissionManagement_Pre(
+      $grpc.ServiceCall call,
+      $async.Future<$0.TournamentAccess> request) async {
+    return getPermissionManagement(call, await request);
+  }
+
+  $async.Future<$0.Acknowledgment> setPermission_Pre(
+      $grpc.ServiceCall call, $async.Future<$0.SetPermission> request) async {
+    return setPermission(call, await request);
+  }
+
+  $async.Future<$0.Acknowledgment> removePermissionKey_Pre(
+      $grpc.ServiceCall call,
+      $async.Future<$0.RemovePermissionKey> request) async {
+    return removePermissionKey(call, await request);
+  }
+
   $async.Stream<$0.TournamentEvent> subscribe(
       $grpc.ServiceCall call, $0.TournamentAccess request);
   $async.Future<$0.Acknowledgment> unsubscribe(
@@ -435,4 +557,14 @@ abstract class TournamentAPIServiceBase extends $grpc.Service {
       $grpc.ServiceCall call, $0.SetMode request);
   $async.Future<$0.Acknowledgment> setResult(
       $grpc.ServiceCall call, $0.SetResult request);
+  $async.Future<$0.Permission> getPermissionOfKey(
+      $grpc.ServiceCall call, $0.PermissionQuery request);
+  $async.Future<$0.Permission> getPermission(
+      $grpc.ServiceCall call, $0.TournamentAccess request);
+  $async.Future<$0.KeyPermissionPairs> getPermissionManagement(
+      $grpc.ServiceCall call, $0.TournamentAccess request);
+  $async.Future<$0.Acknowledgment> setPermission(
+      $grpc.ServiceCall call, $0.SetPermission request);
+  $async.Future<$0.Acknowledgment> removePermissionKey(
+      $grpc.ServiceCall call, $0.RemovePermissionKey request);
 }

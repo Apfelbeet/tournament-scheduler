@@ -8,6 +8,20 @@
 import 'dart:core' as $core;
 import 'dart:convert' as $convert;
 import 'dart:typed_data' as $typed_data;
+@$core.Deprecated('Use pERMISSIONDescriptor instead')
+const PERMISSION$json = const {
+  '1': 'PERMISSION',
+  '2': const [
+    const {'1': 'NONE', '2': 0},
+    const {'1': 'READ_ONLY', '2': 1},
+    const {'1': 'EDIT', '2': 2},
+    const {'1': 'MOD', '2': 3},
+    const {'1': 'OWNER', '2': 4},
+  ],
+};
+
+/// Descriptor for `PERMISSION`. Decode as a `google.protobuf.EnumDescriptorProto`.
+final $typed_data.Uint8List pERMISSIONDescriptor = $convert.base64Decode('CgpQRVJNSVNTSU9OEggKBE5PTkUQABINCglSRUFEX09OTFkQARIICgRFRElUEAISBwoDTU9EEAMSCQoFT1dORVIQBA==');
 @$core.Deprecated('Use emptyDescriptor instead')
 const Empty$json = const {
   '1': 'Empty',
@@ -37,6 +51,20 @@ const Acknowledgment_Status$json = const {
 
 /// Descriptor for `Acknowledgment`. Decode as a `google.protobuf.DescriptorProto`.
 final $typed_data.Uint8List acknowledgmentDescriptor = $convert.base64Decode('Cg5BY2tub3dsZWRnbWVudBI3CgZzdGF0dXMYASABKA4yHy5sb2dpY0FQSS5BY2tub3dsZWRnbWVudC5TdGF0dXNSBnN0YXR1cxIYCgdtZXNzYWdlGAIgASgJUgdtZXNzYWdlIiwKBlN0YXR1cxIGCgJPSxAAEgoKBkVSUlJPUhABEg4KClNZTkNfRVJST1IQAg==');
+@$core.Deprecated('Use tournamentCreateAcknowledgmentDescriptor instead')
+const TournamentCreateAcknowledgment$json = const {
+  '1': 'TournamentCreateAcknowledgment',
+  '2': const [
+    const {'1': 'error', '3': 1, '4': 1, '5': 9, '9': 0, '10': 'error'},
+    const {'1': 'access', '3': 2, '4': 1, '5': 11, '6': '.logicAPI.TournamentAccess', '9': 0, '10': 'access'},
+  ],
+  '8': const [
+    const {'1': 'response'},
+  ],
+};
+
+/// Descriptor for `TournamentCreateAcknowledgment`. Decode as a `google.protobuf.DescriptorProto`.
+final $typed_data.Uint8List tournamentCreateAcknowledgmentDescriptor = $convert.base64Decode('Ch5Ub3VybmFtZW50Q3JlYXRlQWNrbm93bGVkZ21lbnQSFgoFZXJyb3IYASABKAlIAFIFZXJyb3ISNAoGYWNjZXNzGAIgASgLMhoubG9naWNBUEkuVG91cm5hbWVudEFjY2Vzc0gAUgZhY2Nlc3NCCgoIcmVzcG9uc2U=');
 @$core.Deprecated('Use tournamentCreateDescriptor instead')
 const TournamentCreate$json = const {
   '1': 'TournamentCreate',
@@ -53,11 +81,12 @@ const TournamentAccess$json = const {
   '2': const [
     const {'1': 'key', '3': 1, '4': 1, '5': 9, '10': 'key'},
     const {'1': 'sync', '3': 2, '4': 1, '5': 9, '10': 'sync'},
+    const {'1': 'permissionKeys', '3': 3, '4': 3, '5': 9, '10': 'permissionKeys'},
   ],
 };
 
 /// Descriptor for `TournamentAccess`. Decode as a `google.protobuf.DescriptorProto`.
-final $typed_data.Uint8List tournamentAccessDescriptor = $convert.base64Decode('ChBUb3VybmFtZW50QWNjZXNzEhAKA2tleRgBIAEoCVIDa2V5EhIKBHN5bmMYAiABKAlSBHN5bmM=');
+final $typed_data.Uint8List tournamentAccessDescriptor = $convert.base64Decode('ChBUb3VybmFtZW50QWNjZXNzEhAKA2tleRgBIAEoCVIDa2V5EhIKBHN5bmMYAiABKAlSBHN5bmMSJgoOcGVybWlzc2lvbktleXMYAyADKAlSDnBlcm1pc3Npb25LZXlz');
 @$core.Deprecated('Use tournamentDetailsListDescriptor instead')
 const TournamentDetailsList$json = const {
   '1': 'TournamentDetailsList',
@@ -298,3 +327,78 @@ const Stats$json = const {
 
 /// Descriptor for `Stats`. Decode as a `google.protobuf.DescriptorProto`.
 final $typed_data.Uint8List statsDescriptor = $convert.base64Decode('CgVTdGF0cxISCgR0ZWFtGAEgASgFUgR0ZWFtEhYKBnBvaW50cxgCIAEoBVIGcG9pbnRzEhIKBHdpbnMYAyABKAVSBHdpbnMSFAoFbG9zZXMYBCABKAVSBWxvc2VzEhQKBWRyYXdzGAUgASgFUgVkcmF3cxIWCgZzY29yZWQYBiABKAVSBnNjb3JlZBIaCghjb25jZWRlZBgHIAEoBVIIY29uY2VkZWQ=');
+@$core.Deprecated('Use permissionDescriptor instead')
+const Permission$json = const {
+  '1': 'Permission',
+  '2': const [
+    const {'1': 'permission', '3': 1, '4': 1, '5': 14, '6': '.logicAPI.PERMISSION', '10': 'permission'},
+  ],
+};
+
+/// Descriptor for `Permission`. Decode as a `google.protobuf.DescriptorProto`.
+final $typed_data.Uint8List permissionDescriptor = $convert.base64Decode('CgpQZXJtaXNzaW9uEjQKCnBlcm1pc3Npb24YASABKA4yFC5sb2dpY0FQSS5QRVJNSVNTSU9OUgpwZXJtaXNzaW9u');
+@$core.Deprecated('Use permissionQueryDescriptor instead')
+const PermissionQuery$json = const {
+  '1': 'PermissionQuery',
+  '2': const [
+    const {'1': 'access', '3': 1, '4': 1, '5': 11, '6': '.logicAPI.TournamentAccess', '10': 'access'},
+    const {'1': 'permissionKey', '3': 2, '4': 1, '5': 9, '10': 'permissionKey'},
+  ],
+};
+
+/// Descriptor for `PermissionQuery`. Decode as a `google.protobuf.DescriptorProto`.
+final $typed_data.Uint8List permissionQueryDescriptor = $convert.base64Decode('Cg9QZXJtaXNzaW9uUXVlcnkSMgoGYWNjZXNzGAEgASgLMhoubG9naWNBUEkuVG91cm5hbWVudEFjY2Vzc1IGYWNjZXNzEiQKDXBlcm1pc3Npb25LZXkYAiABKAlSDXBlcm1pc3Npb25LZXk=');
+@$core.Deprecated('Use permissionKeysDescriptor instead')
+const PermissionKeys$json = const {
+  '1': 'PermissionKeys',
+  '2': const [
+    const {'1': 'permissionKeys', '3': 1, '4': 3, '5': 9, '10': 'permissionKeys'},
+  ],
+};
+
+/// Descriptor for `PermissionKeys`. Decode as a `google.protobuf.DescriptorProto`.
+final $typed_data.Uint8List permissionKeysDescriptor = $convert.base64Decode('Cg5QZXJtaXNzaW9uS2V5cxImCg5wZXJtaXNzaW9uS2V5cxgBIAMoCVIOcGVybWlzc2lvbktleXM=');
+@$core.Deprecated('Use keyPermissionPairDescriptor instead')
+const KeyPermissionPair$json = const {
+  '1': 'KeyPermissionPair',
+  '2': const [
+    const {'1': 'key', '3': 1, '4': 1, '5': 9, '10': 'key'},
+    const {'1': 'permission', '3': 2, '4': 1, '5': 14, '6': '.logicAPI.PERMISSION', '10': 'permission'},
+  ],
+};
+
+/// Descriptor for `KeyPermissionPair`. Decode as a `google.protobuf.DescriptorProto`.
+final $typed_data.Uint8List keyPermissionPairDescriptor = $convert.base64Decode('ChFLZXlQZXJtaXNzaW9uUGFpchIQCgNrZXkYASABKAlSA2tleRI0CgpwZXJtaXNzaW9uGAIgASgOMhQubG9naWNBUEkuUEVSTUlTU0lPTlIKcGVybWlzc2lvbg==');
+@$core.Deprecated('Use keyPermissionPairsDescriptor instead')
+const KeyPermissionPairs$json = const {
+  '1': 'KeyPermissionPairs',
+  '2': const [
+    const {'1': 'pairs', '3': 1, '4': 3, '5': 11, '6': '.logicAPI.KeyPermissionPair', '10': 'pairs'},
+  ],
+};
+
+/// Descriptor for `KeyPermissionPairs`. Decode as a `google.protobuf.DescriptorProto`.
+final $typed_data.Uint8List keyPermissionPairsDescriptor = $convert.base64Decode('ChJLZXlQZXJtaXNzaW9uUGFpcnMSMQoFcGFpcnMYASADKAsyGy5sb2dpY0FQSS5LZXlQZXJtaXNzaW9uUGFpclIFcGFpcnM=');
+@$core.Deprecated('Use setPermissionDescriptor instead')
+const SetPermission$json = const {
+  '1': 'SetPermission',
+  '2': const [
+    const {'1': 'access', '3': 1, '4': 1, '5': 11, '6': '.logicAPI.TournamentAccess', '10': 'access'},
+    const {'1': 'permissionKey', '3': 2, '4': 1, '5': 9, '10': 'permissionKey'},
+    const {'1': 'permission', '3': 3, '4': 1, '5': 14, '6': '.logicAPI.PERMISSION', '10': 'permission'},
+  ],
+};
+
+/// Descriptor for `SetPermission`. Decode as a `google.protobuf.DescriptorProto`.
+final $typed_data.Uint8List setPermissionDescriptor = $convert.base64Decode('Cg1TZXRQZXJtaXNzaW9uEjIKBmFjY2VzcxgBIAEoCzIaLmxvZ2ljQVBJLlRvdXJuYW1lbnRBY2Nlc3NSBmFjY2VzcxIkCg1wZXJtaXNzaW9uS2V5GAIgASgJUg1wZXJtaXNzaW9uS2V5EjQKCnBlcm1pc3Npb24YAyABKA4yFC5sb2dpY0FQSS5QRVJNSVNTSU9OUgpwZXJtaXNzaW9u');
+@$core.Deprecated('Use removePermissionKeyDescriptor instead')
+const RemovePermissionKey$json = const {
+  '1': 'RemovePermissionKey',
+  '2': const [
+    const {'1': 'access', '3': 1, '4': 1, '5': 11, '6': '.logicAPI.TournamentAccess', '10': 'access'},
+    const {'1': 'permissionKey', '3': 2, '4': 1, '5': 9, '10': 'permissionKey'},
+  ],
+};
+
+/// Descriptor for `RemovePermissionKey`. Decode as a `google.protobuf.DescriptorProto`.
+final $typed_data.Uint8List removePermissionKeyDescriptor = $convert.base64Decode('ChNSZW1vdmVQZXJtaXNzaW9uS2V5EjIKBmFjY2VzcxgBIAEoCzIaLmxvZ2ljQVBJLlRvdXJuYW1lbnRBY2Nlc3NSBmFjY2VzcxIkCg1wZXJtaXNzaW9uS2V5GAIgASgJUg1wZXJtaXNzaW9uS2V5');

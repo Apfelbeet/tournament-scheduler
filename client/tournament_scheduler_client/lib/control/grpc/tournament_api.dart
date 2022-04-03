@@ -1,22 +1,23 @@
 import 'package:grpc/grpc.dart';
 import 'package:tournament_scheduler_client/control/grpc/proto_logic_api.dart';
+import 'package:tournament_scheduler_client/util/Pair.dart';
 
 class TournamentAPI {
   final TournamentAPIClient tournamentStub;
 
   TournamentAPI(this.tournamentStub);
 
-  Future<Acknowledgment> addTeam(String key, String sync, String name) async {
-    final ack = await tournamentStub.addTeam(
-        TeamAdd(access: TournamentAccess(key: key, sync: sync), name: name));
+  Future<Acknowledgment> addTeam(TournamentAccess access, String name) async {
+    final ack =
+        await tournamentStub.addTeam(TeamAdd(access: access, name: name));
 
     return ack;
   }
 
   Future<Acknowledgment> editTeam(
-      String key, String sync, int id, String name) async {
+      TournamentAccess access, int id, String name) async {
     final ack = await tournamentStub.editTeam(TeamEdit(
-      access: TournamentAccess(key: key, sync: sync),
+      access: access,
       name: name,
       id: id,
     ));
@@ -24,26 +25,26 @@ class TournamentAPI {
     return ack;
   }
 
-  Future<Acknowledgment> removeTeam(String key, String sync, int id) async {
+  Future<Acknowledgment> removeTeam(TournamentAccess access, int id) async {
     final ack = await tournamentStub.removeTeam(TeamRemove(
-      access: TournamentAccess(key: key, sync: sync),
+      access: access,
       id: id,
     ));
     return ack;
   }
 
-  Future<Acknowledgment> setMode(String key, String sync, int id) async {
+  Future<Acknowledgment> setMode(TournamentAccess access, int id) async {
     final ack = await tournamentStub.setMode(SetMode(
-      access: TournamentAccess(key: key, sync: sync),
+      access: access,
       id: id,
     ));
     return ack;
   }
 
   Future<Acknowledgment> setResult(
-      String key, String sync, int id, int scoreA, int scoreB) async {
+      TournamentAccess access, int id, int scoreA, int scoreB) async {
     final ack = await tournamentStub.setResult(SetResult(
-        access: TournamentAccess(sync: sync, key: key),
+        access: access,
         game: GameData(
           id: id,
           scoreA: scoreA,
@@ -53,17 +54,13 @@ class TournamentAPI {
     return ack;
   }
 
-  Future<Acknowledgment> start(String key, String sync) async {
-    final ack =
-        await tournamentStub.start(TournamentAccess(key: key, sync: sync));
+  Future<Acknowledgment> start(TournamentAccess access) async {
+    final ack = await tournamentStub.start(access);
     return ack;
   }
 
-  Future<Acknowledgment> reset(String key, String sync) async {
-    final ack =
-        await tournamentStub.reset(TournamentAccess(key: key, sync: sync));
-    return ack;
-  }
+  Future<Acknowledgment> reset(TournamentAccess access) =>
+      tournamentStub.reset(access);
 
   ResponseStream<TournamentEvent> subscribe(String key) {
     final res = tournamentStub.subscribe(TournamentAccess(key: key));
@@ -75,8 +72,44 @@ class TournamentAPI {
     return ack;
   }
 
-  Future<ResponseTournamentData> load(String key) async {
-    final res = await tournamentStub.load(TournamentAccess(key: key));
+  Future<ResponseTournamentData> load(TournamentAccess access) async {
+    final res = await tournamentStub.load(access);
+    return res;
+  }
+
+  Future<PERMISSION> getPermissionOfKey(
+      TournamentAccess access, String permissionKey) async {
+    final res = await tournamentStub.getPermissionOfKey(PermissionQuery(
+      access: access,
+      permissionKey: permissionKey,
+    ));
+    return res.permission;
+  }
+
+  Future<PERMISSION> getPermission(TournamentAccess access) async {
+    final res = await tournamentStub.getPermission(access);
+    return res.permission;
+  }
+
+  Future<List<Pair<String, PERMISSION>>> getPermissionManagement(
+      TournamentAccess access) async {
+    final res = await tournamentStub.getPermissionManagement(access);
+    return res.pairs
+        .map((e) => Pair(e.key, e.permission))
+        .toList(growable: false);
+  }
+
+  Future<Acknowledgment> setPermission(TournamentAccess access,
+      String permissionKey, PERMISSION permission) async {
+    final res = await tournamentStub.setPermission(SetPermission(
+        access: access, permissionKey: permissionKey, permission: permission));
+    return res;
+  }
+
+  Future<Acknowledgment> removePermissionKey(
+      TournamentAccess access, String permissionKey) async {
+    final res = await tournamentStub.removePermissionKey(
+        RemovePermissionKey(access: access, permissionKey: permissionKey));
     return res;
   }
 }

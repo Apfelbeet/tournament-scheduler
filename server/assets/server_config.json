@@ -1,7 +1,7 @@
 {
   "port": 8080,
   "lexicon": "default.lexicon",
-  "logTags": ["warning", "info", "error", "debug", "network"],
+  "logTags": ["warning", "info", "error", "debug", "network", "database"],
   "database": {
     "host": "127.0.0.1",
     "port": 6379

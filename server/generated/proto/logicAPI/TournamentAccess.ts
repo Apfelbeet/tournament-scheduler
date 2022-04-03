@@ -4,9 +4,11 @@
 export interface TournamentAccess {
   'key'?: (string);
   'sync'?: (string);
+  'permissionKeys'?: (string)[];
 }
 
 export interface TournamentAccess__Output {
   'key'?: (string);
   'sync'?: (string);
+  'permissionKeys'?: (string)[];
 }

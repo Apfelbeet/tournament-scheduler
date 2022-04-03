@@ -5,7 +5,6 @@ import 'package:tournament_scheduler_client/control/tournament.dart';
 
 import '../control/grpc/proto_logic_api.dart';
 
-
 class ModeView extends StatelessWidget {
   final Tournament tournament;
 
@@ -13,9 +12,9 @@ class ModeView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return EventBuilder(channel: tournament.statusEvents,
-        builder: (context) =>
-        ListView(
+    return EventBuilder(
+        channel: tournament.statusEvents,
+        builder: (context) => ListView(
             children: _ModeViewTile.fromModels(tournament.server.state.modes)));
   }
 }
@@ -34,8 +33,7 @@ class _ModeViewTile extends StatelessWidget {
       title: Text(this.model.title),
       subtitle: Text(this.model.description),
       onTap: () {
-        tournament.setMode(
-            tournament.key, tournament.state.sync, model.id);
+        tournament.setMode(model.id);
       },
       selected: tournament.state.activeMode.id == model.id,
     );

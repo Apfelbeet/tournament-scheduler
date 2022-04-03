@@ -1,8 +1,8 @@
 import { Module } from "../logic/generation_modules/module";
+import { Permission, PermissionKey } from "./tournament_types";
 
-export type Key = string;
+
 export type TeamId = number;
-export type Sync = string;
 
 export type Team = {
     name: string;
@@ -53,3 +53,5 @@ export type UnparsedLexiconEntry = {
 }
 
 export type LogType = "info" | "warning" | "error" | "always" | "network" | "database" | "debug"
+
+export type PermissionStorage = Map<PermissionKey, Permission>;

@@ -103,6 +103,84 @@ class Acknowledgment extends $pb.GeneratedMessage {
   void clearMessage() => clearField(2);
 }
 
+enum TournamentCreateAcknowledgment_Response {
+  error, 
+  access, 
+  notSet
+}
+
+class TournamentCreateAcknowledgment extends $pb.GeneratedMessage {
+  static const $core.Map<$core.int, TournamentCreateAcknowledgment_Response> _TournamentCreateAcknowledgment_ResponseByTag = {
+    1 : TournamentCreateAcknowledgment_Response.error,
+    2 : TournamentCreateAcknowledgment_Response.access,
+    0 : TournamentCreateAcknowledgment_Response.notSet
+  };
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'TournamentCreateAcknowledgment', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'logicAPI'), createEmptyInstance: create)
+    ..oo(0, [1, 2])
+    ..aOS(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'error')
+    ..aOM<TournamentAccess>(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'access', subBuilder: TournamentAccess.create)
+    ..hasRequiredFields = false
+  ;
+
+  TournamentCreateAcknowledgment._() : super();
+  factory TournamentCreateAcknowledgment({
+    $core.String? error,
+    TournamentAccess? access,
+  }) {
+    final _result = create();
+    if (error != null) {
+      _result.error = error;
+    }
+    if (access != null) {
+      _result.access = access;
+    }
+    return _result;
+  }
+  factory TournamentCreateAcknowledgment.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
+  factory TournamentCreateAcknowledgment.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+  @$core.Deprecated(
+  'Using this can add significant overhead to your binary. '
+  'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
+  'Will be removed in next major version')
+  TournamentCreateAcknowledgment clone() => TournamentCreateAcknowledgment()..mergeFromMessage(this);
+  @$core.Deprecated(
+  'Using this can add significant overhead to your binary. '
+  'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
+  'Will be removed in next major version')
+  TournamentCreateAcknowledgment copyWith(void Function(TournamentCreateAcknowledgment) updates) => super.copyWith((message) => updates(message as TournamentCreateAcknowledgment)) as TournamentCreateAcknowledgment; // ignore: deprecated_member_use
+  $pb.BuilderInfo get info_ => _i;
+  @$core.pragma('dart2js:noInline')
+  static TournamentCreateAcknowledgment create() => TournamentCreateAcknowledgment._();
+  TournamentCreateAcknowledgment createEmptyInstance() => create();
+  static $pb.PbList<TournamentCreateAcknowledgment> createRepeated() => $pb.PbList<TournamentCreateAcknowledgment>();
+  @$core.pragma('dart2js:noInline')
+  static TournamentCreateAcknowledgment getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<TournamentCreateAcknowledgment>(create);
+  static TournamentCreateAcknowledgment? _defaultInstance;
+
+  TournamentCreateAcknowledgment_Response whichResponse() => _TournamentCreateAcknowledgment_ResponseByTag[$_whichOneof(0)]!;
+  void clearResponse() => clearField($_whichOneof(0));
+
+  @$pb.TagNumber(1)
+  $core.String get error => $_getSZ(0);
+  @$pb.TagNumber(1)
+  set error($core.String v) { $_setString(0, v); }
+  @$pb.TagNumber(1)
+  $core.bool hasError() => $_has(0);
+  @$pb.TagNumber(1)
+  void clearError() => clearField(1);
+
+  @$pb.TagNumber(2)
+  TournamentAccess get access => $_getN(1);
+  @$pb.TagNumber(2)
+  set access(TournamentAccess v) { setField(2, v); }
+  @$pb.TagNumber(2)
+  $core.bool hasAccess() => $_has(1);
+  @$pb.TagNumber(2)
+  void clearAccess() => clearField(2);
+  @$pb.TagNumber(2)
+  TournamentAccess ensureAccess() => $_ensure(1);
+}
+
 class TournamentCreate extends $pb.GeneratedMessage {
   static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'TournamentCreate', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'logicAPI'), createEmptyInstance: create)
     ..aOS(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'key')
@@ -154,6 +232,7 @@ class TournamentAccess extends $pb.GeneratedMessage {
   static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'TournamentAccess', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'logicAPI'), createEmptyInstance: create)
     ..aOS(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'key')
     ..aOS(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'sync')
+    ..pPS(3, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'permissionKeys', protoName: 'permissionKeys')
     ..hasRequiredFields = false
   ;
 
@@ -161,6 +240,7 @@ class TournamentAccess extends $pb.GeneratedMessage {
   factory TournamentAccess({
     $core.String? key,
     $core.String? sync,
+    $core.Iterable<$core.String>? permissionKeys,
   }) {
     final _result = create();
     if (key != null) {
@@ -168,6 +248,9 @@ class TournamentAccess extends $pb.GeneratedMessage {
     }
     if (sync != null) {
       _result.sync = sync;
+    }
+    if (permissionKeys != null) {
+      _result.permissionKeys.addAll(permissionKeys);
     }
     return _result;
   }
@@ -209,6 +292,9 @@ class TournamentAccess extends $pb.GeneratedMessage {
   $core.bool hasSync() => $_has(1);
   @$pb.TagNumber(2)
   void clearSync() => clearField(2);
+
+  @$pb.TagNumber(3)
+  $core.List<$core.String> get permissionKeys => $_getList(2);
 }
 
 class TournamentDetailsList extends $pb.GeneratedMessage {
@@ -1699,5 +1785,398 @@ class Stats extends $pb.GeneratedMessage {
   $core.bool hasConceded() => $_has(6);
   @$pb.TagNumber(7)
   void clearConceded() => clearField(7);
+}
+
+class Permission extends $pb.GeneratedMessage {
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'Permission', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'logicAPI'), createEmptyInstance: create)
+    ..e<PERMISSION>(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'permission', $pb.PbFieldType.OE, defaultOrMaker: PERMISSION.NONE, valueOf: PERMISSION.valueOf, enumValues: PERMISSION.values)
+    ..hasRequiredFields = false
+  ;
+
+  Permission._() : super();
+  factory Permission({
+    PERMISSION? permission,
+  }) {
+    final _result = create();
+    if (permission != null) {
+      _result.permission = permission;
+    }
+    return _result;
+  }
+  factory Permission.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
+  factory Permission.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+  @$core.Deprecated(
+  'Using this can add significant overhead to your binary. '
+  'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
+  'Will be removed in next major version')
+  Permission clone() => Permission()..mergeFromMessage(this);
+  @$core.Deprecated(
+  'Using this can add significant overhead to your binary. '
+  'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
+  'Will be removed in next major version')
+  Permission copyWith(void Function(Permission) updates) => super.copyWith((message) => updates(message as Permission)) as Permission; // ignore: deprecated_member_use
+  $pb.BuilderInfo get info_ => _i;
+  @$core.pragma('dart2js:noInline')
+  static Permission create() => Permission._();
+  Permission createEmptyInstance() => create();
+  static $pb.PbList<Permission> createRepeated() => $pb.PbList<Permission>();
+  @$core.pragma('dart2js:noInline')
+  static Permission getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<Permission>(create);
+  static Permission? _defaultInstance;
+
+  @$pb.TagNumber(1)
+  PERMISSION get permission => $_getN(0);
+  @$pb.TagNumber(1)
+  set permission(PERMISSION v) { setField(1, v); }
+  @$pb.TagNumber(1)
+  $core.bool hasPermission() => $_has(0);
+  @$pb.TagNumber(1)
+  void clearPermission() => clearField(1);
+}
+
+class PermissionQuery extends $pb.GeneratedMessage {
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'PermissionQuery', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'logicAPI'), createEmptyInstance: create)
+    ..aOM<TournamentAccess>(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'access', subBuilder: TournamentAccess.create)
+    ..aOS(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'permissionKey', protoName: 'permissionKey')
+    ..hasRequiredFields = false
+  ;
+
+  PermissionQuery._() : super();
+  factory PermissionQuery({
+    TournamentAccess? access,
+    $core.String? permissionKey,
+  }) {
+    final _result = create();
+    if (access != null) {
+      _result.access = access;
+    }
+    if (permissionKey != null) {
+      _result.permissionKey = permissionKey;
+    }
+    return _result;
+  }
+  factory PermissionQuery.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
+  factory PermissionQuery.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+  @$core.Deprecated(
+  'Using this can add significant overhead to your binary. '
+  'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
+  'Will be removed in next major version')
+  PermissionQuery clone() => PermissionQuery()..mergeFromMessage(this);
+  @$core.Deprecated(
+  'Using this can add significant overhead to your binary. '
+  'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
+  'Will be removed in next major version')
+  PermissionQuery copyWith(void Function(PermissionQuery) updates) => super.copyWith((message) => updates(message as PermissionQuery)) as PermissionQuery; // ignore: deprecated_member_use
+  $pb.BuilderInfo get info_ => _i;
+  @$core.pragma('dart2js:noInline')
+  static PermissionQuery create() => PermissionQuery._();
+  PermissionQuery createEmptyInstance() => create();
+  static $pb.PbList<PermissionQuery> createRepeated() => $pb.PbList<PermissionQuery>();
+  @$core.pragma('dart2js:noInline')
+  static PermissionQuery getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<PermissionQuery>(create);
+  static PermissionQuery? _defaultInstance;
+
+  @$pb.TagNumber(1)
+  TournamentAccess get access => $_getN(0);
+  @$pb.TagNumber(1)
+  set access(TournamentAccess v) { setField(1, v); }
+  @$pb.TagNumber(1)
+  $core.bool hasAccess() => $_has(0);
+  @$pb.TagNumber(1)
+  void clearAccess() => clearField(1);
+  @$pb.TagNumber(1)
+  TournamentAccess ensureAccess() => $_ensure(0);
+
+  @$pb.TagNumber(2)
+  $core.String get permissionKey => $_getSZ(1);
+  @$pb.TagNumber(2)
+  set permissionKey($core.String v) { $_setString(1, v); }
+  @$pb.TagNumber(2)
+  $core.bool hasPermissionKey() => $_has(1);
+  @$pb.TagNumber(2)
+  void clearPermissionKey() => clearField(2);
+}
+
+class PermissionKeys extends $pb.GeneratedMessage {
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'PermissionKeys', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'logicAPI'), createEmptyInstance: create)
+    ..pPS(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'permissionKeys', protoName: 'permissionKeys')
+    ..hasRequiredFields = false
+  ;
+
+  PermissionKeys._() : super();
+  factory PermissionKeys({
+    $core.Iterable<$core.String>? permissionKeys,
+  }) {
+    final _result = create();
+    if (permissionKeys != null) {
+      _result.permissionKeys.addAll(permissionKeys);
+    }
+    return _result;
+  }
+  factory PermissionKeys.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
+  factory PermissionKeys.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+  @$core.Deprecated(
+  'Using this can add significant overhead to your binary. '
+  'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
+  'Will be removed in next major version')
+  PermissionKeys clone() => PermissionKeys()..mergeFromMessage(this);
+  @$core.Deprecated(
+  'Using this can add significant overhead to your binary. '
+  'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
+  'Will be removed in next major version')
+  PermissionKeys copyWith(void Function(PermissionKeys) updates) => super.copyWith((message) => updates(message as PermissionKeys)) as PermissionKeys; // ignore: deprecated_member_use
+  $pb.BuilderInfo get info_ => _i;
+  @$core.pragma('dart2js:noInline')
+  static PermissionKeys create() => PermissionKeys._();
+  PermissionKeys createEmptyInstance() => create();
+  static $pb.PbList<PermissionKeys> createRepeated() => $pb.PbList<PermissionKeys>();
+  @$core.pragma('dart2js:noInline')
+  static PermissionKeys getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<PermissionKeys>(create);
+  static PermissionKeys? _defaultInstance;
+
+  @$pb.TagNumber(1)
+  $core.List<$core.String> get permissionKeys => $_getList(0);
+}
+
+class KeyPermissionPair extends $pb.GeneratedMessage {
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'KeyPermissionPair', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'logicAPI'), createEmptyInstance: create)
+    ..aOS(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'key')
+    ..e<PERMISSION>(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'permission', $pb.PbFieldType.OE, defaultOrMaker: PERMISSION.NONE, valueOf: PERMISSION.valueOf, enumValues: PERMISSION.values)
+    ..hasRequiredFields = false
+  ;
+
+  KeyPermissionPair._() : super();
+  factory KeyPermissionPair({
+    $core.String? key,
+    PERMISSION? permission,
+  }) {
+    final _result = create();
+    if (key != null) {
+      _result.key = key;
+    }
+    if (permission != null) {
+      _result.permission = permission;
+    }
+    return _result;
+  }
+  factory KeyPermissionPair.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
+  factory KeyPermissionPair.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+  @$core.Deprecated(
+  'Using this can add significant overhead to your binary. '
+  'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
+  'Will be removed in next major version')
+  KeyPermissionPair clone() => KeyPermissionPair()..mergeFromMessage(this);
+  @$core.Deprecated(
+  'Using this can add significant overhead to your binary. '
+  'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
+  'Will be removed in next major version')
+  KeyPermissionPair copyWith(void Function(KeyPermissionPair) updates) => super.copyWith((message) => updates(message as KeyPermissionPair)) as KeyPermissionPair; // ignore: deprecated_member_use
+  $pb.BuilderInfo get info_ => _i;
+  @$core.pragma('dart2js:noInline')
+  static KeyPermissionPair create() => KeyPermissionPair._();
+  KeyPermissionPair createEmptyInstance() => create();
+  static $pb.PbList<KeyPermissionPair> createRepeated() => $pb.PbList<KeyPermissionPair>();
+  @$core.pragma('dart2js:noInline')
+  static KeyPermissionPair getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<KeyPermissionPair>(create);
+  static KeyPermissionPair? _defaultInstance;
+
+  @$pb.TagNumber(1)
+  $core.String get key => $_getSZ(0);
+  @$pb.TagNumber(1)
+  set key($core.String v) { $_setString(0, v); }
+  @$pb.TagNumber(1)
+  $core.bool hasKey() => $_has(0);
+  @$pb.TagNumber(1)
+  void clearKey() => clearField(1);
+
+  @$pb.TagNumber(2)
+  PERMISSION get permission => $_getN(1);
+  @$pb.TagNumber(2)
+  set permission(PERMISSION v) { setField(2, v); }
+  @$pb.TagNumber(2)
+  $core.bool hasPermission() => $_has(1);
+  @$pb.TagNumber(2)
+  void clearPermission() => clearField(2);
+}
+
+class KeyPermissionPairs extends $pb.GeneratedMessage {
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'KeyPermissionPairs', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'logicAPI'), createEmptyInstance: create)
+    ..pc<KeyPermissionPair>(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'pairs', $pb.PbFieldType.PM, subBuilder: KeyPermissionPair.create)
+    ..hasRequiredFields = false
+  ;
+
+  KeyPermissionPairs._() : super();
+  factory KeyPermissionPairs({
+    $core.Iterable<KeyPermissionPair>? pairs,
+  }) {
+    final _result = create();
+    if (pairs != null) {
+      _result.pairs.addAll(pairs);
+    }
+    return _result;
+  }
+  factory KeyPermissionPairs.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
+  factory KeyPermissionPairs.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+  @$core.Deprecated(
+  'Using this can add significant overhead to your binary. '
+  'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
+  'Will be removed in next major version')
+  KeyPermissionPairs clone() => KeyPermissionPairs()..mergeFromMessage(this);
+  @$core.Deprecated(
+  'Using this can add significant overhead to your binary. '
+  'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
+  'Will be removed in next major version')
+  KeyPermissionPairs copyWith(void Function(KeyPermissionPairs) updates) => super.copyWith((message) => updates(message as KeyPermissionPairs)) as KeyPermissionPairs; // ignore: deprecated_member_use
+  $pb.BuilderInfo get info_ => _i;
+  @$core.pragma('dart2js:noInline')
+  static KeyPermissionPairs create() => KeyPermissionPairs._();
+  KeyPermissionPairs createEmptyInstance() => create();
+  static $pb.PbList<KeyPermissionPairs> createRepeated() => $pb.PbList<KeyPermissionPairs>();
+  @$core.pragma('dart2js:noInline')
+  static KeyPermissionPairs getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<KeyPermissionPairs>(create);
+  static KeyPermissionPairs? _defaultInstance;
+
+  @$pb.TagNumber(1)
+  $core.List<KeyPermissionPair> get pairs => $_getList(0);
+}
+
+class SetPermission extends $pb.GeneratedMessage {
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'SetPermission', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'logicAPI'), createEmptyInstance: create)
+    ..aOM<TournamentAccess>(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'access', subBuilder: TournamentAccess.create)
+    ..aOS(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'permissionKey', protoName: 'permissionKey')
+    ..e<PERMISSION>(3, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'permission', $pb.PbFieldType.OE, defaultOrMaker: PERMISSION.NONE, valueOf: PERMISSION.valueOf, enumValues: PERMISSION.values)
+    ..hasRequiredFields = false
+  ;
+
+  SetPermission._() : super();
+  factory SetPermission({
+    TournamentAccess? access,
+    $core.String? permissionKey,
+    PERMISSION? permission,
+  }) {
+    final _result = create();
+    if (access != null) {
+      _result.access = access;
+    }
+    if (permissionKey != null) {
+      _result.permissionKey = permissionKey;
+    }
+    if (permission != null) {
+      _result.permission = permission;
+    }
+    return _result;
+  }
+  factory SetPermission.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
+  factory SetPermission.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+  @$core.Deprecated(
+  'Using this can add significant overhead to your binary. '
+  'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
+  'Will be removed in next major version')
+  SetPermission clone() => SetPermission()..mergeFromMessage(this);
+  @$core.Deprecated(
+  'Using this can add significant overhead to your binary. '
+  'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
+  'Will be removed in next major version')
+  SetPermission copyWith(void Function(SetPermission) updates) => super.copyWith((message) => updates(message as SetPermission)) as SetPermission; // ignore: deprecated_member_use
+  $pb.BuilderInfo get info_ => _i;
+  @$core.pragma('dart2js:noInline')
+  static SetPermission create() => SetPermission._();
+  SetPermission createEmptyInstance() => create();
+  static $pb.PbList<SetPermission> createRepeated() => $pb.PbList<SetPermission>();
+  @$core.pragma('dart2js:noInline')
+  static SetPermission getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<SetPermission>(create);
+  static SetPermission? _defaultInstance;
+
+  @$pb.TagNumber(1)
+  TournamentAccess get access => $_getN(0);
+  @$pb.TagNumber(1)
+  set access(TournamentAccess v) { setField(1, v); }
+  @$pb.TagNumber(1)
+  $core.bool hasAccess() => $_has(0);
+  @$pb.TagNumber(1)
+  void clearAccess() => clearField(1);
+  @$pb.TagNumber(1)
+  TournamentAccess ensureAccess() => $_ensure(0);
+
+  @$pb.TagNumber(2)
+  $core.String get permissionKey => $_getSZ(1);
+  @$pb.TagNumber(2)
+  set permissionKey($core.String v) { $_setString(1, v); }
+  @$pb.TagNumber(2)
+  $core.bool hasPermissionKey() => $_has(1);
+  @$pb.TagNumber(2)
+  void clearPermissionKey() => clearField(2);
+
+  @$pb.TagNumber(3)
+  PERMISSION get permission => $_getN(2);
+  @$pb.TagNumber(3)
+  set permission(PERMISSION v) { setField(3, v); }
+  @$pb.TagNumber(3)
+  $core.bool hasPermission() => $_has(2);
+  @$pb.TagNumber(3)
+  void clearPermission() => clearField(3);
+}
+
+class RemovePermissionKey extends $pb.GeneratedMessage {
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'RemovePermissionKey', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'logicAPI'), createEmptyInstance: create)
+    ..aOM<TournamentAccess>(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'access', subBuilder: TournamentAccess.create)
+    ..aOS(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'permissionKey', protoName: 'permissionKey')
+    ..hasRequiredFields = false
+  ;
+
+  RemovePermissionKey._() : super();
+  factory RemovePermissionKey({
+    TournamentAccess? access,
+    $core.String? permissionKey,
+  }) {
+    final _result = create();
+    if (access != null) {
+      _result.access = access;
+    }
+    if (permissionKey != null) {
+      _result.permissionKey = permissionKey;
+    }
+    return _result;
+  }
+  factory RemovePermissionKey.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
+  factory RemovePermissionKey.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+  @$core.Deprecated(
+  'Using this can add significant overhead to your binary. '
+  'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
+  'Will be removed in next major version')
+  RemovePermissionKey clone() => RemovePermissionKey()..mergeFromMessage(this);
+  @$core.Deprecated(
+  'Using this can add significant overhead to your binary. '
+  'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
+  'Will be removed in next major version')
+  RemovePermissionKey copyWith(void Function(RemovePermissionKey) updates) => super.copyWith((message) => updates(message as RemovePermissionKey)) as RemovePermissionKey; // ignore: deprecated_member_use
+  $pb.BuilderInfo get info_ => _i;
+  @$core.pragma('dart2js:noInline')
+  static RemovePermissionKey create() => RemovePermissionKey._();
+  RemovePermissionKey createEmptyInstance() => create();
+  static $pb.PbList<RemovePermissionKey> createRepeated() => $pb.PbList<RemovePermissionKey>();
+  @$core.pragma('dart2js:noInline')
+  static RemovePermissionKey getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<RemovePermissionKey>(create);
+  static RemovePermissionKey? _defaultInstance;
+
+  @$pb.TagNumber(1)
+  TournamentAccess get access => $_getN(0);
+  @$pb.TagNumber(1)
+  set access(TournamentAccess v) { setField(1, v); }
+  @$pb.TagNumber(1)
+  $core.bool hasAccess() => $_has(0);
+  @$pb.TagNumber(1)
+  void clearAccess() => clearField(1);
+  @$pb.TagNumber(1)
+  TournamentAccess ensureAccess() => $_ensure(0);
+
+  @$pb.TagNumber(2)
+  $core.String get permissionKey => $_getSZ(1);
+  @$pb.TagNumber(2)
+  set permissionKey($core.String v) { $_setString(1, v); }
+  @$pb.TagNumber(2)
+  $core.bool hasPermissionKey() => $_has(1);
+  @$pb.TagNumber(2)
+  void clearPermissionKey() => clearField(2);
 }
 

@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:tournament_scheduler_client/control/event_builder.dart';
 import 'package:tournament_scheduler_client/control/grpc/grpc_api.dart';
 import 'package:tournament_scheduler_client/control/grpc/proto_logic_api.dart';
+import 'package:tournament_scheduler_client/control/perferences.dart';
 import 'package:tournament_scheduler_client/navigation/snackbar.dart';
 
 class Server {
@@ -39,17 +40,32 @@ class Server {
         break;
       case ServerEvent_Event.error:
         messenger.showError(e.error);
-        debugPrint('Error ${e.error}');
         break;
       case ServerEvent_Event.notSet:
         break;
     }
   }
 
-  close() {
+  void close() {
     //Close all tournaments and their views
     //Close own views
     //Close connection?
+  }
+
+  Future<void> createTournament(String name) async {
+    final TournamentCreateAcknowledgment createAcknowledgement = await api.serverAPI.createTournament(name);
+
+    switch(createAcknowledgement.whichResponse()) {
+      case TournamentCreateAcknowledgment_Response.error:
+        messenger.showError(createAcknowledgement.error);
+        break;
+      case TournamentCreateAcknowledgment_Response.access:
+        final TournamentAccess access = createAcknowledgement.access;
+        Preferences.addPermissionKeys(access.key, access.permissionKeys);
+        break;
+      case TournamentCreateAcknowledgment_Response.notSet:
+        break;
+    }
   }
 }
 

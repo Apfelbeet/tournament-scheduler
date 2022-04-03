@@ -16,13 +16,13 @@ class ServerAPI {
     return res.keys;
   }
 
-  Future<Acknowledgment> createTournament(String name) async {
+  Future<TournamentCreateAcknowledgment> createTournament(String name) async {
     final res = await serverStub.createTournament(TournamentCreate(key: name));
     return res;
   }
 
-  Future<Acknowledgment> removeTournament(String key, String sync) async {
-    final res = await serverStub.removeTournament(TournamentAccess(key: key, sync: sync));
+  Future<Acknowledgment> removeTournament(TournamentAccess access) async {
+    final res = await serverStub.removeTournament(access);
     return res;
   }
 

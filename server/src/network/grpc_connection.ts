@@ -6,7 +6,7 @@ import { ServerEvent } from "../../generated/proto/logicAPI/ServerEvent";
 import { TournamentAccess__Output } from "../../generated/proto/logicAPI/TournamentAccess";
 import { TournamentEvent } from "../../generated/proto/logicAPI/TournamentEvent";
 import { ProtoGrpcType } from "../../generated/proto/logic_api";
-import { Key } from "../types/general_types";
+import { Key } from "../types/tournament_types";
 import * as logger from "../util/logger";
 import ServerAPI from "./grpc_server_api";
 import TournamentAPI from "./grpc_tournament";
@@ -71,7 +71,12 @@ export function init(port: number) {
     );
 }
 
+export function hasSubscription(key: Key) {
+    return subscriptions.has(key) && subscriptions.get(key)!.length > 0;
+}
+
 export function sendServerEvent(event: ServerEvent) {
+    logger.net(JSON.stringify(event));
     connections.forEach((call) => {
         call.write(event);
     });

@@ -2,10 +2,10 @@ import { randomKey } from "../util/util";
 import Entry from "./generation_modules/entry_module";
 import { Module } from "./generation_modules/module";
 import Game from "./generation_modules/game_module";
-import { Mode, Team, TeamId , Sync} from "../types/general_types";
+import { Mode, Team, TeamId} from "../types/general_types";
 import { TournamentFacade } from "./tournament_facade";
 import { ModuleId, Structure } from "../types/module_types";
-
+import { Permission, PermissionKey, Sync } from "../types/tournament_types";
 
 export function newSync(): Sync {
     return randomKey(20);

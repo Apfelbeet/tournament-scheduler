@@ -50,7 +50,6 @@ class _TeamViewTileState extends State<_TeamViewTile> {
   bool write = false;
   TextEditingController controller = new TextEditingController();
 
-
   _TeamViewTileState();
 
   @override
@@ -71,11 +70,7 @@ class _TeamViewTileState extends State<_TeamViewTile> {
                     icon: write ? Icon(Icons.arrow_forward) : Icon(Icons.edit),
                     onPressed: () {
                       if (write && controller.text.isNotEmpty) {
-                        tournament.editTeam(
-                            tournament.key,
-                            tournament.state.sync,
-                            widget.model.id,
-                            controller.text);
+                        tournament.editTeam(widget.model.id, controller.text);
                       } else {
                         controller.text = widget.model.name;
                       }
@@ -86,8 +81,7 @@ class _TeamViewTileState extends State<_TeamViewTile> {
                 IconButton(
                   icon: Icon(Icons.close),
                   onPressed: () {
-                    tournament.removeTeam(
-                        tournament.key, tournament.state.sync, widget.model.id);
+                    tournament.removeTeam(widget.model.id);
                   },
                 ),
               ],
@@ -149,7 +143,7 @@ class _NewTeamTileState extends State<_NewTeamTile> {
     Tournament tournament = context.read<Tournament>();
     if (controller.text.isNotEmpty) {
       setState(() {
-        tournament.addTeam(tournament.key, tournament.state.sync, controller.text);
+        tournament.addTeam(controller.text);
         controller.clear();
         write = false;
       });
